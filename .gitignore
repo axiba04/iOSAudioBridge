@@ -11,3 +11,4 @@ dist/
 *.user
 *.log
 !docs/test-results/**/*.log
+DriverInstallKit/logs/

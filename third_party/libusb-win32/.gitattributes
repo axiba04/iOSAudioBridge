@@ -1,0 +1,5 @@
+# Keep normalized text hashes stable across Windows and other checkouts.
+*.txt text eol=lf
+*.h text eol=lf
+*.def text eol=lf
+*.json text eol=lf

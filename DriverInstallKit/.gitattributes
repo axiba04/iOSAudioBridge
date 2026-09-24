@@ -1,0 +1,6 @@
+# Signed Apple files and upstream license assets retain their original bytes,
+# including CRLF and any upstream whitespace covered by payload hashes.
+AppleUSB/** -text -whitespace
+licenses/** -text -whitespace
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

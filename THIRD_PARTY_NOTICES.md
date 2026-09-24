@@ -11,19 +11,34 @@ in `third_party/iphone-mirror-baseline/`. The modified implementation is in
 negotiation/decoding, expose a C ABI, replace the audio queue/rendering, and
 integrate the ZL application described below. Changes were made on 2026-09-24.
 
-## libusb-win32 1.2.6.0
+## libusb-win32 1.4.0.2
 
 The application dynamically links the x64 `libusb0.dll` compatibility runtime.
-The runtime, header and import library were copied from the user's matching
-iPhoneMirror source/driver assets. No kernel driver is installed by this app.
+The runtime, header and import library come from the official 1.4.0.2 binary
+archive. The x64 MSVC import library is stored as `libusb0-dynamic.lib` to retain
+the existing build layout. Source, file hashes and release URLs are recorded in
+`third_party/libusb-win32/pins.json`. No kernel driver is installed by this app;
+the separate driver trial scripts require explicit administrator execution.
 
 - Project: https://github.com/mcuee/libusb-win32
-- Release: https://sourceforge.net/projects/libusb-win32/files/libusb-win32-releases/1.2.6.0/
-- Library license: LGPL version 3; upstream distribution also includes GPL material.
+- Release: https://github.com/mcuee/libusb-win32/releases/tag/release_1.4.0.2
+- Library license: LGPL; the upstream archive includes LGPL version 3 and GPL
+  license texts, preserved here together with the original source notices.
 - Licenses/authors: `third_party/libusb-win32/COPYING_LGPL.txt`,
-  `COPYING_GPL.txt`, `AUTHORS.txt`, `README.txt`.
-- Corresponding upstream source: `third_party/libusb-win32/libusb-win32-src-1.2.6.0.zip`.
+  `COPYING_GPL.txt`, `AUTHORS.txt`, `README.txt`, `CHANGELOG.txt`.
+- Corresponding upstream source: `third_party/libusb-win32/libusb-win32-src-1.4.0.2.zip`,
+  commit `0987f983a89e5e60d3c2db2af46564239c1b0d37`.
   This archive is also included with the local application package in `licenses/`.
+
+## Driver installation kit
+
+`DriverInstallKit/` preserves the original signed Apple Mobile Device Support
+MSI and AppleUSB driver package from the user's original driver kit. Apple
+software remains subject to Apple's copyright and terms, not this project's
+GPL license. The libusb kernel driver and filter installer come from the same
+1.4.0.2 upstream release described above; their original GPL/LGPL notices and
+corresponding source are included under `DriverInstallKit/licenses/`.
+The new PowerShell installation scripts are part of this GPL-3.0 project.
 
 ## Protocol fixtures
 

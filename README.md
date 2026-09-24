@@ -18,6 +18,16 @@ iPhone USB → QuickTime 仅音频握手 → PCM16 / 48 kHz / Stereo
 
 详细操作、预设、日志和静音诊断入口见[使用与构建](docs/zl-bridge-running.zh-CN.md)。
 
+当前包使用 libusb-win32 1.4.0.2 用户态运行库；系统 filter 需单独安装。
+本机驱动切换结果、备份与回退命令见[驱动升级记录](docs/driver-upgrade-evaluation.zh-CN.md)。
+新电脑请使用精简后的 [DriverInstallKit 安装说明](DriverInstallKit/README.zh-CN.md)，依次运行
+`01-AppleSupport.cmd`、`02-iPhoneFilter.cmd`、`03-Check.cmd`。可用
+`./scripts/Build-DriverInstallKit.ps1` 生成独立离线 ZIP；完整首次安装仍待新电脑验收。
+同一电脑可重复运行第二步，按设备编号分别登记多台 iPhone / iPad，共用一套驱动；
+第三步会逐台报告状态。多设备实机验收尚未完成，软件单窗口仍只采集一台。
+已有已验证的 libusb 1.2.6.0 可运行 `04-UpgradeLibUsb.cmd`，按提示备份、拔线升级；
+`05-RestoreLibUsb.cmd` 用于恢复本电脑的升级备份。这两个入口无需开发工具。
+
 ## 构建
 
 仓库已包含 ZLCompressor、JUCE、Highway、zldsp_fft 的源码快照及集成修改，版本来源见 `third_party/ZLCompressor.pins.json`。
@@ -59,7 +69,7 @@ ZL 集成测试结果与边界见[集成验收](docs/zl-bridge-validation.zh-CN.
 | `src/AudioBridge.UsbRestore/` | 独立 USB 配置恢复辅助程序 |
 | `tests/`、`tools/AudioProbe/` | 协议 fixtures、Native/PCM/ABI 回归、命令行诊断 |
 | `third_party/` | 上游源码快照、依赖、补丁、版本与许可证 |
-| `scripts/` | 依赖准备、ZL 构建打包、底层稳定性测试及汇总 |
+| `scripts/` | 依赖准备、ZL 构建打包、稳定性测试及驱动备份与试切换 |
 
 WPF 前端、旧发布脚本和一次性基线导入脚本已移除，需要追溯时可查看 Git 历史。当前构建直接使用已导入的源码和来源清单。
 

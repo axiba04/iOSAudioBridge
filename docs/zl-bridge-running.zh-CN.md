@@ -6,6 +6,8 @@
 
 打开 `dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe`，保留同目录的 `AudioBridge.UsbRestore.exe` 与 `libusb0.dll`。无需 VST Host 或 .NET。
 
+当前包使用 libusb-win32 1.4.0.2 DLL。系统驱动单独维护，本机升级及恢复方法见[驱动升级记录](driver-upgrade-evaluation.zh-CN.md)。
+
 1. 沿用这台机器已验证的 Apple USB 支持与 libusb-win32 filter；本程序不安装驱动。
 2. 连接并解锁手机，退出其他监听程序；刷新并选择手机、输出设备。
 3. 点击“开始监听”。首次打开及每次重启均默认静音，监听音量为 50%。主界面保留“静音输出”；点击“高级设置”可展开“监听音量”滑块，收起面板不会改变音量。它只调节本软件最终输出，不改变 Windows 音量。解除静音由使用者手动操作；自动验收始终静音。

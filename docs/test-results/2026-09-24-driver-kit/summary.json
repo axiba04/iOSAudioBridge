@@ -1,0 +1,21 @@
+{
+  "old_archive_bytes": 103194640,
+  "new_archive_bytes": 39067987,
+  "reduction_percent": 62.14,
+  "new_archive_sha256": "BD987ABC52CE75E8B726907B70E1252E7BA2DEF94105BA2D4911296FB2633126",
+  "zip_entries": 29,
+  "original_backup": "build/driver-kit-inspection/DriverInstallKit-original.rar",
+  "apple_catalog_members_verified": 4,
+  "current_machine_read_only_check": "No connected iPhone/iPad; connection readiness not tested in this revision",
+  "clean_machine_installation_tested": false,
+  "system_drivers_modified_this_task": false,
+  "windows_powershell_51_guards_passed": 12,
+  "extracted_archive_payload_validation": "Passed under Windows PowerShell 5.1 from a directory containing spaces",
+  "upgrade_simulation_tests_passed": 25,
+  "upgrade_already_current_noop_tested": true,
+  "upgrade_script_real_126_switch_tested": false,
+  "previous_connected_single_device_check": "READY",
+  "multidevice_simulation_tests_passed": 21,
+  "real_multiple_device_registration_tested": false,
+  "current_machine_registered_device_check": "Passed including disconnected registration"
+}

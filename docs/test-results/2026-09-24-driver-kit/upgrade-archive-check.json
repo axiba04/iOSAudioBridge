@@ -1,0 +1,16 @@
+{
+  "archive_sha256": "BD987ABC52CE75E8B726907B70E1252E7BA2DEF94105BA2D4911296FB2633126",
+  "zip_entries": 29,
+  "upgrade_entries_present": true,
+  "multidevice_entries_present": true,
+  "runtime_data_excluded": true,
+  "extracted_directory_contains_spaces": true,
+  "windows_powershell_51_payload_validation": "Passed",
+  "already_current_upgrade_exit_code": 0,
+  "already_current_message": "正在校验驱动安装包，请稍候……\n系统文件已经是 1.4.0.2，无需重复升级。可运行 03-Check.cmd 检查连接状态。",
+  "system_driver_hashes_unchanged": true,
+  "backup_root_existence_unchanged": true,
+  "operation_logs_created": false,
+  "real_126_upgrade_tested": false,
+  "real_multiple_device_registration_tested": false
+}

@@ -1,0 +1,8 @@
+{
+  "mode": "Check",
+  "exit_code": 0,
+  "elapsed_seconds": 88.35,
+  "system_modified": false,
+  "connected_device_check": "No supported iPhone/iPad connected; connection READY was not tested",
+  "registered_device_binding_check": "Passed including disconnected registration"
+}

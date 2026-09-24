@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "architecture": "AMD64",
+  "libusb_version": "1.4.0.2",
+  "apple_msi_product_version": "19.4.0.10",
+  "apple_usb_version": "538.0.0.0",
+  "apple_origin": "Apple-signed files preserved from the original DriverInstallKit.rar; AppleUSB files match the installed baseline.",
+  "original_archive_sha256": "576102AFF473B46E82016D4CEB9102C5BBA4154A1FA3AF8410F23F3954FE52C6",
+  "libusb_release": "https://github.com/mcuee/libusb-win32/releases/tag/release_1.4.0.2",
+  "libusb_archive_sha256": "00004c92cdb99be36e17fb2377165eb97e63b48ba895bfc04a642ea9c3e26d94",
+  "libusb_source_commit": "0987f983a89e5e60d3c2db2af46564239c1b0d37",
+  "files": [
+    {
+      "path": "AppleMobileDeviceSupport64.msi",
+      "bytes": 40308736,
+      "sha256": "B60533FB54E7BD81FFC52D99678A9CCE04E58CB54A76281BD7B1309F20D360E9"
+    },
+    {
+      "path": "AppleUSB/AppleKmdfFilter.sys",
+      "bytes": 39272,
+      "sha256": "72FE475D8ADA0CC2E26A4E659CA7D03BDB8D3061B4A689016A54EB52B18773A3"
+    },
+    {
+      "path": "AppleUSB/AppleLowerFilter.sys",
+      "bytes": 55608,
+      "sha256": "AC3469AC659287626B05CDA0DA457B63ED78241D4F20C60778F6292D6E158346"
+    },
+    {
+      "path": "AppleUSB/appleusb.cat",
+      "bytes": 23286,
+      "sha256": "775E43292702903D1F3991B655DDE23CCB378052D28F7E0E8F89E2F4580A7387"
+    },
+    {
+      "path": "AppleUSB/AppleUsb.inf",
+      "bytes": 17266,
+      "sha256": "71EF7DBEF3E7B2C1BDC32C1A4400AA5F92C5C7EEE9EF6261385C54CD9D0E26A6"
+    },
+    {
+      "path": "AppleUSB/AppleUsbFilter.dll",
+      "bytes": 134464,
+      "sha256": "17FA26EA576E98F40EB2A353123D27232335E3A20C8D91465EC83710BC1A8EAE"
+    },
+    {
+      "path": "libusb/libusb0.cat",
+      "bytes": 14724,
+      "sha256": "8556E3387CEDE278353D0F6BBD74197F0ED43186E4891B1114491855BB9C66AB"
+    },
+    {
+      "path": "libusb/amd64/install-filter.exe",
+      "bytes": 69360,
+      "sha256": "95F4F575639B9A4BF4F8A2F2EE226720CF87FB962AA33B6327EF0C704B63A3C4"
+    },
+    {
+      "path": "libusb/amd64/libusb0.dll",
+      "bytes": 123552,
+      "sha256": "0CD18719D5701E9CC642FC93A83F13830931D6F29F664FEDBDF212BCB7C349BD"
+    },
+    {
+      "path": "libusb/amd64/libusb0.sys",
+      "bytes": 99224,
+      "sha256": "CDA0070FE4F7C5DE5D3BB06FA6D7E29E6F6740C0F2FA319FB5C1AF235D78D616"
+    },
+    {
+      "path": "libusb/x86/libusb0_x86.dll",
+      "bytes": 107680,
+      "sha256": "F56C6F28BFB864761CEBC05494B56AF8BED97493F3B6E7B19AFCB8F1ABCD2CBE"
+    },
+    {
+      "path": "licenses/AUTHORS.txt",
+      "bytes": 376,
+      "sha256": "52718D277BD2878C1DF3C26DD59E0F8FBDAF0DE8A9AB9A523F85D753C1F02706"
+    },
+    {
+      "path": "licenses/CHANGELOG.txt",
+      "bytes": 11552,
+      "sha256": "405B616586AB58F4D806C6D657434B58C6C91EFE745E0CE5B06CF072AAF218FC"
+    },
+    {
+      "path": "licenses/COPYING_GPL.txt",
+      "bytes": 35147,
+      "sha256": "8CEB4B9EE5ADEDDE47B31E975C1D90C73AD27B6B165A1DCD80C7C545EB65B903"
+    },
+    {
+      "path": "licenses/COPYING_LGPL.txt",
+      "bytes": 7651,
+      "sha256": "DA7EABB7BAFDF7D3AE5E9F223AA5BDC1EECE45AC569DC21B3B037520B4464768"
+    },
+    {
+      "path": "licenses/Installer-GPL-3.0.txt",
+      "bytes": 35821,
+      "sha256": "0B383D5A63DA644F628D99C33976EA6487ED89AAA59F0B3257992DEAC1171E6B"
+    },
+    {
+      "path": "licenses/libusb-win32-src-1.4.0.2.zip",
+      "bytes": 240270,
+      "sha256": "D77EF8A2370DE8ECC7550D8D99C93568C00A5528F5CF79AB1CEC3DD9E9B538D3"
+    },
+    {
+      "path": "licenses/README.txt",
+      "bytes": 423,
+      "sha256": "346EAD5AE900E9E375A664A59E636FC4BF9DFAB466FB8AA28CD79FA96EC71BFD"
+    }
+  ]
+}

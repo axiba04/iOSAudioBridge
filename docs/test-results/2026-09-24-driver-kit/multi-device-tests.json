@@ -1,0 +1,29 @@
+{
+  "powershell": "5.1.26100.1591",
+  "passed": [
+    "exact instance selection survives identical names and changed enumeration order",
+    "numbered menu selects the requested device",
+    "cancel and invalid menu selections cause no native operations",
+    "unplugged selection fails without substituting another connected device",
+    "register second device only, preserve first binding and shared files, report both READY",
+    "repeated registration is a no-op",
+    "existing disconnected device remains registered when adding another",
+    "partial registration failure rolls back only the selected device",
+    "per-device checks distinguish ready and unregistered devices",
+    "reject shared scope: accessory",
+    "reject shared scope: nonApple",
+    "reject shared scope: childInterface",
+    "reject shared scope: unknownPid",
+    "reject shared scope: directDriver",
+    "reject shared scope: lowerFilter",
+    "reject shared scope: extraUpper",
+    "reject shared scope: missingAppleLower",
+    "reject shared scope: globalFilter",
+    "Apple accessory omitted from device selection",
+    "old shared driver requires upgrade before registering another device",
+    "missing shared file blocks new registration without attempting live repair"
+  ],
+  "count": 21,
+  "real_system_driver_changes": false,
+  "scope": "Real selection, scope guards, per-device status and installation/rollback code; PnP, registry, services, catalog and install-filter execution are simulated. Shared-file hash checks use workspace temporary files."
+}

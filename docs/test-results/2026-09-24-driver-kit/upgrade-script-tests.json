@@ -1,0 +1,33 @@
+{
+  "powershell": "5.1.26100.1591",
+  "passed": [
+    "backup, upgrade, and explicit restore",
+    "new kernel load failure restores and loads old driver",
+    "partial copy failure at file 1 restores all originals",
+    "partial copy failure at file 2 restores all originals",
+    "partial copy failure at file 3 restores all originals",
+    "unload refusal leaves every system file unchanged",
+    "catalog failure restarts old driver without file writes",
+    "reconnection halts copying; explicit restore repairs mixed files after unplug",
+    "explicit restore repairs damaged target from verified backup",
+    "rollback load failure is reported and catalog retained for recovery",
+    "corrupt backup rejected before service operations",
+    "another computer backup rejected",
+    "preflight refuses connected",
+    "preflight refuses busy",
+    "preflight refuses otherFilter",
+    "preflight refuses bindingChanged",
+    "unknown installed version rejected",
+    "mixed installed versions rejected for upgrade",
+    "candidate change before copy rejected and original kept",
+    "shared upgrade/restore includes disconnected registered devices and preserves all bindings",
+    "second connected device prevents shared upgrade",
+    "unregistered connected iPad also prevents shared replacement",
+    "backup scope mismatch rejected before changing the shared driver",
+    "previous single-device backup remains usable for unchanged scope",
+    "protected backup ACL descriptor construction"
+  ],
+  "count": 25,
+  "real_system_driver_changes": false,
+  "scope": "Real temporary-file backup/copy/hash operations and ACL descriptor construction; device, service, registry, catalog, ACL assignment and kernel loading are simulated."
+}

@@ -41,7 +41,7 @@ Copy-Item -LiteralPath "$vendor/highway/LICENSE" -Destination "$licenses/Highway
 Copy-Item -LiteralPath "$vendor/zldsp_fft/LICENSE.md" -Destination "$licenses/zldsp_fft-LICENSE.md" -Force
 foreach($name in 'pamplejuce_LICENSE.txt','material-design-icons_LICENSE.txt') {Copy-Item -LiteralPath "$vendor/licenses/$name" -Destination $licenses -Force}
 Copy-Item -LiteralPath "$root/third_party/zl-bridge-licenses/Inter-OFL.txt" -Destination $licenses -Force
-foreach($name in 'COPYING_LGPL.txt','COPYING_GPL.txt','AUTHORS.txt','README.txt','libusb-win32-src-1.2.6.0.zip') {
+foreach($name in 'COPYING_LGPL.txt','COPYING_GPL.txt','AUTHORS.txt','README.txt','CHANGELOG.txt','pins.json','libusb-win32-src-1.4.0.2.zip') {
     $target=Join-Path $licenses 'libusb-win32';New-Item -ItemType Directory -Force $target | Out-Null
     Copy-Item -LiteralPath "$root/third_party/libusb-win32/$name" -Destination $target -Force
 }
@@ -54,6 +54,10 @@ Get-ChildItem "$vendor/JUCE/modules" -Recurse -File | Where-Object { $_.Name -ma
 Copy-Item -LiteralPath "$root/THIRD_PARTY_NOTICES.md","$root/third_party/ZLCompressor.pins.json","$root/third_party/ZLCompressor.bridge.patch" -Destination $dist -Force
 Copy-Item -LiteralPath "$root/docs/zl-bridge-running.zh-CN.md" -Destination "$dist/README.zh-CN.md" -Force
 Copy-Item -LiteralPath "$root/docs/zl-bridge-validation.zh-CN.md" -Destination "$dist/VALIDATION.zh-CN.md" -Force
+Copy-Item -LiteralPath "$root/docs/driver-upgrade-evaluation.zh-CN.md" -Destination $dist -Force
+$driverEvidence=Join-Path $dist 'test-results/2026-09-24-driver-upgrade'
+New-Item -ItemType Directory -Force -Path $driverEvidence | Out-Null
+Copy-Item -LiteralPath "$root/docs/test-results/2026-09-24-driver-upgrade/summary.json" -Destination $driverEvidence -Force
 Get-ChildItem $dist -File | Where-Object { $_.Extension -in '.exe','.dll' } | ForEach-Object {
     [pscustomobject]@{file=$_.Name;bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 } | ConvertTo-Json | Set-Content "$dist/build-hashes.json" -Encoding utf8
