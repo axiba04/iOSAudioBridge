@@ -1,0 +1,459 @@
+diff --git a/src/Core/CMakeLists.txt b/src/Core/CMakeLists.txt
+index 08d6bd1..511af2b 100644
+--- a/src/Core/CMakeLists.txt
++++ b/src/Core/CMakeLists.txt
+@@ -206,7 +206,13 @@ if(IPHONEMIRROR_BUILD_TESTS)
+ 
+ endif()
+ 
+-install(TARGETS iPhoneMirror.Core iPhoneMirror.UsbConfigurationSwitch
++add_executable(iPhoneMirror.UsbAudioOnly tools/UsbAudioOnly.cpp)
++target_include_directories(iPhoneMirror.UsbAudioOnly PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
++target_compile_definitions(iPhoneMirror.UsbAudioOnly PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
++target_compile_options(iPhoneMirror.UsbAudioOnly PRIVATE /W4 /permissive- /utf-8 /EHsc)
++target_link_libraries(iPhoneMirror.UsbAudioOnly PRIVATE iPhoneMirror.Core)
++
++install(TARGETS iPhoneMirror.Core iPhoneMirror.UsbConfigurationSwitch iPhoneMirror.UsbAudioOnly
+     RUNTIME DESTINATION .
+     LIBRARY DESTINATION .
+     ARCHIVE DESTINATION lib
+diff --git a/src/Core/include/iPhoneMirror/CoreApi.h b/src/Core/include/iPhoneMirror/CoreApi.h
+index ca03e37..af492d9 100644
+--- a/src/Core/include/iPhoneMirror/CoreApi.h
++++ b/src/Core/include/iPhoneMirror/CoreApi.h
+@@ -207,7 +207,8 @@ struct AudioPacketInfo {
+ // Versioned capture preferences used by im_start_capture_with_options.
+ // requested_width/requested_height are local preview-render limits. The first
+ // Reserved words 0/1 are the optional advanced USB HPD1 size. Reserved word 2
+-// selects USB projection mode (0=demo, 1=AirPlay, 2=Aisi-compatible), word 3
++// selects USB projection mode (0=demo, 1=AirPlay, 2=Aisi-compatible,
++// 3=experimental USB audio-only; never requests video), word 3
+ // selects decoder policy (0=auto, 1=hardware preferred, 2=software compatible),
+ // and word 4 selects color output (0=auto, 1=SDR tone-map, 2=prefer HDR).
+ struct CaptureOptions {
+diff --git a/src/Core/src/Capture/CaptureSession.cpp b/src/Core/src/Capture/CaptureSession.cpp
+index 0c98dd3..72d4955 100644
+--- a/src/Core/src/Capture/CaptureSession.cpp
++++ b/src/Core/src/Capture/CaptureSession.cpp
+@@ -742,6 +742,10 @@ UsbDisplayConfiguration make_usb_display_configuration(UsbProjectionMode mode,
+         options.requested_width = 1565;
+         options.requested_height = 1565;
+         break;
++    case UsbProjectionMode::AudioOnly:
++        options.request_video = false;
++        options.request_audio = true;
++        break;
+     }
+     return configuration;
+ }
+@@ -1128,7 +1132,8 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+         preferences_.usb_projection_mode, native.width, native.height,
+         preferences_.usb_requested_width, preferences_.usb_requested_height);
+     auto session_options = display_configuration.session_options;
+-    const bool adaptive_display = display_configuration.adaptive_reconfiguration;
++    const bool audio_only = !session_options.request_video;
++    const bool adaptive_display = !audio_only && display_configuration.adaptive_reconfiguration;
+     // Always negotiate the audio stream. The playback toggle is deliberately
+     // local so it can be switched on again without restarting USB/QuickTime.
+     session_options.request_audio = true;
+@@ -1137,7 +1142,7 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+         logging::write(std::format("advanced_usb_request={}x{}",
+             preferences_.usb_requested_width, preferences_.usb_requested_height));
+     }
+-    const char* projection_mode = preferences_.usb_projection_mode == UsbProjectionMode::Demo
++    const char* projection_mode = audio_only ? "audio_only" : preferences_.usb_projection_mode == UsbProjectionMode::Demo
+         ? "demo" : preferences_.usb_projection_mode == UsbProjectionMode::AirPlay
+         ? "airplay" : "aisi";
+     logging::write(std::format(
+@@ -1196,7 +1201,7 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+                 (peer_session_ended || !handshake_started
+                     ? std::chrono::seconds(1)
+                     : std::chrono::seconds(6));
+-            while (release_count < 2 && std::chrono::steady_clock::now() < release_deadline) {
++            while (release_count < stop_messages.size() && std::chrono::steady_clock::now() < release_deadline) {
+                 try {
+                     const auto count = usb->read(read_buffer, 250);
+                     if (count == 0) continue;
+@@ -1227,7 +1232,7 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+                 }
+             }
+             bool final_hpd0_sent{};
+-            if (release_count >= 2) {
++            if (release_count >= stop_messages.size()) {
+                 drain_result = "complete";
+                 for (const auto& message : protocol.complete_stop_messages()) {
+                     try {
+@@ -1241,10 +1246,13 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+                 }
+             }
+             logging::write(std::format(
+-                "shutdown_usb device_fp={} drain_result={} stop_written={}/{} sync_stop={} releases={}/2 decoded_packets={} final_hpd0_sent={}",
++                "shutdown_usb device_fp={} drain_result={} stop_written={}/{} sync_stop={} releases={}/{} decoded_packets={} final_hpd0_sent={}",
+                 device_fp, drain_result, stop_messages_written, stop_messages.size(),
+-                sync_stop_count, release_count, decoded_packet_count,
++                sync_stop_count, release_count, stop_messages.size(), decoded_packet_count,
+                 final_hpd0_sent));
++            if (audio_only) logging::write(std::format(
++                "usb_audio_only final=true audio_packets={} video_packets={} video_bytes={}",
++                protocol.audio_packets(), protocol.video_frames(), protocol.video_bytes()));
+         } catch (...) {}
+         // AppleUsbFilter is unsafe when the stream handle that owns bulk pipes
+         // is also used to disconnect its own PnP node. For libusb0, take the
+@@ -1574,6 +1582,7 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+         // overload is handled by the producer as a bounded GOP reset: discard
+         // through the next IDR, then rebuild the decoder from that keyframe.
+         std::jthread video_worker([&](std::stop_token worker_token) noexcept {
++            if (audio_only) return;
+             try {
+             std::unique_ptr<media::MediaFoundationVideoDecoder> video_decoder;
+             std::optional<coremedia::FormatDescription> current_format;
+@@ -1924,6 +1933,7 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+             }
+         });
+         const auto started = std::chrono::steady_clock::now();
++        auto audio_progress_at = started;
+         auto fps_sample_at = started;
+         std::uint64_t fps_sample_frames{};
+         bool display_reconfigure_pending{};
+@@ -1939,6 +1949,7 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+         detail::StreamingSilenceWatchdog media_silence_watchdog;
+         detail::StreamingSilenceWatchdog video_silence_watchdog;
+         const auto request_fast_reconnect_for_missing_frame_rate = [&] {
++            if (audio_only) return;
+             const auto now = std::chrono::steady_clock::now();
+             if (video_silence_watchdog.silence_duration(now) <
+                 std::chrono::milliseconds(2500)) return;
+@@ -1956,6 +1967,9 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+                     fast_stream_reconnect_gate.attempt_count()));
+         };
+         const auto detect_streaming_media_silence = [&] {
++            // A paused music app may send no PCM at all. USB read failures,
++            // STOP, and periodic parent-presence checks detect disconnects.
++            if (audio_only) return;
+             const auto now = std::chrono::steady_clock::now();
+             if (!media_silence_watchdog.expired(now)) return;
+ 
+@@ -1989,6 +2003,18 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+             throw std::runtime_error(diagnostic);
+         };
+         while (!stop_token.stop_requested()) {
++            if (audio_only && std::chrono::steady_clock::now() - audio_progress_at >=
++                    std::chrono::seconds(5)) {
++                audio_progress_at = std::chrono::steady_clock::now();
++                logging::write(std::format(
++                    "usb_audio_only audio_packets={} video_packets={} video_bytes={}",
++                    protocol.audio_packets(), protocol.video_frames(), protocol.video_bytes()));
++                if (!device::is_apple_usb_parent_present(serial_)) {
++                    failure_kind = FailureKind::DeviceDisconnected;
++                    failure_code = -2110;
++                    throw std::runtime_error("The USB audio device was disconnected");
++                }
++            }
+             video_worker_failure.rethrow_if_set();
+             if (fast_stream_reconnect_requested.exchange(false, std::memory_order_acq_rel)) {
+                 try {
+@@ -2024,7 +2050,7 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+             }
+             const auto count = usb->read(read_buffer, 250);
+             video_worker_failure.rethrow_if_set();
+-            if (protocol.state() != quicktime::SessionState::WaitingForPing &&
++            if (!audio_only && protocol.state() != quicktime::SessionState::WaitingForPing &&
+                 protocol.video_frames() == 0) {
+                 const auto now = std::chrono::steady_clock::now();
+                 if (!first_video_wait_started) first_video_wait_started = now;
+@@ -2036,6 +2062,13 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+                         "QuickTime session established but no video frame arrived within 12 seconds");
+                 }
+             }
++            if (audio_only && !protocol.negotiated_audio() && protocol.audio_packets() == 0 &&
++                std::chrono::steady_clock::now() - started >= std::chrono::seconds(20)) {
++                failure_kind = FailureKind::Timeout;
++                failure_code = -2111;
++                throw std::runtime_error(
++                    "USB audio-only negotiation timed out; this iOS device may require video to start audio");
++            }
+             if (count == 0) {
+                 request_fast_reconnect_for_missing_frame_rate();
+                 detect_streaming_media_silence();
+@@ -2103,6 +2136,37 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+                 if (event.state == quicktime::SessionState::Error) throw std::runtime_error(event.warning);
+                 for (const auto& response : event.outbound) usb->write(response, 1000);
+ 
++                if (audio_only && packet.is_video_sample()) {
++                    {
++                        std::scoped_lock lock(mutex_);
++                        snapshot_.video_frames = protocol.video_frames();
++                    }
++                    logging::write(std::format(
++                        "usb_audio_only rejected=true video_packets={} video_bytes={}",
++                        protocol.video_frames(), protocol.video_bytes()));
++                    failure_kind = FailureKind::VideoStream;
++                    failure_code = -2112;
++                    throw std::runtime_error(
++                        "The iPhone sent video despite audio-only negotiation; capture stopped instead of discarding video");
++                }
++                if (audio_only && event.state == quicktime::SessionState::Stopped) {
++                    peer_session_ended = true;
++                    failure_kind = FailureKind::SystemClosed;
++                    failure_code = -2109;
++                    throw std::runtime_error("The iPhone ended the USB audio session");
++                }
++                if (audio_only && packet.kind == quicktime::PacketKind::Sync &&
++                    packet.subtype == quicktime::fourcc('a', 'f', 'm', 't') &&
++                    protocol.negotiated_audio()) {
++                    transition_release.run_now();
++                    std::scoped_lock lock(mutex_);
++                    snapshot_.state = State::Streaming;
++                    snapshot_.message = L"USB 音频已连接，请在手机上播放声音";
++                    snapshot_.audio_sample_rate = static_cast<std::uint32_t>(
++                        protocol.negotiated_audio()->sample_rate);
++                    snapshot_.audio_channels = protocol.negotiated_audio()->channels_per_frame;
++                }
++
+                 if (event.video_sample) {
+                     failure_stage = FailureStage::Decoder;
+                     failure_kind = FailureKind::VideoStream;
+@@ -2256,7 +2320,7 @@ void CaptureSession::run(std::stop_token stop_token) noexcept {
+                         audio_age_ns >= 0 &&
+                         audio_age_ns <= std::chrono::duration_cast<
+                             std::chrono::nanoseconds>(std::chrono::seconds(3)).count();
+-                    snapshot_.message = !video_protected
++                    snapshot_.message = audio_only ? L"USB 仅音频播放中" : !video_protected
+                         ? L"投屏中"
+                         : audio_active
+                             ? L"DRM_VIDEO_PROTECTED_AUDIO_ACTIVE"
+diff --git a/src/Core/src/Capture/ICaptureSession.h b/src/Core/src/Capture/ICaptureSession.h
+index 039939f..4f8a2ab 100644
+--- a/src/Core/src/Capture/ICaptureSession.h
++++ b/src/Core/src/Capture/ICaptureSession.h
+@@ -53,6 +53,7 @@ enum class UsbProjectionMode : std::uint32_t {
+     Demo = 0,
+     AirPlay = 1,
+     Aisi = 2,
++    AudioOnly = 3,
+ };
+ 
+ struct Snapshot {
+diff --git a/src/Core/src/CoreApi.cpp b/src/Core/src/CoreApi.cpp
+index 5d49392..3a2b00c 100644
+--- a/src/Core/src/CoreApi.cpp
++++ b/src/Core/src/CoreApi.cpp
+@@ -438,7 +438,7 @@ bool valid_image_adjustments(float brightness, float contrast,
+ }
+ 
+ bool valid_capture_option_extensions(const iPhoneMirror::CaptureOptions& options) noexcept {
+-    return options.reserved[2] <= 2 && options.reserved[3] <= 2 &&
++    return options.reserved[2] <= 3 && options.reserved[3] <= 2 &&
+         options.reserved[4] <= 2 &&
+         valid_video_preferences(options.reserved[0], options.reserved[1], 0);
+ }
+diff --git a/src/Core/src/Protocol/QuickTimeSession.cpp b/src/Core/src/Protocol/QuickTimeSession.cpp
+index ccfecc9..f630daf 100644
+--- a/src/Core/src/Protocol/QuickTimeSession.cpp
++++ b/src/Core/src/Protocol/QuickTimeSession.cpp
+@@ -225,6 +225,7 @@ void SessionProtocol::reset() {
+     epoch_ = std::chrono::steady_clock::now();
+     device_audio_clock_ = local_audio_clock_ = device_video_clock_ = local_video_clock_ = local_host_clock_ = 0;
+     video_frames_ = audio_packets_ = 0;
++    video_bytes_ = 0;
+     video_format_.reset();
+     audio_format_.reset();
+     negotiated_audio_.reset();
+@@ -243,7 +244,7 @@ SessionEvent SessionProtocol::process(const Packet& packet) {
+                 if (packet.payload.size() < 32) throw std::runtime_error("CWPA has no device audio clock");
+                 device_audio_clock_ = u64le(packet.payload.data() + 24);
+                 local_audio_clock_ = device_audio_clock_ + 0x1000;
+-                event.outbound.push_back(make_hpd1(options_));
++                if (options_.request_video) event.outbound.push_back(make_hpd1(options_));
+                 event.outbound.push_back(clock_reply(id, local_audio_clock_));
+                 if (options_.request_audio) event.outbound.push_back(make_hpa1(device_audio_clock_));
+                 state_ = SessionState::Negotiating;
+@@ -255,7 +256,7 @@ SessionEvent SessionProtocol::process(const Packet& packet) {
+                 if (packet.payload.size() < 32) throw std::runtime_error("CVRP has no device video clock");
+                 device_video_clock_ = u64le(packet.payload.data() + 24);
+                 local_video_clock_ = device_video_clock_ + 0x1000af;
+-                event.outbound.push_back(make_need(device_video_clock_));
++                if (options_.request_video) event.outbound.push_back(make_need(device_video_clock_));
+                 event.outbound.push_back(clock_reply(id, local_video_clock_));
+             } else if (packet.subtype == fourcc('c', 'l', 'o', 'k')) {
+                 local_host_clock_ = packet.clock_ref + 0x10000;
+@@ -276,13 +277,20 @@ SessionEvent SessionProtocol::process(const Packet& packet) {
+             }
+         } else if (packet.kind == PacketKind::Async) {
+             if (packet.is_video_sample()) {
++                // Count incoming video even when it was not requested. Never
++                // mistake locally discarded video for audio-only transport.
++                ++video_frames_;
++                video_bytes_ += packet.payload.size();
++                if (!options_.request_video) {
++                    event.warning = "The device sent video during an audio-only session";
++                    return event;
++                }
+                 const bool tearing_down = state_ == SessionState::Stopping ||
+                     state_ == SessionState::Stopped;
+                 const auto envelope = coremedia::parse_sample_envelope(packet.payload);
+                 auto sample = coremedia::parse_sample_buffer(envelope.serialized_sample_buffer);
+                 if (sample.format) video_format_ = sample.format;
+                 event.video_sample = std::move(sample);
+-                ++video_frames_;
+                 if (!tearing_down && device_video_clock_ != 0)
+                     event.outbound.push_back(make_need(device_video_clock_));
+                 // Media already queued by the device can arrive after HPD0 or
+@@ -294,8 +302,17 @@ SessionEvent SessionProtocol::process(const Packet& packet) {
+                 const auto envelope = coremedia::parse_sample_envelope(packet.payload);
+                 auto sample = coremedia::parse_sample_buffer(envelope.serialized_sample_buffer);
+                 if (sample.format) audio_format_ = sample.format;
++                else if (!options_.request_video && !audio_format_ && negotiated_audio_) {
++                    coremedia::FormatDescription format;
++                    format.media_type = fourcc('s', 'o', 'u', 'n');
++                    format.audio = negotiated_audio_;
++                    audio_format_ = std::move(format);
++                }
+                 event.audio_sample = std::move(sample);
+                 ++audio_packets_;
++                if (!options_.request_video && state_ != SessionState::Stopping &&
++                    state_ != SessionState::Stopped)
++                    state_ = SessionState::Streaming;
+             }
+         }
+     } catch (const std::exception& error) {
+@@ -316,12 +333,15 @@ std::vector<std::vector<std::uint8_t>> SessionProtocol::stop_messages() {
+         const auto audio_clock = device_audio_clock_ != 0 ? device_audio_clock_ : EmptyClockRef;
+         messages.push_back(async_control(fourcc('h', 'p', 'a', '0'), audio_clock));
+     }
+-    messages.push_back(async_control(fourcc('h', 'p', 'd', '0'), EmptyClockRef));
++    if (options_.request_video || video_frames_ != 0 || device_video_clock_ != 0)
++        messages.push_back(async_control(fourcc('h', 'p', 'd', '0'), EmptyClockRef));
+     return messages;
+ }
+ 
+ std::vector<std::vector<std::uint8_t>> SessionProtocol::complete_stop_messages() {
+     state_ = SessionState::Stopped;
++    if (!options_.request_video && video_frames_ == 0 && device_video_clock_ == 0)
++        return {};
+     // Apple's reference teardown sends HPD0 once to request display release,
+     // waits for both audio/video RELS notifications, then sends HPD0 once more
+     // before the USB interface is released.
+@@ -330,6 +350,7 @@ std::vector<std::vector<std::uint8_t>> SessionProtocol::complete_stop_messages()
+ 
+ std::vector<std::vector<std::uint8_t>> SessionProtocol::begin_display_reconfigure(
+     std::uint32_t width, std::uint32_t height) {
++    if (!options_.request_video) return {};
+     options_.request_native_display_size = false;
+     options_.requested_width = width;
+     options_.requested_height = height;
+@@ -337,6 +358,7 @@ std::vector<std::vector<std::uint8_t>> SessionProtocol::begin_display_reconfigur
+ }
+ 
+ std::vector<std::vector<std::uint8_t>> SessionProtocol::complete_display_reconfigure() {
++    if (!options_.request_video) return {};
+     std::vector<std::vector<std::uint8_t>> messages;
+     messages.push_back(make_hpd1(options_));
+     if (device_video_clock_ != 0) messages.push_back(make_need(device_video_clock_));
+diff --git a/src/Core/src/Protocol/QuickTimeSession.h b/src/Core/src/Protocol/QuickTimeSession.h
+index 1226c6c..790b8f5 100644
+--- a/src/Core/src/Protocol/QuickTimeSession.h
++++ b/src/Core/src/Protocol/QuickTimeSession.h
+@@ -40,6 +40,8 @@ struct SessionOptions {
+     bool demo_mode{false};
+     bool request_audio{true};
+     bool advertise_hevc_444{false};
++    // False requests audio without advertising a display or requesting FEED.
++    bool request_video{true};
+ };
+ 
+ struct SessionEvent {
+@@ -65,6 +67,7 @@ public:
+ 
+     [[nodiscard]] SessionState state() const noexcept { return state_; }
+     [[nodiscard]] std::uint64_t video_frames() const noexcept { return video_frames_; }
++    [[nodiscard]] std::uint64_t video_bytes() const noexcept { return video_bytes_; }
+     [[nodiscard]] std::uint64_t audio_packets() const noexcept { return audio_packets_; }
+     [[nodiscard]] const std::optional<coremedia::FormatDescription>& video_format() const noexcept { return video_format_; }
+     [[nodiscard]] const std::optional<coremedia::FormatDescription>& audio_format() const noexcept { return audio_format_; }
+@@ -80,6 +83,7 @@ private:
+     std::uint64_t local_video_clock_{};
+     std::uint64_t local_host_clock_{};
+     std::uint64_t video_frames_{};
++    std::uint64_t video_bytes_{};
+     std::uint64_t audio_packets_{};
+     std::optional<coremedia::FormatDescription> video_format_;
+     std::optional<coremedia::FormatDescription> audio_format_;
+diff --git a/src/Core/tests/CoreTests.cpp b/src/Core/tests/CoreTests.cpp
+index f93069d..723eb14 100644
+--- a/src/Core/tests/CoreTests.cpp
++++ b/src/Core/tests/CoreTests.cpp
+@@ -437,9 +437,65 @@ void test_session_protocol() {
+         "session emits the final HPD0 after release notifications");
+ }
+ 
++void test_usb_audio_only_protocol() {
++    using namespace iPhoneMirror::quicktime;
++    SessionProtocol session(SessionOptions{.request_video = false});
++    auto event = session.process(decode_framed(make_ping()));
++    check(event.outbound.size() == 1, "audio-only replies to PING");
++    event = session.process(decode_framed(read_fixture(
++        "fixtures/quicktime_video_hack/cwpa-request1")));
++    check(event.outbound.size() == 2 &&
++        decode_framed(event.outbound[0]).kind == PacketKind::Reply &&
++        decode_framed(event.outbound[1]).subtype == fourcc('h', 'p', 'a', '1'),
++        "audio-only negotiates audio without advertising HPD1");
++    event = session.process(decode_framed(read_fixture(
++        "fixtures/quicktime_video_hack/afmt-request")));
++    check(session.negotiated_audio() && event.outbound.size() == 1 &&
++        event.outbound[0] == read_fixture("fixtures/quicktime_video_hack/afmt-reply"),
++        "audio-only retains normal AFMT negotiation");
++    const auto eat = parse_payload(read_fixture("fixtures/quicktime_video_hack/asyn-eat"));
++    event = session.process(eat);
++    check(event.audio_sample && event.state == SessionState::Streaming &&
++        session.audio_packets() == 1 && session.video_frames() == 0 &&
++        session.video_bytes() == 0, "audio alone enters streaming with zero video");
++    check(session.begin_display_reconfigure(1920, 1080).empty() &&
++        session.complete_display_reconfigure().empty(),
++        "orientation/refresh cannot re-enable an audio-only display");
++    const auto stop = session.stop_messages();
++    check(stop.size() == 1 && decode_framed(stop[0]).subtype == fourcc('h', 'p', 'a', '0'),
++        "pure audio session releases only the audio stream");
++    event = session.process(eat);
++    check(event.state == SessionState::Stopping, "late audio preserves stopping state");
++    check(session.complete_stop_messages().empty(), "audio-only has no final display release");
++    event = session.process(eat);
++    check(event.state == SessionState::Stopped, "late audio preserves stopped state");
++
++    session.reset();
++    check(session.audio_packets() == 0 && session.video_frames() == 0 &&
++        session.video_bytes() == 0, "audio-only reset clears all media counters");
++    event = session.process(decode_framed(read_fixture(
++        "fixtures/quicktime_video_hack/cvrp-request")));
++    check(event.outbound.size() == 1 && decode_framed(event.outbound[0]).kind == PacketKind::Reply,
++        "unsolicited video clock is acknowledged without NEED");
++    const auto feed = decode_framed(read_fixture("fixtures/quicktime_video_hack/asyn-feed"));
++    event = session.process(feed);
++    check(!event.video_sample && event.outbound.empty() && !event.warning.empty() &&
++        session.video_frames() == 1 && session.video_bytes() == feed.payload.size(),
++        "unsolicited video is counted without decoding or requesting more video");
++    check(event.state != SessionState::Streaming, "unrequested video cannot mark audio ready");
++    check(session.stop_messages().size() == 2 && session.complete_stop_messages().size() == 1,
++        "unexpected device video is also released during teardown");
++}
++
+ void test_usb_projection_modes() {
+     using namespace iPhoneMirror::capture;
+ 
++    const auto audio_only = make_usb_display_configuration(
++        UsbProjectionMode::AudioOnly, 1206, 2622);
++    check(audio_only.session_options.request_audio &&
++        !audio_only.session_options.request_video && !audio_only.adaptive_reconfiguration,
++        "USB audio-only capture mode disables video negotiation and display adaptation");
++
+     const auto demo = make_usb_display_configuration(
+         UsbProjectionMode::Demo, 1206, 2622);
+     check(demo.session_options.demo_mode, "demo mode enables Valeria");
+@@ -2049,6 +2105,7 @@ int main(int argc, char** argv) {
+         test_coremedia();
+         test_upstream_capture_fixtures();
+         test_session_protocol();
++        test_usb_audio_only_protocol();
+         test_usb_projection_modes();
+         test_apple_usb_serial_matching();
+         test_apple_usb_filter_safety();

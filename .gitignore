@@ -1,0 +1,13 @@
+.research/
+.tools/
+.nuget/
+.dotnet-home/
+build/
+dist/
+**/bin/
+!third_party/libusb-win32/bin/
+!third_party/libusb-win32/bin/**
+**/obj/
+*.user
+*.log
+!docs/test-results/**/*.log

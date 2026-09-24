@@ -1,0 +1,57 @@
+// Copyright (C) 2026 - zsliu98
+// This file is part of ZLCompressor
+//
+// ZLCompressor is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License Version 3 as published by the Free Software Foundation.
+//
+// ZLCompressor is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License along with ZLCompressor. If not, see <https://www.gnu.org/licenses/>.
+
+#pragma once
+
+#include "../../gui/gui.hpp"
+#include "../../PluginProcessor.hpp"
+#include "../helper/panel_constants.hpp"
+
+namespace zlpanel {
+    class ControlSettingPanel final : public juce::Component {
+    public:
+        static constexpr float kHeightP = 20.f;
+
+        explicit ControlSettingPanel(PluginProcessor& p, zlgui::UIBase& base);
+
+        ~ControlSettingPanel() override;
+
+        void loadSetting();
+
+        void saveSetting();
+
+        void resetSetting();
+
+        int getIdealHeight() const;
+
+        void resized() override;
+
+
+    private:
+        PluginProcessor& p_ref_;
+        zlgui::UIBase& base_;
+        zlgui::label::NameLookAndFeel name_laf_;
+
+        juce::Label wheel_label_;
+        juce::Label slider_label_;
+        juce::Label dragger_label_;
+        std::array<zlgui::slider::CompactLinearSlider<true, true, true>, 7> sensitivity_sliders_;
+        zlgui::combobox::CompactCombobox wheel_reverse_box_;
+        juce::Label rotary_style_label_;
+        zlgui::combobox::CompactCombobox rotary_style_box_;
+        zlgui::slider::CompactLinearSlider<true, true, true> rotary_drag_sensitivity_slider_;
+        juce::Label slider_double_click_label_;
+        zlgui::combobox::CompactCombobox slider_double_click_box_;
+
+        std::array<juce::Label, 2> solo_action_labels_;
+        std::array<zlgui::combobox::CompactCombobox, 2> solo_action_mouse_boxes_;
+        std::array<zlgui::combobox::CompactCombobox, 2> solo_action_key_boxes_;
+
+    };
+} // zlpanel

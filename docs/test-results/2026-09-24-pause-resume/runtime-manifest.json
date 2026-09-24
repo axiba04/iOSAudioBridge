@@ -1,0 +1,37 @@
+{
+  "version": "0.1.0-phase1-pause-resume",
+  "date": "2026-09-24",
+  "platform": "win-x64",
+  "files": [
+    {
+      "file": "iOSAudioBridge.exe",
+      "bytes": 151552,
+      "sha256": "FFA48AB4201F0C8F9F0588C659EA692F959A1D75036AD360EE1DB57CB4D124C6"
+    },
+    {
+      "file": "iOSAudioBridge.dll",
+      "bytes": 44544,
+      "sha256": "2BDB8BDF80149791E66BE1C62A3A4D04AF03A549D3268DD3A6E3F8B783C01F4F"
+    },
+    {
+      "file": "AudioCore.dll",
+      "bytes": 774656,
+      "sha256": "5228391FDF8AD070373DC0AFABB41EF96E2FAB6AD3CFCB7B430161CFE8C5CB6F"
+    },
+    {
+      "file": "AudioBridge.UsbRestore.exe",
+      "bytes": 488448,
+      "sha256": "13171CF06D1BD4CDE720030E5786182D6BD6296551C4035621D287244672ED4F"
+    },
+    {
+      "file": "AudioProbe.exe",
+      "bytes": 510464,
+      "sha256": "6F8873BD421ACB61C1437CA5A1DE237EF4A6D5BDA9566E0944CC796B9F3C5FEB"
+    },
+    {
+      "file": "libusb0.dll",
+      "bytes": 76384,
+      "sha256": "4F18B5D2C28AA66B648C8683C6D09B52B92CBBEE85984BBEFAD5F38A64BC2A14"
+    }
+  ]
+}

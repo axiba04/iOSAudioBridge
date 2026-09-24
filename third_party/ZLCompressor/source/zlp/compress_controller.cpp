@@ -1,0 +1,829 @@
+// Copyright (C) 2026 - zsliu98
+// This file is part of ZLCompressor
+//
+// ZLCompressor is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License Version 3 as published by the Free Software Foundation.
+//
+// ZLCompressor is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License along with ZLCompressor. If not, see <https://www.gnu.org/licenses/>.
+
+#include "compress_controller.hpp"
+
+namespace zlp {
+    CompressController::CompressController(juce::AudioProcessor& processor) :
+        processor_ref_(processor) {
+    }
+
+    void CompressController::prepare(const double sample_rate, const size_t max_num_samples) {
+        sample_rate_ = sample_rate;
+        mag_analyzer_sender_.prepare(sample_rate, max_num_samples, {2, 2, 2, 2}, 0.1);
+        for (size_t i = 0; i < kAnalyzerStreamNum; ++i) {
+            mag_analyzer_sender_.setON(i, true);
+        }
+        lufs_matcher_.prepare(sample_rate, 2);
+        output_gain_.prepare(sample_rate, max_num_samples, 0.1);
+
+        pre_buffer_[0].resize(max_num_samples);
+        pre_buffer_[1].resize(max_num_samples);
+        pre_pointers_[0] = pre_buffer_[0].data();
+        pre_pointers_[1] = pre_buffer_[1].data();
+        post_buffer_[0].resize(max_num_samples);
+        post_buffer_[1].resize(max_num_samples);
+        post_pointers_[0] = post_buffer_[0].data();
+        post_pointers_[1] = post_buffer_[1].data();
+        analyzer_side_buffer_[0].resize(max_num_samples);
+        analyzer_side_buffer_[1].resize(max_num_samples);
+        analyzer_side_pointers_[0] = analyzer_side_buffer_[0].data();
+        analyzer_side_pointers_[1] = analyzer_side_buffer_[1].data();
+        // allocate memories for up to max oversampling
+        for (auto& t : rms_tracker_) {
+            t.setMaximumMomentarySeconds(
+                zlp::PRMSLength::kRange.end / 1000.f * static_cast<float>(1 << ZL_MAX_OVERSAMPLE_RATE) + 0.001f);
+            t.prepare(sample_rate);
+            t.setMaximumMomentarySeconds(zlp::PRMSLength::kRange.end / 1000.f + 0.001f);
+        }
+        rms_side_buffer0_.resize(max_num_samples * (1 << ZL_MAX_OVERSAMPLE_RATE));
+        rms_side_buffer1_.resize(rms_side_buffer0_.size());
+        // init oversamplers
+#if ZL_MAX_OVERSAMPLE_RATE >= 1
+        over_sampler2_.prepare(4, max_num_samples);
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 2
+        over_sampler4_.prepare(4, max_num_samples);
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 3
+        over_sampler8_.prepare(4, max_num_samples);
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 4
+        over_sampler16_.prepare(4, max_num_samples);
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 5
+        over_sampler32_.prepare(4, max_num_samples);
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 6
+        over_sampler64_.prepare(4, max_num_samples);
+#endif
+
+#if ZL_MAX_OVERSAMPLE_RATE == 0
+        oversample_delay_.prepare(sample_rate, max_num_samples, 4, 0.f);
+#elif ZL_MAX_OVERSAMPLE_RATE == 1
+        oversample_delay_.prepare(sample_rate, max_num_samples, 4,
+                                  static_cast<float>(over_sampler2_.getLatency()) / static_cast<float>(sample_rate));
+#elif ZL_MAX_OVERSAMPLE_RATE == 2
+        oversample_delay_.prepare(sample_rate, max_num_samples, 4,
+                                  static_cast<float>(over_sampler4_.getLatency()) / static_cast<float>(sample_rate));
+#elif ZL_MAX_OVERSAMPLE_RATE == 3
+        oversample_delay_.prepare(sample_rate, max_num_samples, 4,
+                                  static_cast<float>(over_sampler8_.getLatency()) / static_cast<float>(sample_rate));
+#elif ZL_MAX_OVERSAMPLE_RATE == 4
+        oversample_delay_.prepare(sample_rate, max_num_samples, 4,
+                                  static_cast<float>(over_sampler16_.getLatency()) / static_cast<float>(sample_rate));
+#elif ZL_MAX_OVERSAMPLE_RATE == 5
+        oversample_delay_.prepare(sample_rate, max_num_samples, 4,
+                                  static_cast<float>(over_sampler32_.getLatency()) / static_cast<float>(sample_rate));
+#elif ZL_MAX_OVERSAMPLE_RATE == 6
+        oversample_delay_.prepare(sample_rate, max_num_samples, 4,
+                                  static_cast<float>(over_sampler64_.getLatency()) / static_cast<float>(sample_rate));
+#endif
+        oversample_delay_.setDelayInSamples(0);
+        c_oversample_idx_ = -1;
+        // init lookahead delay
+        lookahead_delay_.prepare(sample_rate, max_num_samples, 2, 0.02f);
+        lookahead_delay_.setDelayInSamples(0);
+        to_update_status_.signal();
+        to_update_stereo_.signal();
+        to_update_style_.signal();
+        to_update_follower_.signal();
+        to_update_rms_.signal();
+        to_update_hold_.signal();
+        to_update_range_.signal();
+        to_update_wet_.signal();
+        to_update_output_gain_.signal();
+        to_update_oversample_.signal();
+        to_update_lookahead_.signal();
+        // init hold buffers
+        for (auto& h : hold_buffer_) {
+            h.setCapacity(static_cast<size_t>(8.0 * sample_rate));
+        }
+        to_update_.signal();
+    }
+
+    void CompressController::prepareBuffer() {
+        if (!to_update_.check()) {
+            return;
+        }
+        bool to_update_pdc = false;
+
+        if (to_update_status_.check()) {
+            c_is_on_ = is_on_.load(std::memory_order::relaxed);
+            c_is_delta_ = is_delta_.load(std::memory_order::relaxed);
+            c_mag_analyzer_on_ = mag_analyzer_on_.load(std::memory_order::relaxed);
+
+            const auto new_lufs_matcher_on_ = lufs_matcher_on_.load(std::memory_order::relaxed);
+            if (new_lufs_matcher_on_ != c_lufs_matcher_on_) {
+                c_lufs_matcher_on_ = new_lufs_matcher_on_;
+                if (c_lufs_matcher_on_) {
+                    lufs_matcher_.reset();
+                }
+            }
+            c_copy_pre = c_mag_analyzer_on_ || c_is_delta_;
+            c_copy_post = c_mag_analyzer_on_ || c_is_delta_;
+        }
+
+        // load oversampling idx, set up trackers/followers and update latency
+        if (to_update_oversample_.check()) {
+            const auto new_oversample_idx = oversample_idx_.load(std::memory_order::relaxed);
+            to_update_pdc = true;
+            c_oversample_idx_ = new_oversample_idx;
+            switch (c_oversample_idx_) {
+            case 0: {
+                oversample_delay_.setDelayInSamples(0);
+                break;
+            }
+#if ZL_MAX_OVERSAMPLE_RATE >= 1
+            case 1: {
+                over_sampler2_.reset();
+                oversample_delay_.setDelayInSamples(static_cast<int>(over_sampler2_.getLatency()));
+                break;
+            }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 2
+            case 2: {
+                over_sampler4_.reset();
+                oversample_delay_.setDelayInSamples(static_cast<int>(over_sampler4_.getLatency()));
+                break;
+            }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 3
+            case 3: {
+                over_sampler8_.reset();
+                oversample_delay_.setDelayInSamples(static_cast<int>(over_sampler8_.getLatency()));
+                break;
+            }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 4
+            case 4: {
+                over_sampler16_.reset();
+                oversample_delay_.setDelayInSamples(static_cast<int>(over_sampler16_.getLatency()));
+                break;
+            }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 5
+            case 5: {
+                over_sampler32_.reset();
+                oversample_delay_.setDelayInSamples(static_cast<int>(over_sampler32_.getLatency()));
+                break;
+            }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 6
+            case 6: {
+                over_sampler64_.reset();
+                oversample_delay_.setDelayInSamples(static_cast<int>(over_sampler64_.getLatency()));
+                break;
+            }
+#endif
+            default: ;
+            }
+            const auto oversample_mul = 1 << c_oversample_idx_;
+            // prepare tracker and followers with the multiplied samplerate
+            oversample_sr_ = sample_rate_ * static_cast<double>(oversample_mul);
+            to_update_rms_.signal();
+            for (auto& f : follower_) {
+                f.prepare(oversample_sr_);
+            }
+            for (auto& f : rms_follower_) {
+                f.prepare(oversample_sr_);
+            }
+            for (auto& t : rms_tracker_) {
+                t.prepare(oversample_sr_);
+            }
+            to_update_style_.signal();
+            // prepare the hold buffer with the multiplied samplerate
+            for (auto& h : hold_buffer_) {
+                h.setCapacity(static_cast<size_t>(oversample_sr_));
+            }
+            to_update_hold_.signal();
+        }
+
+        if (to_update_lookahead_.check()) {
+            const auto delay_length = lookahead_delay_length_.load(std::memory_order::relaxed);
+            to_update_pdc = true;
+            lookahead_delay_.setDelay(std::abs(delay_length));
+            if (std::abs(delay_length) < 1e-6f) {
+                delay_status_ = DelayStatus::kZero;
+            } else if (delay_length > 0.f) {
+                delay_status_ = DelayStatus::kMainDelay;
+            } else {
+                delay_status_ = DelayStatus::kSideDelay;
+            }
+        }
+
+        if (to_update_follower_.check()) {
+            const auto attack = attack_.load(std::memory_order::relaxed);
+            const auto release = release_.load(std::memory_order::relaxed);
+            const auto rms_speed = rms_speed_.load(std::memory_order::relaxed);
+            follower_[0].setAttack(attack);
+            follower_[0].setRelease(release);
+            rms_follower_[0].setAttack(attack * rms_speed);
+            rms_follower_[0].setRelease(release * rms_speed);
+        }
+
+        // load stereo mode
+        if (to_update_stereo_.check()) {
+            const auto stereo_mode = stereo_mode_.load(std::memory_order::relaxed);
+            c_stereo_mode_is_midside = (stereo_mode == 0) || (stereo_mode == 2);
+            c_stereo_mode_is_max = (stereo_mode == 2) || (stereo_mode == 3);
+            c_stereo_swap_ = stereo_swap_.load(std::memory_order::relaxed);
+            c_stereo_link_ = stereo_link_.load(std::memory_order::relaxed);
+            c_stereo_link_max_ = 1.f - 2.f * (1.f - c_stereo_link_);
+        }
+
+        // load compressor style, reset the internal state if different
+        if (to_update_style_.check()) {
+            const auto previous_direction = c_direction_;
+            c_comp_style_ = comp_style_.load(std::memory_order::relaxed);
+            c_direction_ = direction_.load(std::memory_order::relaxed);
+            const auto direction_changed = c_direction_ != previous_direction;
+            c_is_downward_ = (c_direction_ == PCompDirection::kCompress
+                || c_direction_ == PCompDirection::kExpand);
+            if (c_direction_ == PCompDirection::kCompress) {
+                clipper_.setReductionAtUnit(compression_computer_.eval(0.f));
+            } else {
+                clipper_.setReductionAtUnit(-2.360900573208f);
+            }
+            if (c_direction_ == PCompDirection::kExpand || c_direction_ == PCompDirection::kInflate) {
+                if (c_comp_style_ != zldsp::compressor::Style::kClean &&
+                    c_comp_style_ != zldsp::compressor::Style::kClassic) {
+                    c_comp_style_ = zldsp::compressor::Style::kClean;
+                }
+            }
+            switch (c_comp_style_) {
+            case zldsp::compressor::Style::kClean: {
+                zldsp::compressor::CleanCompressor<float>::reset(follower_[0]);
+                zldsp::compressor::CleanCompressor<float>::reset(follower_[1]);
+                break;
+            }
+            case zldsp::compressor::Style::kClassic: {
+                classic_comps_[0].reset(follower_[0]);
+                classic_comps_[1].reset(follower_[1]);
+                break;
+            }
+            case zldsp::compressor::Style::kOptical: {
+                zldsp::compressor::OpticalCompressor<float>::reset(follower_[0]);
+                zldsp::compressor::OpticalCompressor<float>::reset(follower_[1]);
+                break;
+            }
+            case zldsp::compressor::Style::kVocal: {
+                vocal_comps_[0].reset(follower_[0]);
+                vocal_comps_[1].reset(follower_[1]);
+                break;
+            }
+            default:
+                break;
+            }
+            zldsp::compressor::CleanCompressor<float>::reset(rms_follower_[0]);
+            zldsp::compressor::CleanCompressor<float>::reset(rms_follower_[1]);
+            if (direction_changed) {
+                hold_buffer_[0].clear();
+                hold_buffer_[1].clear();
+            }
+        }
+
+        // load hold values
+        if (to_update_hold_.check()) {
+            const auto oversample_mul = 1 << c_oversample_idx_;
+            const auto hold_size = static_cast<size_t>(
+                sample_rate_ * hold_length_.load(std::memory_order::relaxed)
+            ) * static_cast<size_t>(oversample_mul);
+            hold_buffer_[0].setSize(hold_size);
+            hold_buffer_[1].setSize(hold_size);
+        }
+        // load wet values
+        if (to_update_wet_.check()) {
+            const auto c_wet = wet_.load(std::memory_order::relaxed);
+            c_wet1_ = wet1_.load(std::memory_order::relaxed) * c_wet * 0.05f;
+            // 0.05 accounts for the db to gain transformation
+            c_wet2_ = wet2_.load(std::memory_order::relaxed) * c_wet * 0.05f;
+            to_update_range_.signal();
+            to_update_output_gain_.signal();
+        }
+        if (to_update_range_.check()) {
+            c_range_ = range_.load(std::memory_order::relaxed) * wet_.load(std::memory_order::relaxed);
+            c_is_range_inf_ = is_range_inf_.load(std::memory_order::relaxed);
+        }
+        if (to_update_output_gain_.check()) {
+            output_gain_.setGainDecibels(
+                output_gain_db_.load(std::memory_order::relaxed) * wet_.load(std::memory_order::relaxed));
+        }
+        if (to_update_rms_.check()) {
+            const auto rms_length = rms_length_.load(std::memory_order::relaxed);
+            rms_tracker_[0].setMomentarySeconds(rms_length);
+            rms_tracker_[1].setMomentarySeconds(rms_length);
+            c_use_rms_ = use_rms_.load(std::memory_order::relaxed);
+            if (c_use_rms_) {
+                c_rms_mix_ = rms_mix_.load(std::memory_order::relaxed);
+                rms_tracker_[0].prepareBuffer();
+                rms_tracker_[1].prepareBuffer();
+            } else {
+                zldsp::compressor::CleanCompressor<float>::reset(rms_follower_[0]);
+                zldsp::compressor::CleanCompressor<float>::reset(rms_follower_[1]);
+            }
+        }
+        if (to_update_pdc) {
+            int new_pdc{0};
+            switch (delay_status_) {
+            case DelayStatus::kZero:
+            case DelayStatus::kSideDelay: {
+                new_pdc = oversample_delay_.getDelayInSamples();
+                break;
+            }
+            case DelayStatus::kMainDelay: {
+                new_pdc = lookahead_delay_.getDelayInSamples() + oversample_delay_.getDelayInSamples();
+                break;
+            }
+            }
+            if (pdc_.exchange(new_pdc) != new_pdc) {
+                triggerAsyncUpdate();
+            }
+        }
+    }
+
+    void CompressController::process(std::array<float*, 2> main_pointers,
+                                     std::array<float*, 2> side_pointers,
+                                     const size_t num_samples, bool bypass) {
+        prepareBuffer();
+        switch (delay_status_) {
+        case DelayStatus::kZero: {
+            break;
+        }
+        case DelayStatus::kMainDelay: {
+            lookahead_delay_.process(main_pointers, num_samples);
+            break;
+        }
+        case DelayStatus::kSideDelay: {
+            lookahead_delay_.process(side_pointers, num_samples);
+            break;
+        }
+        }
+        if (c_mag_analyzer_on_) {
+            zldsp::vector::copy<float>(analyzer_side_pointers_, side_pointers, num_samples);
+        }
+        // process the pre lufs matcher
+        if (c_lufs_matcher_on_) {
+            lufs_matcher_.processPre(main_pointers, num_samples);
+        }
+        // copy pre buffer
+        if (c_copy_pre) {
+            zldsp::vector::copy<float>(pre_pointers_, main_pointers, num_samples);
+        }
+        // stereo split the main/side buffer
+        if (c_stereo_mode_is_midside) {
+            zldsp::splitter::InplaceMSSplitter<float>::split(main_pointers[0], main_pointers[1], num_samples);
+            zldsp::splitter::InplaceMSSplitter<float>::split(side_pointers[0], side_pointers[1], num_samples);
+        }
+        // upsample side buffer
+        std::array<float*, 4> pointers{main_pointers[0], main_pointers[1], side_pointers[0], side_pointers[1]};
+        std::array<float*, 4> analyzer_pointers{
+            pre_pointers_[0], pre_pointers_[1], analyzer_side_pointers_[0], analyzer_side_pointers_[1]};
+        switch (c_oversample_idx_) {
+        case 0: {
+            processBuffer(main_pointers[0], main_pointers[1], side_pointers[0], side_pointers[1], num_samples,
+                          bypass);
+            break;
+        }
+#if ZL_MAX_OVERSAMPLE_RATE >= 1
+        case 1: {
+            over_sampler2_.upsample(pointers, num_samples);
+            auto& os_pointers = over_sampler2_.getOSPointer();
+            processBuffer(os_pointers[0], os_pointers[1], os_pointers[2], os_pointers[3], num_samples << 1, bypass);
+            over_sampler2_.downsample(pointers, num_samples);
+            if (c_copy_pre) {
+                oversample_delay_.process(analyzer_pointers, num_samples);
+            }
+            break;
+        }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 2
+        case 2: {
+            over_sampler4_.upsample(pointers, num_samples);
+            auto& os_pointers = over_sampler4_.getOSPointer();
+            processBuffer(os_pointers[0], os_pointers[1], os_pointers[2], os_pointers[3], num_samples << 2, bypass);
+            over_sampler4_.downsample(pointers, num_samples);
+            if (c_copy_pre) {
+                oversample_delay_.process(analyzer_pointers, num_samples);
+            }
+            break;
+        }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 3
+        case 3: {
+            over_sampler8_.upsample(pointers, num_samples);
+            auto& os_pointers = over_sampler8_.getOSPointer();
+            processBuffer(os_pointers[0], os_pointers[1], os_pointers[2], os_pointers[3], num_samples << 3, bypass);
+            over_sampler8_.downsample(pointers, num_samples);
+            if (c_copy_pre) {
+                oversample_delay_.process(analyzer_pointers, num_samples);
+            }
+            break;
+        }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 4
+        case 4: {
+            over_sampler16_.upsample(pointers, num_samples);
+            auto& os_pointers = over_sampler16_.getOSPointer();
+            processBuffer(os_pointers[0], os_pointers[1], os_pointers[2], os_pointers[3], num_samples << 4, bypass);
+            over_sampler16_.downsample(pointers, num_samples);
+            if (c_copy_pre) {
+                oversample_delay_.process(analyzer_pointers, num_samples);
+            }
+            break;
+        }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 5
+        case 5: {
+            over_sampler32_.upsample(pointers, num_samples);
+            auto& os_pointers = over_sampler32_.getOSPointer();
+            processBuffer(os_pointers[0], os_pointers[1], os_pointers[2], os_pointers[3], num_samples << 5, bypass);
+            over_sampler32_.downsample(pointers, num_samples);
+            if (c_copy_pre) {
+                oversample_delay_.process(analyzer_pointers, num_samples);
+            }
+            break;
+        }
+#endif
+#if ZL_MAX_OVERSAMPLE_RATE >= 6
+        case 6: {
+            over_sampler64_.upsample(pointers, num_samples);
+            auto& os_pointers = over_sampler64_.getOSPointer();
+            processBuffer(os_pointers[0], os_pointers[1], os_pointers[2], os_pointers[3], num_samples << 6, bypass);
+            over_sampler64_.downsample(pointers, num_samples);
+            if (c_copy_pre) {
+                oversample_delay_.process(analyzer_pointers, num_samples);
+            }
+            break;
+        }
+#endif
+        default: ;
+        }
+        // stereo combine the main buffer
+        if (c_stereo_mode_is_midside) {
+            zldsp::splitter::InplaceMSSplitter<float>::combine(main_pointers[0], main_pointers[1], num_samples);
+        }
+        // copy post buffer
+        if (c_copy_post) {
+            zldsp::vector::copy<float>(post_pointers_, main_pointers, num_samples);
+        }
+        // makeup gain
+        if (c_is_on_ && !bypass) {
+            output_gain_.template process<false>(main_pointers, num_samples);
+        } else {
+            output_gain_.template process<true>(main_pointers, num_samples);
+        }
+        // mag analyzer
+        if (c_mag_analyzer_on_) {
+            mag_analyzer_sender_.process(
+                {pre_pointers_, post_pointers_, main_pointers, analyzer_side_pointers_}, num_samples);
+        }
+        // delta
+        if (c_is_delta_) {
+            for (size_t chan = 0; chan < 2; ++chan) {
+                zldsp::vector::sub(main_pointers[chan], pre_pointers_[chan], post_pointers_[chan], num_samples);
+            }
+        }
+        // process the post lufs matcher
+        if (c_lufs_matcher_on_) {
+            lufs_matcher_.processPost(main_pointers, num_samples);
+        }
+    }
+
+    void CompressController::processBuffer(float* __restrict main_buffer0, float* __restrict main_buffer1,
+                                           float* __restrict side_buffer0, float* __restrict side_buffer1,
+                                           const size_t num_samples, const bool bypass) {
+        // prepare followers
+        if (follower_[0].prepareBuffer()) {
+            follower_[1].copyFrom(follower_[0]);
+        }
+        // prepare rms compressors
+        if (c_use_rms_) {
+            if (rms_follower_[0].prepareBuffer()) {
+                rms_follower_[1].copyFrom(rms_follower_[0]);
+            }
+            zldsp::vector::copy(rms_side_buffer0_.data(), side_buffer0, num_samples);
+            zldsp::vector::copy(rms_side_buffer1_.data(), side_buffer1, num_samples);
+        }
+        // prepare computer & process
+        switch (c_direction_) {
+        case PCompDirection::kCompress: {
+            if (compression_computer_.prepareBuffer()) {
+                clipper_.setReductionAtUnit(compression_computer_.eval(0.f));
+            }
+            processSideBuffer(compression_computer_,
+                              side_buffer0, side_buffer1, num_samples);
+            break;
+        }
+        case PCompDirection::kShape: {
+            compression_computer_.prepareBuffer();
+            processSideBuffer(compression_computer_,
+                              side_buffer0, side_buffer1, num_samples);
+            break;
+        }
+        case PCompDirection::kExpand: {
+            expansion_computer_.prepareBuffer();
+            processSideBuffer(expansion_computer_,
+                              side_buffer0, side_buffer1, num_samples);
+            break;
+        }
+        case PCompDirection::kInflate: {
+            inflation_computer_.prepareBuffer();
+            processSideBuffer(inflation_computer_,
+                              side_buffer0, side_buffer1, num_samples);
+            break;
+        }
+        }
+        // process rms compressors and mix rms
+        if (c_use_rms_) {
+            switch (c_direction_) {
+            case PCompDirection::kCompress:
+            case PCompDirection::kShape: {
+                processSideBufferRMS(compression_computer_,
+                                     rms_side_buffer0_.data(), rms_side_buffer1_.data(), num_samples);
+                break;
+            }
+            case PCompDirection::kExpand: {
+                processSideBufferRMS(expansion_computer_,
+                                     rms_side_buffer0_.data(), rms_side_buffer1_.data(), num_samples);
+                break;
+            }
+            case PCompDirection::kInflate: {
+                processSideBufferRMS(inflation_computer_,
+                                     rms_side_buffer0_.data(), rms_side_buffer1_.data(), num_samples);
+                break;
+            }
+            }
+            {
+                static constexpr hn::ScalableTag<float> d;
+                static constexpr size_t lanes = hn::MaxLanes(d);
+                const auto v_mix = hn::Set(d, c_rms_mix_);
+                size_t i = 0;
+                for (; i + lanes <= num_samples; i += lanes) {
+                    const auto v_rms_side0 = hn::LoadU(d, rms_side_buffer0_.data() + i);
+                    const auto v_rms_side1 = hn::LoadU(d, rms_side_buffer1_.data() + i);
+                    auto v_side0 = hn::LoadU(d, side_buffer0 + i);
+                    auto v_side1 = hn::LoadU(d, side_buffer1 + i);
+                    v_side0 = hn::MulAdd(v_mix, hn::Sub(v_rms_side0, v_side0), v_side0);
+                    v_side1 = hn::MulAdd(v_mix, hn::Sub(v_rms_side1, v_side1), v_side1);
+                    hn::StoreU(v_side0, d, side_buffer0 + i);
+                    hn::StoreU(v_side1, d, side_buffer1 + i);
+                }
+                for (; i < num_samples; ++i) {
+                    const auto v_rms_side0 = rms_side_buffer0_[i];
+                    const auto v_rms_side1 = rms_side_buffer1_[i];
+                    auto v_side0 = side_buffer0[i];
+                    auto v_side1 = side_buffer1[i];
+                    v_side0 = c_rms_mix_ * (v_rms_side0 - v_side0) + v_side0;
+                    v_side1 = c_rms_mix_ * (v_rms_side1 - v_side1) + v_side1;
+                    side_buffer0[i] = v_side0;
+                    side_buffer1[i] = v_side1;
+                }
+            }
+        }
+        // apply the hold
+        if (hold_buffer_[0].getSize() > 0) {
+            for (size_t i = 0; i < num_samples; ++i) {
+                side_buffer0[i] = hold_buffer_[0].push(side_buffer0[i]);
+                side_buffer1[i] = hold_buffer_[1].push(side_buffer1[i]);
+            }
+        }
+        // if bypassed, skip reduction calculation
+        if (!c_is_on_ || bypass) {
+            return;
+        }
+        // apply the stereo link
+        if (c_stereo_mode_is_max) {
+            for (size_t i = 0; i < num_samples; ++i) {
+                const auto x = side_buffer0[i];
+                const auto y = side_buffer1[i];
+                if (x < y) {
+                    side_buffer1[i] = (y - x) * c_stereo_link_max_ + x;
+                } else {
+                    side_buffer0[i] = (x - y) * c_stereo_link_max_ + y;
+                }
+            }
+        } else {
+            for (size_t i = 0; i < num_samples; ++i) {
+                const auto x = side_buffer0[i];
+                const auto y = side_buffer1[i];
+                const auto xy = c_stereo_link_ * (x - y);
+                side_buffer0[i] = y + xy;
+                side_buffer1[i] = x - xy;
+            }
+        }
+        // process wet values and convert decibel to gain, apply stereo swap
+        if (c_stereo_swap_) {
+            appleSideBuffer<true>(main_buffer0, main_buffer1, side_buffer0, side_buffer1, num_samples);
+        } else {
+            appleSideBuffer<false>(main_buffer0, main_buffer1, side_buffer0, side_buffer1, num_samples);
+        }
+        // apply clipper
+        clipper_.prepareBuffer();
+        if (clipper_.getIsON()) {
+            clipper_.process(main_buffer0, num_samples);
+            clipper_.process(main_buffer1, num_samples);
+        }
+    }
+
+    template <bool stereo_swap>
+    void CompressController::appleSideBuffer(float* __restrict main_buffer0, float* __restrict main_buffer1,
+                                             float* __restrict side_buffer0, float* __restrict side_buffer1,
+                                             const size_t num_samples) const {
+        static constexpr hn::ScalableTag<float> d;
+        static constexpr size_t lanes = hn::MaxLanes(d);
+        static constexpr float kLn10 = 2.30258509299404568402f;
+
+        const float wet1 = c_is_downward_ ? c_wet1_ * kLn10 : -c_wet1_ * kLn10;
+        const float wet2 = c_is_downward_ ? c_wet2_ * kLn10 : -c_wet2_ * kLn10;
+
+        const auto v_wet1 = hn::Set(d, wet1);
+        const auto v_wet2 = hn::Set(d, wet2);
+        const auto range_low = c_is_range_inf_ ? -240.f : -c_range_;
+        const auto range_high = c_is_range_inf_ ? 40.f : std::min(40.f, c_range_);
+
+        const auto v_neg_range = hn::Set(d, range_low);
+        const auto v_pos_range = hn::Set(d, range_high);
+
+        size_t i = 0;
+        for (; i + lanes <= num_samples; i += lanes) {
+            auto v_side0 = hn::LoadU(d, side_buffer0 + i);
+            auto v_side1 = hn::LoadU(d, side_buffer1 + i);
+            v_side0 = hn::Clamp(v_side0, v_neg_range, v_pos_range);
+            v_side0 = hn::Exp(d, hn::Mul(v_side0, v_wet1));
+            v_side1 = hn::Clamp(v_side1, v_neg_range, v_pos_range);
+            v_side1 = hn::Exp(d, hn::Mul(v_side1, v_wet2));
+            auto v_main0 = hn::LoadU(d, main_buffer0 + i);
+            auto v_main1 = hn::LoadU(d, main_buffer1 + i);
+            if constexpr (stereo_swap) {
+                v_main0 = hn::Mul(v_main0, v_side1);
+                v_main1 = hn::Mul(v_main1, v_side0);
+            } else {
+                v_main0 = hn::Mul(v_main0, v_side0);
+                v_main1 = hn::Mul(v_main1, v_side1);
+            }
+            hn::StoreU(v_main0, d, main_buffer0 + i);
+            hn::StoreU(v_main1, d, main_buffer1 + i);
+        }
+
+        for (; i < num_samples; ++i) {
+            float s0 = side_buffer0[i];
+            float s1 = side_buffer1[i];
+            s0 = std::clamp(s0, range_low, range_high);
+            s0 = std::exp(s0 * wet1);
+            s1 = std::clamp(s1, range_low, range_high);
+            s1 = std::exp(s1 * wet2);
+            float m0 = main_buffer0[i];
+            float m1 = main_buffer1[i];
+            if constexpr (stereo_swap) {
+                m0 *= s1;
+                m1 *= s0;
+            } else {
+                m0 *= s0;
+                m1 *= s1;
+            }
+            main_buffer0[i] = m0;
+            main_buffer1[i] = m1;
+        }
+    }
+
+    template <typename C>
+    void CompressController::processSideBuffer(C& c,
+                                               float* __restrict buffer0, float* __restrict buffer1,
+                                               size_t num_samples) {
+        switch (c_comp_style_) {
+        case zldsp::compressor::Style::kClean: {
+            dispatchProcess(c, clean_comps_[0], clean_comps_[1], buffer0, buffer1, num_samples);
+            break;
+        }
+        case zldsp::compressor::Style::kClassic: {
+            dispatchProcess(c, classic_comps_[0], classic_comps_[1], buffer0, buffer1, num_samples);
+            break;
+        }
+        case zldsp::compressor::Style::kOptical: {
+            dispatchProcess(c, optical_comps_[0], optical_comps_[1], buffer0, buffer1, num_samples);
+            break;
+        }
+        case zldsp::compressor::Style::kVocal: {
+            dispatchProcess(c, vocal_comps_[0], vocal_comps_[1], buffer0, buffer1, num_samples);
+            break;
+        }
+        default:
+            return;
+        }
+    }
+
+    template <typename C, typename Style>
+    void CompressController::dispatchProcess(C& c, Style& comp0, Style& comp1,
+                                             float* __restrict buffer0, float* __restrict buffer1,
+                                             const size_t num_samples) {
+        using zldsp::compressor::PPState;
+        using zldsp::compressor::SState;
+        const auto pp_state = follower_[0].getPPState();
+        const auto s_state = follower_[0].getSState();
+        switch (pp_state) {
+        // ================== PPState: kOff ==================
+        case PPState::kOff:
+            switch (s_state) {
+            case SState::kOff: {
+                comp0.template process<C, zldsp::compressor::PSFollower<float>, PPState::kOff, SState::kOff>(
+                    c, follower_[0], buffer0, num_samples);
+                comp1.template process<C, zldsp::compressor::PSFollower<float>, PPState::kOff, SState::kOff>(
+                    c, follower_[1], buffer1, num_samples);
+                break;
+            }
+            case SState::kFull: {
+                comp0.template process<C, zldsp::compressor::PSFollower<float>, PPState::kOff, SState::kFull>(
+                    c, follower_[0], buffer0, num_samples);
+                comp1.template process<C, zldsp::compressor::PSFollower<float>, PPState::kOff, SState::kFull>(
+                    c, follower_[1], buffer1, num_samples);
+                break;
+            }
+            case SState::kMix: {
+                comp0.template process<C, zldsp::compressor::PSFollower<float>, PPState::kOff, SState::kMix>(
+                    c, follower_[0], buffer0, num_samples);
+                comp1.template process<C, zldsp::compressor::PSFollower<float>, PPState::kOff, SState::kMix>(
+                    c, follower_[1], buffer1, num_samples);
+                break;
+            }
+            }
+            break;
+
+        // ================== PPState: kPunch ==================
+        case PPState::kPunch:
+            switch (s_state) {
+            case SState::kOff: {
+                comp0.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPunch, SState::kOff>(
+                    c, follower_[0], buffer0, num_samples);
+                comp1.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPunch, SState::kOff>(
+                    c, follower_[1], buffer1, num_samples);
+                break;
+            }
+            case SState::kFull: {
+                comp0.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPunch, SState::kFull>(
+                    c, follower_[0], buffer0, num_samples);
+                comp1.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPunch, SState::kFull>(
+                    c, follower_[1], buffer1, num_samples);
+                break;
+            }
+            case SState::kMix: {
+                comp0.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPunch, SState::kMix>(
+                    c, follower_[0], buffer0, num_samples);
+                comp1.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPunch, SState::kMix>(
+                    c, follower_[1], buffer1, num_samples);
+                break;
+            }
+            }
+            break;
+
+        // ================== PPState: kPump ==================
+        case PPState::kPump:
+            switch (s_state) {
+            case SState::kOff: {
+                comp0.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPump, SState::kOff>(
+                    c, follower_[0], buffer0, num_samples);
+                comp1.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPump, SState::kOff>(
+                    c, follower_[1], buffer1, num_samples);
+                break;
+            }
+            case SState::kFull: {
+                comp0.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPump, SState::kFull>(
+                    c, follower_[0], buffer0, num_samples);
+                comp1.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPump, SState::kFull>(
+                    c, follower_[1], buffer1, num_samples);
+                break;
+            }
+            case SState::kMix: {
+                comp0.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPump, SState::kMix>(
+                    c, follower_[0], buffer0, num_samples);
+                comp1.template process<C, zldsp::compressor::PSFollower<float>, PPState::kPump, SState::kMix>(
+                    c, follower_[1], buffer1, num_samples);
+                break;
+            }
+            }
+            break;
+        }
+    }
+
+    template <typename C>
+    void CompressController::processSideBufferRMS(C& c,
+                                                  float* __restrict buffer0, float* __restrict buffer1,
+                                                  const size_t num_samples) {
+        rms_comps_[0].process<C, zldsp::compressor::PSFollower<float>,
+                              zldsp::compressor::PPState::kOff, zldsp::compressor::SState::kOff>(
+            c, rms_follower_[0], rms_tracker_[0], buffer0, num_samples);
+        rms_comps_[1].process<C, zldsp::compressor::PSFollower<float>,
+                              zldsp::compressor::PPState::kOff, zldsp::compressor::SState::kOff>(
+            c, rms_follower_[1], rms_tracker_[1], buffer1, num_samples);
+    }
+
+    void CompressController::handleAsyncUpdate() {
+        processor_ref_.setLatencySamples(pdc_.load(std::memory_order::relaxed));
+    }
+}

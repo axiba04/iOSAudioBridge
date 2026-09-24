@@ -1,0 +1,26 @@
+[
+  {
+    "file": "iOSAudioBridge.exe",
+    "unchanged": true
+  },
+  {
+    "file": "iOSAudioBridge.dll",
+    "unchanged": true
+  },
+  {
+    "file": "AudioCore.dll",
+    "unchanged": true
+  },
+  {
+    "file": "AudioProbe.exe",
+    "unchanged": true
+  },
+  {
+    "file": "AudioBridge.UsbRestore.exe",
+    "unchanged": true
+  },
+  {
+    "file": "libusb0.dll",
+    "unchanged": true
+  }
+]

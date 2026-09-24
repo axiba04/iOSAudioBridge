@@ -1,0 +1,2 @@
+0 凯迪的iPhone iPhone16,2 iOS 26.6 accessible=1
+devices=1

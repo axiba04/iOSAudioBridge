@@ -1,0 +1,36 @@
+等待 iPhone 切换至 USB 音频配置 | audio=0 video=0 queue=0 underruns=0 dropped=0
+等待 iPhone 切换至 USB 音频配置 | audio=0 video=0 queue=0 underruns=0 dropped=0
+正在协商 USB 仅音频 | audio=0 video=0 queue=0 underruns=0 dropped=0
+USB 仅音频播放中 | audio=5 video=0 queue=1664 underruns=0 dropped=0
+USB 仅音频播放中 | audio=52 video=0 queue=832 underruns=0 dropped=0
+USB 仅音频播放中 | audio=100 video=0 queue=1504 underruns=0 dropped=0
+USB 仅音频播放中 | audio=147 video=0 queue=1632 underruns=0 dropped=0
+USB 仅音频播放中 | audio=194 video=0 queue=1280 underruns=0 dropped=0
+USB 仅音频播放中 | audio=241 video=0 queue=928 underruns=0 dropped=0
+USB 仅音频播放中 | audio=288 video=0 queue=1056 underruns=0 dropped=0
+USB 仅音频播放中 | audio=335 video=0 queue=1184 underruns=0 dropped=0
+USB 仅音频播放中 | audio=383 video=0 queue=1856 underruns=0 dropped=0
+USB 仅音频播放中 | audio=430 video=0 queue=1024 underruns=0 dropped=0
+USB 仅音频播放中 | audio=477 video=0 queue=1152 underruns=0 dropped=0
+USB 仅音频播放中 | audio=524 video=0 queue=1280 underruns=0 dropped=0
+USB 仅音频播放中 | audio=572 video=0 queue=1952 underruns=0 dropped=0
+USB 仅音频播放中 | audio=619 video=0 queue=1600 underruns=0 dropped=0
+USB 仅音频播放中 | audio=666 video=0 queue=1728 underruns=0 dropped=0
+USB 仅音频播放中 | audio=713 video=0 queue=1376 underruns=0 dropped=0
+USB 仅音频播放中 | audio=761 video=0 queue=1568 underruns=0 dropped=0
+USB 仅音频播放中 | audio=808 video=0 queue=1696 underruns=0 dropped=0
+USB 仅音频播放中 | audio=854 video=0 queue=800 underruns=0 dropped=0
+USB 仅音频播放中 | audio=902 video=0 queue=1472 underruns=0 dropped=0
+USB 仅音频播放中 | audio=950 video=0 queue=1664 underruns=0 dropped=0
+USB 仅音频播放中 | audio=997 video=0 queue=1792 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1044 video=0 queue=1440 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1091 video=0 queue=1568 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1139 video=0 queue=1760 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1186 video=0 queue=1888 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1233 video=0 queue=1536 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1281 video=0 queue=1728 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1328 video=0 queue=1856 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1375 video=0 queue=1024 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1423 video=0 queue=1696 underruns=0 dropped=0
+USB 仅音频播放中 | audio=1470 video=0 queue=1824 underruns=0 dropped=0
+已停止，USB 已释放 | final_audio=1471 final_video=0 final_video_bytes=0 rendered=1504416 underruns=0 dropped=0 format=48000/16/2 input_db=-2.80597,-2.85149 output_db=-120,-120 period=480 endpoint=1056

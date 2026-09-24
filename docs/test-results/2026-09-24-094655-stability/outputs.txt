@@ -1,0 +1,3 @@
+0 CABLE Input (VB-Audio Virtual Cable)
+1 CABLE In 16ch (VB-Audio Virtual Cable)
+2 扬声器 (Realtek(R) Audio) [default]

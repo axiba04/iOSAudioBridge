@@ -1,0 +1,13 @@
+等待 iPhone 切换至 USB 音频配置 | audio=0 video=0 queue=0 underruns=0 dropped=0
+等待 iPhone 切换至 USB 音频配置 | audio=0 video=0 queue=0 underruns=0 dropped=0
+USB 仅音频播放中 | audio=22 video=0 queue=1312 underruns=0 dropped=0
+USB 仅音频播放中 | audio=69 video=0 queue=960 underruns=0 dropped=0
+USB 仅音频播放中 | audio=117 video=0 queue=1632 underruns=0 dropped=0
+USB 仅音频播放中 | audio=164 video=0 queue=1280 underruns=0 dropped=0
+USB 仅音频播放中 | audio=211 video=0 queue=928 underruns=0 dropped=0
+USB 仅音频播放中 | audio=258 video=0 queue=1056 underruns=0 dropped=0
+USB 仅音频播放中 | audio=306 video=0 queue=1728 underruns=0 dropped=0
+USB 仅音频播放中 | audio=353 video=0 queue=1856 underruns=0 dropped=0
+USB 仅音频播放中 | audio=400 video=0 queue=1504 underruns=0 dropped=0
+USB 仅音频播放中 | audio=447 video=0 queue=1152 underruns=0 dropped=0
+已停止，USB 已释放 | final_audio=449 final_video=0 final_video_bytes=0 rendered=456576 underruns=0 dropped=0 format=48000/16/2 input_db=-120,-120 output_db=-120,-120 period=480 endpoint=1056 stop_ms=10176

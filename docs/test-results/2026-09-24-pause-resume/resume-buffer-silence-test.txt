@@ -1,0 +1,4 @@
+pause_cycle=1 active=1 resumed=1 underruns=0
+pause_cycle=2 active=1 resumed=1 underruns=0
+pause_cycle=3 active=1 resumed=1 underruns=0
+active=1 rendered=404128 period=480 endpoint=1056 underruns=0 autoconvert=0

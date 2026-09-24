@@ -1,0 +1,19 @@
+Start testing: Sep 24 09:20 中国标准时间
+----------------------------------------------------------
+1/1 Testing: AudioCore.Tests
+1/1 Test: AudioCore.Tests
+Command: "E:/Code/iOSAudioBridge/build/native/bin/AudioCore.Tests.exe"
+Directory: E:/Code/iOSAudioBridge/tests
+"AudioCore.Tests" start time: Sep 24 09:20 中国标准时间
+Output:
+----------------------------------------------------------
+PASS: framing, audio-only negotiation/teardown, AFMT fallback, PCM validation, SPSC boundaries and 500000-frame concurrency, ABI lifetime/errors, one-shot USB restoration policy, STOP/quiet/late-media/partial-packet/deadline behavior
+<end of output>
+Test time =   0.34 sec
+----------------------------------------------------------
+Test Passed.
+"AudioCore.Tests" end time: Sep 24 09:20 中国标准时间
+"AudioCore.Tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 24 09:20 中国标准时间

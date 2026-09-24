@@ -1,0 +1,181 @@
+t=1 等待 iPhone 切换至 USB 音频配置 | audio=0 video=0 queue=0 underruns=0 dropped=0 state=1 output_active=0 source_idle=1
+t=2 等待 iPhone 切换至 USB 音频配置 | audio=0 video=0 queue=0 underruns=0 dropped=0 state=1 output_active=0 source_idle=1
+t=3 等待 iPhone 切换至 USB 音频配置 | audio=0 video=0 queue=0 underruns=0 dropped=0 state=1 output_active=0 source_idle=1
+t=4 USB 仅音频播放中 | audio=39 video=0 queue=1440 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=5 USB 仅音频播放中 | audio=86 video=0 queue=1088 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=6 USB 仅音频播放中 | audio=134 video=0 queue=1760 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=7 USB 仅音频播放中 | audio=181 video=0 queue=928 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=8 USB 仅音频播放中 | audio=228 video=0 queue=1056 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=9 USB 仅音频播放中 | audio=276 video=0 queue=1248 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=10 USB 仅音频播放中 | audio=323 video=0 queue=896 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=11 USB 仅音频播放中 | audio=370 video=0 queue=1024 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=12 USB 仅音频播放中 | audio=417 video=0 queue=1152 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=13 USB 仅音频播放中 | audio=465 video=0 queue=1344 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=14 USB 仅音频播放中 | audio=512 video=0 queue=1472 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=15 USB 仅音频播放中 | audio=559 video=0 queue=1120 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=16 USB 仅音频播放中 | audio=606 video=0 queue=1248 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=17 USB 仅音频播放中 | audio=653 video=0 queue=1376 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=18 USB 仅音频播放中 | audio=700 video=0 queue=1504 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=19 USB 仅音频播放中 | audio=748 video=0 queue=1696 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=20 USB 仅音频播放中 | audio=795 video=0 queue=1824 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=21 USB 仅音频播放中 | audio=842 video=0 queue=992 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=22 USB 仅音频播放中 | audio=890 video=0 queue=1664 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=23 USB 仅音频播放中 | audio=937 video=0 queue=1792 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=24 USB 仅音频播放中 | audio=984 video=0 queue=1920 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=25 USB 仅音频播放中 | audio=1031 video=0 queue=1568 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=26 USB 仅音频播放中 | audio=1078 video=0 queue=1216 underruns=0 dropped=0 state=3 output_active=1 source_idle=0
+t=27 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=28 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=29 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=30 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=31 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=32 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=33 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=34 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=35 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=36 手机音频已暂停，保持连接等待恢复 | audio=1080 video=0 queue=0 underruns=0 dropped=0 state=2 output_active=1 source_idle=1
+t=37 USB 仅音频播放中 | audio=1105 video=0 queue=992 underruns=1 dropped=0 state=3 output_active=1 source_idle=0
+t=38 USB 仅音频播放中 | audio=1152 video=0 queue=1120 underruns=1 dropped=0 state=3 output_active=1 source_idle=0
+t=39 USB 仅音频播放中 | audio=1199 video=0 queue=800 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=40 USB 仅音频播放中 | audio=1246 video=0 queue=448 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=41 USB 仅音频播放中 | audio=1294 video=0 queue=1120 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=42 USB 仅音频播放中 | audio=1341 video=0 queue=768 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=43 USB 仅音频播放中 | audio=1388 video=0 queue=896 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=44 USB 仅音频播放中 | audio=1436 video=0 queue=1088 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=45 USB 仅音频播放中 | audio=1483 video=0 queue=736 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=46 USB 仅音频播放中 | audio=1530 video=0 queue=864 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=47 USB 仅音频播放中 | audio=1577 video=0 queue=512 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=48 USB 仅音频播放中 | audio=1625 video=0 queue=1184 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=49 USB 仅音频播放中 | audio=1672 video=0 queue=1312 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=50 USB 仅音频播放中 | audio=1719 video=0 queue=1440 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=51 USB 仅音频播放中 | audio=1766 video=0 queue=1088 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=52 USB 仅音频播放中 | audio=1813 video=0 queue=736 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=53 USB 仅音频播放中 | audio=1860 video=0 queue=864 underruns=2 dropped=0 state=3 output_active=1 source_idle=0
+t=54 手机音频已暂停，保持连接等待恢复 | audio=1899 video=0 queue=0 underruns=2 dropped=0 state=2 output_active=1 source_idle=1
+t=55 手机音频已暂停，保持连接等待恢复 | audio=1899 video=0 queue=0 underruns=2 dropped=0 state=2 output_active=1 source_idle=1
+t=56 手机音频已暂停，保持连接等待恢复 | audio=1899 video=0 queue=0 underruns=2 dropped=0 state=2 output_active=1 source_idle=1
+t=57 手机音频已暂停，保持连接等待恢复 | audio=1899 video=0 queue=0 underruns=2 dropped=0 state=2 output_active=1 source_idle=1
+t=58 手机音频已暂停，保持连接等待恢复 | audio=1899 video=0 queue=0 underruns=2 dropped=0 state=2 output_active=1 source_idle=1
+t=59 手机音频已暂停，保持连接等待恢复 | audio=1899 video=0 queue=0 underruns=2 dropped=0 state=2 output_active=1 source_idle=1
+t=60 手机音频已暂停，保持连接等待恢复 | audio=1899 video=0 queue=0 underruns=2 dropped=0 state=2 output_active=1 source_idle=1
+t=61 手机音频已暂停，保持连接等待恢复 | audio=1899 video=0 queue=0 underruns=2 dropped=0 state=2 output_active=1 source_idle=1
+t=62 手机音频已暂停，保持连接等待恢复 | audio=1899 video=0 queue=0 underruns=2 dropped=0 state=2 output_active=1 source_idle=1
+t=63 USB 仅音频播放中 | audio=1942 video=0 queue=992 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=64 USB 仅音频播放中 | audio=1989 video=0 queue=1120 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=65 USB 仅音频播放中 | audio=2036 video=0 queue=288 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=66 USB 仅音频播放中 | audio=2084 video=0 queue=960 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=67 USB 仅音频播放中 | audio=2131 video=0 queue=1088 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=68 USB 仅音频播放中 | audio=2178 video=0 queue=256 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=69 USB 仅音频播放中 | audio=2226 video=0 queue=928 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=70 USB 仅音频播放中 | audio=2273 video=0 queue=1056 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=71 USB 仅音频播放中 | audio=2320 video=0 queue=704 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=72 USB 仅音频播放中 | audio=2368 video=0 queue=896 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=73 USB 仅音频播放中 | audio=2415 video=0 queue=1024 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=74 USB 仅音频播放中 | audio=2462 video=0 queue=672 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=75 USB 仅音频播放中 | audio=2509 video=0 queue=800 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=76 USB 仅音频播放中 | audio=2556 video=0 queue=448 underruns=5 dropped=0 state=3 output_active=1 source_idle=0
+t=77 手机音频已暂停，保持连接等待恢复 | audio=2562 video=0 queue=0 underruns=5 dropped=0 state=2 output_active=1 source_idle=1
+t=78 手机音频已暂停，保持连接等待恢复 | audio=2562 video=0 queue=0 underruns=5 dropped=0 state=2 output_active=1 source_idle=1
+t=79 手机音频已暂停，保持连接等待恢复 | audio=2562 video=0 queue=0 underruns=5 dropped=0 state=2 output_active=1 source_idle=1
+t=80 USB 仅音频播放中 | audio=2599 video=0 queue=896 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=81 USB 仅音频播放中 | audio=2646 video=0 queue=544 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=82 USB 仅音频播放中 | audio=2693 video=0 queue=672 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=83 USB 仅音频播放中 | audio=2741 video=0 queue=864 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=84 USB 仅音频播放中 | audio=2788 video=0 queue=992 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=85 USB 仅音频播放中 | audio=2835 video=0 queue=160 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=86 USB 仅音频播放中 | audio=2883 video=0 queue=832 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=87 USB 仅音频播放中 | audio=2930 video=0 queue=960 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=88 USB 仅音频播放中 | audio=2978 video=0 queue=1152 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=89 USB 仅音频播放中 | audio=3025 video=0 queue=1280 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=90 USB 仅音频播放中 | audio=3072 video=0 queue=448 underruns=7 dropped=0 state=3 output_active=1 source_idle=0
+t=91 USB 仅音频播放中 | audio=3119 video=0 queue=608 underruns=8 dropped=0 state=3 output_active=1 source_idle=0
+t=92 USB 仅音频播放中 | audio=3166 video=0 queue=256 underruns=8 dropped=0 state=3 output_active=1 source_idle=0
+t=93 USB 仅音频播放中 | audio=3213 video=0 queue=384 underruns=8 dropped=0 state=3 output_active=1 source_idle=0
+t=94 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=95 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=96 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=97 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=98 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=99 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=100 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=101 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=102 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=103 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=104 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=105 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=106 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=107 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=108 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=109 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=110 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=111 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=112 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=113 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=114 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=115 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=116 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=117 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=118 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=119 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=120 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=121 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=122 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=123 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=124 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=125 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=126 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=127 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=128 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=129 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=130 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=131 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=132 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=133 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=134 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=135 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=136 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=137 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=138 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=139 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=140 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=141 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=142 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=143 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=144 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=145 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=146 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=147 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=148 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=149 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=150 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=151 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=152 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=153 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=154 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=155 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=156 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=157 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=158 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=159 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=160 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=161 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=162 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=163 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=164 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=165 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=166 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=167 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=168 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=169 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=170 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=171 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=172 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=173 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=174 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=175 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=176 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=177 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=178 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=179 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+t=180 手机音频已暂停，保持连接等待恢复 | audio=3251 video=0 queue=0 underruns=8 dropped=0 state=2 output_active=1 source_idle=1
+已停止，USB 已释放 | final_audio=3251 final_video=0 final_video_bytes=0 rendered=3329024 underruns=8 dropped=0 format=48000/16/2 input_db=-120,-120 output_db=-120,-120 period=480 endpoint=1056 stop_ms=11718

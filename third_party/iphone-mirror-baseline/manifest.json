@@ -1,0 +1,143 @@
+{
+  "repository": "https://github.com/RayrenSX/iPhoneMirror",
+  "baseCommit": "1270c443a29457751cadd20f6d7bbe1ce213b9db",
+  "includesUncommittedAudioOnlyChanges": true,
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "0B383D5A63DA644F628D99C33976EA6487ED89AAA59F0B3257992DEAC1171E6B"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "sha256": "06B40CA72A685C0C39099E92195C708CBB8F9977521B45CB0098EA4DB1EC1B3B"
+    },
+    {
+      "path": "docs/USB_AUDIO_ONLY.md",
+      "sha256": "2D92D543683E913B9D11C3DA6AD286816B7D2356161FEDDD7479A5EF7FABA501"
+    },
+    {
+      "path": "src/Core/src/Protocol/QuickTimePacket.cpp",
+      "sha256": "2AD0E1B14A7470CA21719342032E3A8F1B7494FA8597E65D60E38C604B1E8CB1"
+    },
+    {
+      "path": "src/Core/src/Protocol/QuickTimePacket.h",
+      "sha256": "B98BDB0834EA863F9E72B4DCED868800CC13E3644DBDD18279872C5FFE202548"
+    },
+    {
+      "path": "src/Core/src/Protocol/QuickTimeSession.cpp",
+      "sha256": "5E6DD9E15D4C516D9523175DFDF59B3FF6EE42FE37EA88838309761C4AB97BE5"
+    },
+    {
+      "path": "src/Core/src/Protocol/QuickTimeSession.h",
+      "sha256": "7F394EC11F843F280EF8E5DB54EB80C0A049E96F01943C167064795E920053F6"
+    },
+    {
+      "path": "src/Core/src/Protocol/Plist.cpp",
+      "sha256": "8B2B020EA5EB934ECE6D147C058251EE0AD4C6DD5A1D2EF7070D07E129BF093A"
+    },
+    {
+      "path": "src/Core/src/Protocol/Plist.h",
+      "sha256": "1032F4CEC2374C28BDDE0DF783B0912782628EB5ACDAFF29669922691A84F3C9"
+    },
+    {
+      "path": "src/Core/src/Media/CoreMedia.cpp",
+      "sha256": "7BAE563C456F744CB77F64FA3A4A62B5F911879B5A50DA049D1F302A3D109617"
+    },
+    {
+      "path": "src/Core/src/Media/CoreMedia.h",
+      "sha256": "2158E45386F434391E1EBDA2F67FC6BF98CA957AACE292007E45840C9C7E52A2"
+    },
+    {
+      "path": "src/Core/src/Transport/LibUsb0Transport.cpp",
+      "sha256": "3C1D0D00DAD16C7A493113B4DFADCEC3B90FE8D5E47CCC1CC88CA0081796E926"
+    },
+    {
+      "path": "src/Core/src/Transport/LibUsb0Transport.h",
+      "sha256": "0DAD4D92FFCAFFD3EEF0EE242C6A76CC8D08BD9E3E7993C37103CD969B352A76"
+    },
+    {
+      "path": "src/Core/src/Transport/LibUsb0Readiness.h",
+      "sha256": "C6D8C8BCF136049B1062E64371BF2813B64409DBA7BE416F7C67145313724CF2"
+    },
+    {
+      "path": "src/Core/src/Transport/AppleUsbIdentityCache.h",
+      "sha256": "644A0B67DEDDBA017D201AD453CD1A03C6EDD7989FCE2FC4FF6DC2DA3088BA69"
+    },
+    {
+      "path": "src/Core/src/Transport/UsbInterfaceTransitionPolicy.h",
+      "sha256": "2717535B49908AE1E8B65875D590BBF745B8632E11DD1F5AE9A7DC11914D48D0"
+    },
+    {
+      "path": "src/Core/src/Transport/QtUsbTransport.h",
+      "sha256": "01B1E0B0885479D597CD86F8C59958EE8A085C5D92DC4FC6280CB744568540EC"
+    },
+    {
+      "path": "src/Core/src/Transport/Socket.cpp",
+      "sha256": "DA5E1097FAC9FEEADD7EC894F09884150BEFC857065B0E0278BCCF774C179EBB"
+    },
+    {
+      "path": "src/Core/src/Transport/Socket.h",
+      "sha256": "E8E4A7CC6D36A223EBF14CB010ED9C5A8A26F6B98721472AEF0D165A0E01DFCC"
+    },
+    {
+      "path": "src/Core/src/Transport/UsbMuxClient.cpp",
+      "sha256": "4AFBBC226EFF2B6D68C6FD93081E51B566982A94915D129ADB0FC1FC407305CC"
+    },
+    {
+      "path": "src/Core/src/Transport/UsbMuxClient.h",
+      "sha256": "F4A17AB456057B199C0FAE641BDEB2513989F4C20BFE94ECD22C123025572A6C"
+    },
+    {
+      "path": "src/Core/src/Device/AppleUsbDiscovery.cpp",
+      "sha256": "DDA96BDEDE4B49F55BA004E79791F7BC1F0EB0BE6610F25B79E781C25BC3DCC5"
+    },
+    {
+      "path": "src/Core/src/Device/AppleUsbDiscovery.h",
+      "sha256": "EE3AEDBD29BD6E94C546D194CED1D917753262F9D6676B8C506F343C4F55B0C9"
+    },
+    {
+      "path": "src/Core/src/Device/DeviceManager.cpp",
+      "sha256": "46AA9C2AE812FA247441441E6FD93007974730AD173D4CDE85F2DF0B22359660"
+    },
+    {
+      "path": "src/Core/src/Device/DeviceManager.h",
+      "sha256": "5D3D4E711B3FF0BDD6826888B7D9C02E8F60A70F71897CE22355D0E9275FF116"
+    },
+    {
+      "path": "src/Core/src/Capture/CaptureSession.cpp",
+      "sha256": "094F892C23EE1E4CDC27C77A8249E0FDDC8C99FF55D7BDD3A18A834F141DA4E4"
+    },
+    {
+      "path": "src/Core/src/Capture/UsbConfigurationRestorePolicy.h",
+      "sha256": "2E3357B505020804AACE7A3A8D6093B2D87B10651035875A6777164001AF050C"
+    },
+    {
+      "path": "src/Core/src/Audio/WasapiRenderer.cpp",
+      "sha256": "A7AD2824C44470625D82FC9113E502FA549C5FDD709A485D147A41571B7EC6DA"
+    },
+    {
+      "path": "src/Core/src/Audio/WasapiRenderer.h",
+      "sha256": "EE0839420C54591BE6F1C15E229CC0341FA0152FA83083DEF0F83717F8BEA11B"
+    },
+    {
+      "path": "src/Core/src/Logging.cpp",
+      "sha256": "A1D909E90C3B886B040D096D498C0B301F66F4F488FDD82EB04C62C490E38550"
+    },
+    {
+      "path": "src/Core/src/Logging.h",
+      "sha256": "02155EB9E6FB7CE855671EA425379FD5A0C3A66C57626BC7C3E91B0DA8D04A6B"
+    },
+    {
+      "path": "src/Core/tools/UsbConfigurationSwitch.cpp",
+      "sha256": "6BB4FCFDF98CD35F97CB3935CCA092F218405A85217B1960E6A50D5E77CFC46E"
+    },
+    {
+      "path": "src/Core/tools/UsbAudioOnly.cpp",
+      "sha256": "F4CF27C953FB6F1CB743B9B08C895F2674046BE66FDC35415DFD9821DD5331D7"
+    },
+    {
+      "path": "src/Core/tests/CoreTests.cpp",
+      "sha256": "208F25B0DDC1D5F341BE8E57BF620ED6940AF223D441928B4782F5779E0D61F5"
+    }
+  ]
+}

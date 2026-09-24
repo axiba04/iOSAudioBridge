@@ -1,0 +1,43 @@
+<Window x:Class="iOSAudioBridge.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="iOS Audio Bridge" Width="760" Height="700" MinWidth="650" MinHeight="650" Background="#101723" Foreground="#E5EAF4" FontFamily="Microsoft YaHei UI" FontSize="13" WindowStartupLocation="CenterScreen" Loaded="OnLoaded" Closing="OnClosing">
+ <ScrollViewer VerticalScrollBarVisibility="Auto">
+  <StackPanel Margin="28">
+   <TextBlock Text="iOS Audio Bridge" FontSize="27" FontWeight="SemiBold" />
+   <TextBlock Text="USB 仅音频 · 实时耳机监听" Foreground="#9CACBF" Margin="0,8,0,24" />
+   <Border Background="#1C293B" CornerRadius="8" Padding="18" Margin="0,0,0,18"><StackPanel>
+    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="15" />
+    <TextBlock Text="{Binding Format}" Foreground="#89BEFF" Margin="0,10,0,0" />
+    <TextBlock Text="{Binding Counters}" Foreground="#9CACBF" Margin="0,6,0,0" />
+   </StackPanel></Border>
+   <TextBlock Text="iPhone" Margin="0,0,0,6" />
+   <ComboBox x:Name="PhoneSelect" ItemsSource="{Binding Phones}" ItemTemplate="{StaticResource DeviceDisplayTemplate}" Margin="0,0,0,14" SelectionChanged="SelectionChanged" />
+   <TextBlock Text="耳机 / DAC 输出设备" Margin="0,0,0,6" />
+   <ComboBox x:Name="OutputSelect" ItemsSource="{Binding Outputs}" ItemTemplate="{StaticResource DeviceDisplayTemplate}" Margin="0,0,0,18" SelectionChanged="SelectionChanged" />
+   <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+    <Button x:Name="StartButton" Content="开始监听" Click="StartClicked" Background="#80B8FF" IsEnabled="False" />
+    <Button x:Name="StopButton" Content="停止" Click="StopClicked" IsEnabled="False" />
+    <Button x:Name="RefreshButton" Content="刷新设备" Click="RefreshClicked" />
+   </StackPanel>
+   <Grid Margin="0,0,0,20"><Grid.ColumnDefinitions><ColumnDefinition Width="60"/><ColumnDefinition Width="*"/><ColumnDefinition Width="90"/></Grid.ColumnDefinitions>
+    <TextBlock Text="音量" VerticalAlignment="Center" />
+    <Slider x:Name="VolumeSlider" Grid.Column="1" Minimum="0" Maximum="100" Value="50" VerticalAlignment="Center" ValueChanged="VolumeChanged" />
+    <CheckBox x:Name="MuteBox" Grid.Column="2" Content="静音" Foreground="#E5EAF4" VerticalAlignment="Center" HorizontalAlignment="Right" Checked="MuteChanged" Unchecked="MuteChanged" />
+   </Grid>
+   <Border Background="#172131" CornerRadius="8" Padding="16"><StackPanel>
+    <UniformGrid Columns="4" Margin="0,0,0,14">
+     <StackPanel><TextBlock Text="缓冲" Foreground="#9CACBF"/><TextBlock Text="{Binding Buffer}" FontSize="21" Margin="0,6,0,0"/></StackPanel>
+     <StackPanel><TextBlock Text="主机延迟估计" Foreground="#9CACBF"/><TextBlock Text="{Binding Latency}" FontSize="21" Margin="0,6,0,0"/></StackPanel>
+     <StackPanel><TextBlock Text="欠载次数" Foreground="#9CACBF"/><TextBlock Text="{Binding Underruns}" FontSize="21" Margin="0,6,0,0"/></StackPanel>
+     <StackPanel><TextBlock Text="丢弃帧数" Foreground="#9CACBF"/><TextBlock Text="{Binding Dropped}" FontSize="21" Margin="0,6,0,0"/></StackPanel>
+    </UniformGrid>
+    <ProgressBar Value="{Binding Fill, Mode=OneWay}" Maximum="100" Height="5" Foreground="#80B8FF" Background="#26384F" BorderThickness="0" />
+    <TextBlock Text="{Binding Engine}" Foreground="#9CACBF" Margin="0,10,0,14"/>
+    <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+     <StackPanel><TextBlock Text="输入峰值" Foreground="#9CACBF"/><TextBlock Text="{Binding Input}" Margin="0,5,0,0"/></StackPanel>
+     <StackPanel Grid.Column="1"><TextBlock Text="输出峰值" Foreground="#9CACBF"/><TextBlock Text="{Binding Output}" Margin="0,5,0,0"/></StackPanel>
+    </Grid>
+   </StackPanel></Border>
+   <TextBlock Text="当前为音频直通，尚未启用压缩器。延迟估计不包含 iPhone 内部与 DAC 的未知延迟。" TextWrapping="Wrap" Foreground="#9CACBF" FontSize="11" Margin="0,14,0,0" />
+  </StackPanel>
+ </ScrollViewer>
+</Window>
