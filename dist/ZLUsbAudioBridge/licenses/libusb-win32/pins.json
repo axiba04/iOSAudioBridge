@@ -1,0 +1,53 @@
+{
+  "version": "1.4.0.2",
+  "release": "https://github.com/mcuee/libusb-win32/releases/tag/release_1.4.0.2",
+  "binary_archive_url": "https://github.com/mcuee/libusb-win32/releases/download/release_1.4.0.2/libusb-win32-bin-1.4.0.2.zip",
+  "binary_archive_sha256": "00004c92cdb99be36e17fb2377165eb97e63b48ba895bfc04a642ea9c3e26d94",
+  "source_url": "https://api.github.com/repos/mcuee/libusb-win32/zipball/release_1.4.0.2",
+  "source_commit": "0987f983a89e5e60d3c2db2af46564239c1b0d37",
+  "source_archive": "libusb-win32-src-1.4.0.2.zip",
+  "source_archive_sha256": "D77EF8A2370DE8ECC7550D8D99C93568C00A5528F5CF79AB1CEC3DD9E9B538D3",
+  "files": [
+    {
+      "path": "AUTHORS.txt",
+      "sha256": "52718D277BD2878C1DF3C26DD59E0F8FBDAF0DE8A9AB9A523F85D753C1F02706"
+    },
+    {
+      "path": "CHANGELOG.txt",
+      "sha256": "5FAE82DA6142294561725E86F606AE532DAC966DA3C870BBF6EAB714687ACFA9"
+    },
+    {
+      "path": "COPYING_GPL.txt",
+      "sha256": "8CEB4B9EE5ADEDDE47B31E975C1D90C73AD27B6B165A1DCD80C7C545EB65B903"
+    },
+    {
+      "path": "COPYING_LGPL.txt",
+      "sha256": "DA7EABB7BAFDF7D3AE5E9F223AA5BDC1EECE45AC569DC21B3B037520B4464768"
+    },
+    {
+      "path": "libusb-win32-src-1.4.0.2.zip",
+      "sha256": "D77EF8A2370DE8ECC7550D8D99C93568C00A5528F5CF79AB1CEC3DD9E9B538D3"
+    },
+    {
+      "path": "libusb0.def",
+      "sha256": "D4A54AFC3F13A424B7CD61D737B656CFA5C891BDF9406704B389DD923A3443C8"
+    },
+    {
+      "path": "README.txt",
+      "sha256": "905FC96562E289144CCD24E6C97EEC393D605FF2A98903984E588816523E1770"
+    },
+    {
+      "path": "bin/x64/libusb0.dll",
+      "sha256": "0CD18719D5701E9CC642FC93A83F13830931D6F29F664FEDBDF212BCB7C349BD"
+    },
+    {
+      "path": "include/lusb0_usb.h",
+      "sha256": "B67C16070A68AC969353BCF3598F95457A1870A4A86964256C95C85FB63E77C2"
+    },
+    {
+      "path": "lib/x64/libusb0-dynamic.lib",
+      "sha256": "666C2ECCB62531ACA121AE6270DF0D13746BCA5F259599AE55D5696C6D3E0D2D"
+    }
+  ],
+  "text_normalization": "Text assets use LF line endings without trailing spaces. Binary files and the source archive are unchanged."
+}

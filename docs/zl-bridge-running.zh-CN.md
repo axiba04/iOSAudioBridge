@@ -10,8 +10,8 @@
 
 1. 沿用这台机器已验证的 Apple USB 支持与 libusb-win32 filter；本程序不安装驱动。
 2. 连接并解锁手机，退出其他监听程序；刷新并选择手机、输出设备。
-3. 点击“开始监听”。首次打开及每次重启均默认静音，监听音量为 50%。主界面保留“静音输出”；点击“高级设置”可展开“监听音量”滑块，收起面板不会改变音量。它只调节本软件最终输出，不改变 Windows 音量。解除静音由使用者手动操作；自动验收始终静音。
-4. 原版 Threshold、Ratio、Attack、Release、Knee、Makeup 可实时调整。原版曲线/电平显示处理器的信号；底部“设备输出”是最终音量和静音后的电平。因此静音时原版分析器仍有输入。
+3. 选齐设备后点击“开始监听”。未检测到手机或音频输出时，下拉框显示明确提示，“开始监听”不可用。首次打开及每次重启均默认静音，监听音量为 50%。主界面保留“静音输出”；点击“高级设置”可在底部展开“监听音量”和诊断信息，收起面板不会改变音量。它只调节本软件最终输出，不改变 Windows 音量。解除静音由使用者手动操作；自动验收始终静音。
+4. 原版 Threshold、Ratio、Attack、Release、Knee、Makeup 可实时调整。原版曲线/电平显示处理器的信号；高级设置中的“设备输出”是最终音量和静音后的电平。因此静音时原版分析器仍有输入。
 5. 手机暂停播放会保持 USB，恢复后重新预填充缓冲。常规运行没有定时停止；断线或输出失败会结束会话并显示原因。
 6. 点击停止或关闭窗口后等待 USB 恢复完成。短测恢复耗时约 8 秒；实际取决于协议收尾和 Windows 重枚举。
 
@@ -31,7 +31,9 @@ WASAPI 使用共享事件模式和 MMCSS Pro Audio。选定端点不支持原生
 Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版界面属性使用重命名后的 `ZL USB Audio Bridge` 产品路径，与原 ZLCompressor 隔离。
 日志可通过环境变量 `IPHONE_MIRROR_LOG_FILE` 指定；默认使用后端的临时目录日志。
 
-底部延迟仅估算队列、WASAPI padding 和 ZL 报告的处理延迟，不含手机端、USB 到达前等待、驱动/DAC 全部延迟；0 帧 DSP 不是端到端 0 ms。
+顶部控件和底部区域跟随 ZL 的背景与文字主题颜色。状态栏显示连接状态、静音和监听音量；缓冲、欠载、缺失帧和延迟信息位于“高级设置”。刷新设备时会尽量保留当前选择。
+
+高级设置中的延迟仅估算队列、WASAPI padding 和 ZL 报告的处理延迟，不含手机端、USB 到达前等待、驱动/DAC 全部延迟；0 帧 DSP 不是端到端 0 ms。
 
 ## 构建
 
@@ -56,12 +58,13 @@ Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版
 ```powershell
 ./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --self-test --result E:/Code/iOSAudioBridge/build/dsp.json
 ./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --ui-smoke --result E:/Code/iOSAudioBridge/build/ui.json
+./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --ui-smoke --ui-empty --result E:/Code/iOSAudioBridge/build/ui-empty.json
 ./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --wasapi-smoke --result E:/Code/iOSAudioBridge/build/wasapi.json
 # 仅在手机已准备好时运行；使用已保存/默认输出，强制静音
 ./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --capture-muted 60 --result E:/Code/iOSAudioBridge/build/capture.json
 ```
 
-UI smoke 只枚举 USB、用合成信号绘制隐藏界面，并输出 PNG；WASAPI smoke 向默认端点提交静音合成音频，检查 3 次暂停/恢复。
+UI smoke 只枚举 USB、用合成信号绘制隐藏界面，并输出主界面、展开高级设置（`-advanced.png`）、最小窗口（`-minimum.png`）截图；附加 `--ui-empty` 可在枚举后清空测试用设备列表，验证无手机和无输出时的提示及按钮状态，不修改系统设备。WASAPI smoke 向默认端点提交静音合成音频，检查 3 次暂停/恢复。
 capture-muted 包含连接启动时间，音频持续时间可能略短于指定秒数，结束还需等待 USB 释放；同时输出每秒 JSONL。
 测试程序退出码 0 不代替检查报告中的欠载、缺失帧、丢帧、视频包、静音和最终 USB 状态。
 

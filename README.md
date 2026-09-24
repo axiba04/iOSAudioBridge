@@ -9,6 +9,8 @@ iPhone USB → QuickTime 仅音频握手 → PCM16 / 48 kHz / Stereo
 
 ## 运行
 
+仓库附带已构建的 [Windows x64 程序及运行依赖](dist/ZLUsbAudioBridge/) 和 [驱动离线安装包](dist/DriverInstallKit-x64-1.4.0.2.zip)。克隆或下载仓库后即可使用；驱动 ZIP 需完整解压后按安装说明操作。
+
 运行 `dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe`，保留同目录的 `AudioBridge.UsbRestore.exe`、`libusb0.dll` 和许可证文件。
 
 1. 沿用已验证的 Apple USB 支持与 libusb-win32 filter，连接手机、解锁并信任电脑；关闭其他占用同一手机的程序。

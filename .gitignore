@@ -3,7 +3,10 @@
 .nuget/
 .dotnet-home/
 build/
-dist/
+/dist/*
+!/dist/.gitattributes
+!/dist/ZLUsbAudioBridge/
+!/dist/DriverInstallKit-x64-*.zip
 **/bin/
 !third_party/libusb-win32/bin/
 !third_party/libusb-win32/bin/**
@@ -11,4 +14,5 @@ dist/
 *.user
 *.log
 !docs/test-results/**/*.log
+!/dist/ZLUsbAudioBridge/test-results/**/*.log
 DriverInstallKit/logs/

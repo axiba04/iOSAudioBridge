@@ -58,6 +58,9 @@ Copy-Item -LiteralPath "$root/docs/driver-upgrade-evaluation.zh-CN.md" -Destinat
 $driverEvidence=Join-Path $dist 'test-results/2026-09-24-driver-upgrade'
 New-Item -ItemType Directory -Force -Path $driverEvidence | Out-Null
 Copy-Item -LiteralPath "$root/docs/test-results/2026-09-24-driver-upgrade/summary.json" -Destination $driverEvidence -Force
+$uiEvidence=Join-Path $dist 'test-results/2026-09-24-ui-theme'
+New-Item -ItemType Directory -Force -Path $uiEvidence | Out-Null
+Get-ChildItem -LiteralPath "$root/docs/test-results/2026-09-24-ui-theme" -File | Copy-Item -Destination $uiEvidence -Force
 Get-ChildItem $dist -File | Where-Object { $_.Extension -in '.exe','.dll' } | ForEach-Object {
     [pscustomobject]@{file=$_.Name;bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 } | ConvertTo-Json | Set-Content "$dist/build-hashes.json" -Encoding utf8
