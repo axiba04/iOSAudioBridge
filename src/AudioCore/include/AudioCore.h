@@ -39,7 +39,7 @@ AB_API int32_t __cdecl ab_list_outputs(AB_OutputDevice* items, uint32_t* count);
 AB_API int32_t __cdecl ab_create(AB_Handle* handle);
 AB_API int32_t __cdecl ab_start(AB_Handle handle, const AB_Config* config);
 // start returns after launching the worker; poll status for Ready/Streaming or Error.
-// stop is synchronous, including USB restoration. Call off the WPF dispatcher.
+// stop is synchronous, including USB restoration. Call off the UI thread.
 AB_API int32_t __cdecl ab_stop(AB_Handle handle);
 AB_API void __cdecl ab_destroy(AB_Handle handle);
 // Destroy (or stop then destroy) every handle before unloading AudioCore.dll.

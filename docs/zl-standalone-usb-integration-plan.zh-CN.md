@@ -1,5 +1,7 @@
 # ZL 原版界面 + iPhone USB 输入：集成设计与实施计划
 
+> 历史记录：WPF 前端及其发布脚本现已移除；下文保留当时的设计或验收依据。当前入口见 [README](../README.md)。
+
 分析日期：2026-09-24。实施更新：已构建自定义 Standalone、拆分共用后端、接入原版 ZL Processor/Editor，完成 DSP 回归和约 60 秒静音 USB 短测。
 实际文件、完成范围和限制见[集成验收记录](zl-bridge-validation.zh-CN.md)，运行见[使用与构建](zl-bridge-running.zh-CN.md)。
 下文保留设计时的分析与分阶段判据；其中“尚未编译/依赖未就绪”的描述是分析时状态，以本段及验收记录为准。

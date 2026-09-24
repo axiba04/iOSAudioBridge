@@ -4,7 +4,7 @@
 
 ## 运行
 
-打开 `dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe`，保留同目录的 `AudioBridge.UsbRestore.exe` 与 `libusb0.dll`。无需 VST Host 或 .NET。旧 WPF 程序仍在 `dist/iOSAudioBridge`，不要同时监听同一手机。
+打开 `dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe`，保留同目录的 `AudioBridge.UsbRestore.exe` 与 `libusb0.dll`。无需 VST Host 或 .NET。
 
 1. 沿用这台机器已验证的 Apple USB 支持与 libusb-win32 filter；本程序不安装驱动。
 2. 连接并解锁手机，退出其他监听程序；刷新并选择手机、输出设备。
@@ -40,12 +40,12 @@ Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版
 ./scripts/Build-ZLBridge.ps1
 ```
 
-准备脚本需要 Git、curl、7z，下载固定 ZL commit/子模块及 LLVM 22.1.0，校验 LLVM 压缩包 SHA-256 后仅解压到 `.tools`，不执行安装器或修改系统 PATH。
-已存在的 vendor 修改若与补丁冲突会停止，不覆盖本地修改。
+仓库已包含 ZL 及其依赖的源码快照和集成修改，无需额外克隆或应用补丁。
+准备脚本检查源码是否齐全；缺少 LLVM 时使用 curl、7z 下载 LLVM 22.1.0，校验压缩包 SHA-256 后仅解压到 `.tools`，不执行安装器或修改系统 PATH。
 构建脚本默认使用本机 `D:/GreenSoftware/iPhoneMirror-v1.8.3-win-x64/audio-only-work` 内的 MSVC/SDK、Ninja、CMake；其他机器需通过 `-ToolRoot` 提供相同目录结构。
 固定版本见 `third_party/ZLCompressor.pins.json`。Clang 编译使用 MSVC STL 和 Windows SDK；C++20、SSE2、静态 CRT。
 
-输出目录独立为 `build/zl-bridge` 和 `dist/ZLUsbAudioBridge`，不会覆盖旧 WPF 包。
+构建目录为 `build/zl-bridge`，发布目录为 `dist/ZLUsbAudioBridge`。
 默认执行 Native、PCM 适配和 ZL DSP 三组回归；合成 DSP 检查不打开音频端点、不连接 USB。
 发布目录包含依赖许可和来源清单。对外分发时需同时提供本项目对应源码、固定依赖及构建材料，不能只发 EXE。
 

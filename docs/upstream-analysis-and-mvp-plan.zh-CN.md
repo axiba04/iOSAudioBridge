@@ -1,4 +1,6 @@
 > 2026-09-24 路线更新：第二阶段改为保留 ZL 原版界面的自定义 JUCE Standalone，接入现有 USB/WASAPI 后端。
+
+> 历史记录：WPF 前端及其发布脚本现已移除；下文保留当时的设计或验收依据。当前入口见 [README](../README.md)。
 > 以 [ZL Standalone 集成设计](zl-standalone-usb-integration-plan.zh-CN.md)为后续实施依据。
 > 下文保留最初分析及第一阶段依据，其中“第二阶段仅调用 DSP 子集、WPF 重做界面”的安排已被新方案取代。
 

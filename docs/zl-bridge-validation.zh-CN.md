@@ -18,7 +18,7 @@ iPhone → 原仅音频 USB 协议 → UsbAudioSource → PcmPipe / SPSC
 - `Capture/UsbAudioSource.*` 保留已验证的协议、暂停等待、手机独占会话锁、安全 USB 恢复流程。
 - `Buffer/PcmPipe.h` 将队列和源统计从 WASAPI 分离；`Engine/AudioEngine.*` 组织生命周期。
 - `Processing/IBlockProcessor.h`、`PcmBlockRenderer.h` 提供预分配处理、有限值检查、剪裁计数和最终增益渐变；静音仍执行 DSP。
-- `Session/AudioSession.h` 保留原名称门面；C ABI 结构与版本未改变，默认处理器为直通，旧 WPF 继续可构建。
+- `Session/AudioSession.h` 保留原名称门面；C ABI 结构与版本未改变，默认处理器为直通，当时保留了 WPF 构建；WPF 前端现已移除，C ABI 继续供 AudioProbe 和回归测试使用。
 - `src/ZLUsbAudioBridge/` 为自定义 JUCE 程序、ZL float 适配和测试。没有 JUCE 默认 StandalonePluginHolder、AudioDeviceManager、AudioProcessorPlayer 或 VST Host 的第二条音频回调。
 - 原版 Editor、参数附件、分析器与预设浏览器保留。Lookahead/Oversampling/外部侧链受约束；整份预设走停止→恢复 USB→应用状态→按需重连，六项旋钮实时更新。
 - 两通道 L/R、禁用 Aux，总线布局在 prepare 阶段固定。块上限 4096；WASAPI 较大请求由适配层分块；正常渲染路径不调用 UI/文件/设备枚举。

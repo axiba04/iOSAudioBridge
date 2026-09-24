@@ -2,24 +2,12 @@ param([switch]$SkipLLVM)
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 $vendor=Join-Path $root 'third_party/ZLCompressor'
-$commit='0e19ffcf3dcf7304ca2f650cd28267959bd40a21'
-if(-not(Test-Path -LiteralPath $vendor)) {
-    & git clone --filter=blob:none --no-checkout https://github.com/ZL-Audio/ZLCompressor.git $vendor
-    if($LASTEXITCODE){throw 'ZL clone failed'}
-    & git -C $vendor checkout --detach $commit
-    if($LASTEXITCODE){throw 'ZL checkout failed'}
-}
-$actual=& git -C $vendor rev-parse HEAD
-if($actual -ne $commit){throw "Vendor HEAD differs from pinned commit: $actual"}
-& git -C $vendor submodule update --init --recursive --depth 1
-if($LASTEXITCODE){throw 'Pinned submodule setup failed'}
-$patch=Join-Path $root 'third_party/ZLCompressor.bridge.patch'
-& git -C $vendor apply --reverse --check $patch 2>$null
-if($LASTEXITCODE){
-    & git -C $vendor apply --check $patch
-    if($LASTEXITCODE){throw 'Vendor patch conflicts with local changes; no files were overwritten'}
-    & git -C $vendor apply $patch
-    if($LASTEXITCODE){throw 'Applying bridge patch failed'}
+# Patched source snapshots are tracked by the parent repository; nested Git
+# metadata is neither present nor needed in a fresh checkout.
+foreach($file in 'CMakeLists.txt','source/PluginProcessor.cpp','JUCE/CMakeLists.txt','highway/CMakeLists.txt','zldsp_fft/src/zldsp_fft_rfft.hpp') {
+    if(-not(Test-Path -LiteralPath (Join-Path $vendor $file) -PathType Leaf)) {
+        throw "Vendored source missing: $file. Restore third_party/ZLCompressor from this repository."
+    }
 }
 if(-not $SkipLLVM) {
     $llvm=Join-Path $root '.tools/llvm-22.1.0'
@@ -39,4 +27,4 @@ if(-not $SkipLLVM) {
     & "$llvm/bin/clang-cl.exe" --version
     if($LASTEXITCODE){throw 'LLVM executable failed'}
 }
-Write-Output 'Pinned ZL dependencies are ready. No system installer was executed.'
+Write-Output 'Vendored ZL sources are present. No system installer was executed.'

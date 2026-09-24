@@ -5,10 +5,15 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
-$runtime = Join-Path $root 'dist/iOSAudioBridge'
+$runtime = Join-Path $root 'build/zl-bridge/bin'
+$files = 'AudioCore.dll','AudioProbe.exe','AudioBridge.UsbRestore.exe','libusb0.dll'
+foreach ($file in $files) {
+    if (-not (Test-Path -LiteralPath (Join-Path $runtime $file))) {
+        throw "Missing $file. Run scripts/Build-ZLBridge.ps1 first."
+    }
+}
 $result = Join-Path $root ('docs/test-results/' + (Get-Date -Format 'yyyy-MM-dd-HHmmss') + '-stability')
 New-Item -ItemType Directory -Path $result | Out-Null
-$files = 'iOSAudioBridge.exe','iOSAudioBridge.dll','AudioCore.dll','AudioProbe.exe','AudioBridge.UsbRestore.exe','libusb0.dll'
 $manifest = foreach ($file in $files) {
     $path = Join-Path $runtime $file
     [ordered]@{file=$file; bytes=(Get-Item -LiteralPath $path).Length; sha256=(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash}

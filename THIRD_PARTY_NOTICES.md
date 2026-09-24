@@ -9,7 +9,7 @@ The unmodified selected source snapshot, SHA-256 manifest and local patch are
 in `third_party/iphone-mirror-baseline/`. The modified implementation is in
 `src/AudioCore/` and `src/AudioBridge.UsbRestore/`. Local changes remove video
 negotiation/decoding, expose a C ABI, replace the audio queue/rendering, and
-add the WPF application. Changes were made on 2026-09-24.
+integrate the ZL application described below. Changes were made on 2026-09-24.
 
 ## libusb-win32 1.2.6.0
 
@@ -31,21 +31,13 @@ iPhoneMirror source/driver assets. No kernel driver is installed by this app.
 fixtures from https://github.com/danielpaulus/quicktime_video_hack.
 Copyright (c) 2019 danielpaulus; MIT license, included alongside the fixtures.
 
-## .NET / WPF
-
-The self-contained Windows build includes Microsoft .NET 8 and Windows Desktop
-runtime files. The build copies their package licenses and component notices
-into `licenses/Microsoft.NETCore.App/` and `licenses/Microsoft.WindowsDesktop.App/`.
-Sources: https://github.com/dotnet/runtime and https://github.com/dotnet/wpf.
-
-The phase-one WPF package does not include ZLCompressor or JUCE. The separate
-ZL USB Audio Bridge package described below includes both. Neither package
-includes FFmpeg, AirPlay, libusb-1.0 or a VST host. Microsoft/Apple device support
+The current application does not bundle .NET, WPF, FFmpeg, AirPlay, libusb-1.0
+or a VST host. Microsoft/Apple device support
 and the existing libusb filter must already be installed on the test machine.
 
 ## ZL USB Audio Bridge (2026-09-24 integration)
 
-This separate native application uses ZLCompressor's processor and editor with
+This native application uses ZLCompressor's processor and editor with
 the shared iPhone USB/WASAPI backend. It is a modified community integration,
 not an official ZL-Audio release. New application and adapter code in
 `src/ZLUsbAudioBridge/` is provided under AGPL-3.0; original component notices

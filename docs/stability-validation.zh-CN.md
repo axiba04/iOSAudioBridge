@@ -1,5 +1,7 @@
 # 当前构建 USB 仅音频稳定性测试
 
+> 历史记录：WPF 前端及其发布脚本现已移除；下文保留当时的设计或验收依据。当前入口见 [README](../README.md)。
+
 日期：2026-09-24，时区 Asia/Shanghai。
 
 ## 结论
@@ -82,11 +84,13 @@
 
 ```powershell
 # 先确认设备索引；输出索引可能随硬件变化。
-./dist/iOSAudioBridge/AudioProbe.exe --devices
-./dist/iOSAudioBridge/AudioProbe.exe --outputs
+./scripts/Build-ZLBridge.ps1
+./build/zl-bridge/bin/AudioProbe.exe --devices
+./build/zl-bridge/bin/AudioProbe.exe --outputs
 ./scripts/Test-Stability.ps1 -Seconds 900 -DeviceIndex 0 -OutputIndex 2
 ./scripts/Summarize-Stability.ps1 -ResultDirectory '<本轮生成的结果目录>'
 ```
 
+当前脚本使用 `build/zl-bridge/bin` 中的原生诊断工具，只验证直通音频底层，不覆盖 ZL DSP 或界面；上面的历史结果仍对应旧构建。
 脚本固定静音，不录制 PCM。测试工具按时长主动 stop 并等待 USB 恢复；
 完成后检查日志、状态样本和各计数，不只看退出码。
