@@ -18,6 +18,8 @@ iPhone USB → QuickTime 仅音频握手 → PCM16 / 48 kHz / Stereo
 3. 压缩器参数可实时调整；“高级设置”中的“监听音量”只影响本程序最终输出。
 4. 停止或关闭窗口后等待 USB 恢复完成。手机暂停播放时保持连接，恢复播放后自动继续。
 
+iPad 停止后无法重新连接的问题已加入自动恢复，触发补救时可能需要约 25 秒，见[修复与实机验证](docs/usb-restore-ipad-fix.zh-CN.md)。
+
 详细操作、预设、日志和静音诊断入口见[使用与构建](docs/zl-bridge-running.zh-CN.md)。
 
 当前包使用 libusb-win32 1.4.0.2 用户态运行库；系统 filter 需单独安装。

@@ -257,7 +257,9 @@ function Install-KitFilter($Phone, $Manifest, [string]$Directory, [string]$LogDi
     foreach ($file in $files) { Assert-CompatibleFile $file.destination $file.hash }
     if ($others.Count) {
         foreach ($file in $files) { if (-not (Test-Path -LiteralPath $file.destination)) { throw 'A shared driver file is missing; repair the existing installation before registering another device.' } }
-        if ((Get-CimInstance Win32_SystemDriver -Filter "Name='libusb0'").State -ne 'Running') { throw 'The existing shared driver is not running. Inspect the registered devices before adding another.' }
+        # Offline registrations remain in the registry even when the demand-start
+        # driver is stopped. After validating the shared files and filter scope,
+        # let the startup check below load it before registering the new device.
     }
     if ($Phone.upper -contains 'libusb0') {
         foreach ($file in $files) { if (-not (Test-Path -LiteralPath $file.destination)) { throw 'An existing filter has missing files; repair it separately.' } }

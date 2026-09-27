@@ -2,6 +2,7 @@
 #include <cfgmgr32.h>
 
 #include "Transport/UsbInterfaceTransitionPolicy.h"
+#include "Capture/UsbRestoreReconnectPolicy.h"
 
 #include <lusb0_usb.h>
 
@@ -261,7 +262,8 @@ std::string topology_scope(std::string_view value) {
 int wmain(int argc, wchar_t** argv) {
     if (argc != 5) return 21;
     const std::wstring_view operation(argv[1]);
-    if (operation != L"activate" && operation != L"restore") return 22;
+    if (operation != L"activate" && operation != L"restore" &&
+        operation != L"reconnect") return 22;
     const auto expected_serial = normalize(narrow_ascii(argv[2]));
     if (expected_serial.empty()) return 23;
     const auto expected_topology = narrow_ascii(argv[4]);
@@ -329,6 +331,7 @@ int wmain(int argc, wchar_t** argv) {
     auto* handle = usb_open(selected_device);
     if (!handle) return 30;
 
+    bool exact_serial{};
     if (selected_device->descriptor.iSerialNumber != 0) {
         char serial[256]{};
         const int serial_length = usb_get_string_simple(handle,
@@ -338,6 +341,7 @@ int wmain(int argc, wchar_t** argv) {
             usb_close(handle);
             return 28;
         }
+        exact_serial = serial_length > 0;
     }
 
     char active_value{};
@@ -364,6 +368,31 @@ int wmain(int argc, wchar_t** argv) {
         return 5;
     }
 
+    if (operation == L"reconnect") {
+        bool has_management{}, has_capture{};
+        for (int c = 0; selected_device->config &&
+                c < selected_device->descriptor.bNumConfigurations; ++c) {
+            const auto& config = selected_device->config[c];
+            if (config.bConfigurationValue != active_configuration) continue;
+            for (int i = 0; config.interface && i < config.bNumInterfaces; ++i) {
+                const auto& group = config.interface[i];
+                for (int a = 0; group.altsetting && a < group.num_altsetting; ++a) {
+                    const auto& iface = group.altsetting[a];
+                    if (iface.bInterfaceClass != 0xff) continue;
+                    has_management |= iface.bInterfaceSubClass == 0xfe;
+                    has_capture |= iface.bInterfaceSubClass == QuickTimeSubclass ||
+                        iface.bInterfaceSubClass == 0xfd;
+                }
+            }
+        }
+        if (!iPhoneMirror::capture::detail::can_reconnect_restored_usb_device(
+                exact_serial, active_configuration, expected_configuration,
+                has_management, has_capture)) {
+            usb_close(handle);
+            return 34;
+        }
+    }
+
     std::unique_ptr<ExactInterfaceTransition> transition;
     try {
         transition = std::make_unique<ExactInterfaceTransition>(
@@ -374,26 +403,29 @@ int wmain(int argc, wchar_t** argv) {
         return 31;
     }
 
-    const int result = usb_control_msg(handle, 0x40, 0x52, 0,
-        operation == L"activate" ? 2 : 0, nullptr, 0, 1000);
-    std::cout << "request_sent result=" << result
+    const int result = operation == L"reconnect"
+        ? usb_reset_ex(handle, USB_RESET_TYPE_CYCLE_PORT)
+        : usb_control_msg(handle, 0x40, 0x52, 0,
+            operation == L"activate" ? 2 : 0, nullptr, 0, 1000);
+    std::cout << "request_sent operation=" << narrow_ascii(operation)
+              << " result=" << result
               << " win32_error=" << GetLastError() << '\n';
-    // The vendor request invalidates the PnP node asynchronously. Retain the
+    // The vendor request or port cycle invalidates the PnP node asynchronously. Retain the
     // old process and handle ownership until this exact phone has completed a
     // full removal/arrival and its interface remains present. Exiting as soon
-    // as 0x52 returns lets process teardown reclaim the stale handle while
+    // as the request returns lets process teardown reclaim the stale handle while
     // AppleUsbFilter is still tearing down its WDF objects.
     const bool stable = transition->wait_until_stable(
         std::chrono::steady_clock::now() + ReenumerationTimeout);
     std::cout << "reenumeration removed=" << transition->removed()
               << " arrived=" << transition->arrived()
               << " stable=" << stable << '\n';
-    // Never call usb_close after a successful configuration request: the
+    // Never call usb_close after a disconnecting request: the
     // handle names the invalidated node. Normal process teardown is the only
     // operation performed after the exact PnP transaction is quiescent.
     if (stable) return 0;
     // A failed control transfer can still have been accepted by the device.
-    // Once 0x52 was submitted, never issue usb_close against the possibly
+    // Once the request was submitted, never issue usb_close against the possibly
     // invalidated handle; distinguish a stalled rearrival from no observed
     // PnP transition for diagnostics.
     return transition->removed() ? 32 : result < 0 ? 10 : 33;

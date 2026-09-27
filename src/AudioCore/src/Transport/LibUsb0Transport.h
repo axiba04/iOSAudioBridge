@@ -68,6 +68,9 @@ public:
     [[nodiscard]] static bool enable_quicktime_configuration(const AppleUsbIdentity& identity);
     [[nodiscard]] static bool disable_quicktime_configuration(const std::string& serial);
     [[nodiscard]] static bool disable_quicktime_configuration(const AppleUsbIdentity& identity);
+    // One exact-device port cycle, only after descriptor-verified normal mode.
+    // Repairs an Apple management handoff that did not survive 0x52 removal.
+    [[nodiscard]] static bool reconnect_normal_configuration(const AppleUsbIdentity& identity);
     [[nodiscard]] static LibUsb0Connection open_quicktime(const std::string& serial);
     [[nodiscard]] static LibUsb0Connection open_quicktime(
         const AppleUsbIdentity& identity,

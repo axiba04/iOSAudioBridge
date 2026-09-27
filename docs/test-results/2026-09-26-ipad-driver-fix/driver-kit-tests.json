@@ -1,0 +1,19 @@
+﻿{
+    "powershell":  "5.1.26100.8737",
+    "system_modified":  false,
+    "scope":  "Input guards only; does not exercise MSI installation, catalog registration, kernel loading or filter changes.",
+    "passed":  [
+                   "no phone",
+                   "ambiguous phone selection",
+                   "wrong parent binding",
+                   "unhealthy phone",
+                   "healthy Apple parent accepted",
+                   "fresh phone without an UpperFilters property",
+                   "existing incompatible file",
+                   "existing matching file accepted without changes",
+                   "missing file accepted for fresh install",
+                   "corrupt payload before signatures or system access",
+                   "payload path traversal",
+                   "installer and packager script parsing"
+               ]
+}

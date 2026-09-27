@@ -175,7 +175,7 @@ DWORD run_configuration_helper(const AppleUsbIdentity& identity,
         throw std::runtime_error(std::format(
             "read USB configuration helper result: win32_error={}", GetLastError()));
     const auto operation_name = operation == L"activate" ? "activate" :
-        operation == L"restore" ? "restore" : "verify";
+        operation == L"restore" ? "restore" : "reconnect";
     logging::write(std::format(
         "usb_configuration_helper operation={} exit_code={}",
         operation_name, exit_code));
@@ -919,6 +919,12 @@ bool LibUsb0Connection::enable_quicktime_configuration(const std::string& serial
 bool LibUsb0Connection::enable_quicktime_configuration(
     const AppleUsbIdentity& identity) {
     return run_configuration_switch_helper(identity, true);
+}
+
+bool LibUsb0Connection::reconnect_normal_configuration(const AppleUsbIdentity& identity) {
+    // The helper owns its own libusb state, as with activate/restore. Do not
+    // hold the process-wide I/O lock while Windows re-enumerates this device.
+    return run_configuration_helper(identity, L"reconnect") == 0;
 }
 
 bool LibUsb0Connection::disable_quicktime_configuration(const std::string& serial) {

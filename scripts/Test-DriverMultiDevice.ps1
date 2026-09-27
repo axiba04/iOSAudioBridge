@@ -62,11 +62,17 @@ function Get-CimInstance {
     param([string]$ClassName,[string]$Filter)
     if ($ClassName -eq 'Win32_PnPEntity') { return }
     if ($ClassName -ne 'Win32_SystemDriver' -or $Filter -ne "Name='libusb0'") { throw 'Unmocked CIM call forbidden' }
-    [pscustomobject]@{State='Running';PathName=(Join-Path $env:SystemRoot 'System32/drivers/libusb0.sys')}
+    [pscustomobject]@{State=$script:driverState;PathName=(Join-Path $env:SystemRoot 'System32/drivers/libusb0.sys')}
 }
 function Get-KitDeployments($Manifest,[string]$Directory) { $script:files }
 function Register-KitCatalog([string]$Directory) { $script:events.Add('catalog') }
 function Invoke-KitNative([string]$File,[string[]]$Arguments) {
+    if ($File -eq "$env:SystemRoot/System32/sc.exe" -and ($Arguments -join '|') -eq 'start|libusb0') {
+        $script:events.Add('start:libusb0')
+        if ($script:failStart) { throw 'simulated driver startup failure' }
+        if (-not $script:stayStopped) { $script:driverState = 'Running' }
+        return
+    }
     if ([IO.Path]::GetFileName($File) -ne 'install-filter.exe' -or $Arguments.Count -ne 2 -or $Arguments[1] -notlike '-di=*') { throw 'Unscoped native operation forbidden' }
     $id = $Arguments[1].Substring(4)
     $target = @($script:devices | Where-Object instance -eq $id)
@@ -87,6 +93,7 @@ function New-Case([string]$Name) {
         [pscustomobject]@{instance=$secondId;name='Apple Mobile Device USB Composite Device';service='usbccgp';upper=@();lower=@('AppleLowerFilter');problem=0;present=$true}
     )
     $script:globalFilter = $false; $script:failInstall = $false; $script:answer = '2'
+    $script:driverState = 'Running'; $script:failStart = $false; $script:stayStopped = $false
     $script:events = [Collections.Generic.List[string]]::new()
     $script:files = @(foreach ($name in 'libusb0.sys','libusb0-x64.dll','libusb0-x86.dll') {
         $path = Join-Path $script:caseDirectory $name
@@ -140,6 +147,32 @@ Register-Second
 Assert-Test ($devices[0].upper -contains 'libusb0' -and $devices[1].upper -contains 'libusb0') 'Offline registration was lost'
 $passed.Add('existing disconnected device remains registered when adding another')
 
+New-Case 'first-offline-driver-stopped'
+$devices[0].present = $false
+$driverState = 'Stopped'
+$original = $devices[0] | ConvertTo-Json -Depth 4 -Compress
+$hashes = @($files | ForEach-Object { (Get-FileHash -LiteralPath $_.destination).Hash })
+Register-Second
+Assert-Test ($driverState -eq 'Running' -and $devices[1].upper -contains 'libusb0') 'Stopped shared driver prevented new registration'
+Assert-Test (($devices[0] | ConvertTo-Json -Depth 4 -Compress) -eq $original) 'Starting shared driver changed offline registration'
+Assert-Test ($events.IndexOf('start:libusb0') -ge 0 -and $events.IndexOf('start:libusb0') -lt $events.IndexOf('i:' + $secondId)) 'Filter registered before driver startup'
+Assert-Test (-not (Compare-Object $hashes @($files | ForEach-Object { (Get-FileHash -LiteralPath $_.destination).Hash }))) 'Starting shared driver rewrote existing files'
+$passed.Add('start stopped shared driver before registering iPad; preserve offline device and shared files')
+
+foreach ($failure in 'start-error','stays-stopped') {
+    New-Case $failure
+    $devices[0].present = $false
+    $driverState = 'Stopped'
+    $failStart = $failure -eq 'start-error'
+    $stayStopped = $failure -eq 'stays-stopped'
+    $original = $devices | ConvertTo-Json -Depth 4 -Compress
+    $message = if ($failStart) { '*simulated driver startup failure*' } else { '*Windows did not load the driver*' }
+    Expect-Failure { Register-Second } $message
+    Assert-Test ($events -contains 'start:libusb0' -and @($events | Where-Object { $_ -like 'i:*' -or $_ -like 'u:*' }).Count -eq 0) 'Failed startup reached filter installation'
+    Assert-Test (($devices | ConvertTo-Json -Depth 4 -Compress) -eq $original) 'Failed startup changed device bindings'
+    $passed.Add("driver startup failure leaves all device bindings intact: $failure")
+}
+
 New-Case 'failed-registration'
 $original = $devices[0] | ConvertTo-Json -Depth 4 -Compress
 $failInstall = $true
@@ -176,12 +209,14 @@ Assert-Test (@(Get-KitPhones).Count -eq 1) 'Apple audio adapter offered as captu
 $passed.Add('Apple accessory omitted from device selection')
 
 New-Case 'old-system-files'
+$driverState = 'Stopped'
 'old version' | Set-Content -LiteralPath $files[0].destination
 Expect-Failure { Register-Second } '*will not overwrite*'
 Assert-Test ($events.Count -eq 0 -and $devices[1].upper.Count -eq 0) 'Old shared driver allowed a new registration'
 $passed.Add('old shared driver requires upgrade before registering another device')
 
 New-Case 'missing-shared-file'
+$driverState = 'Stopped'
 $files[0].destination = Join-Path $caseDirectory 'missing-driver.sys'
 Expect-Failure { Register-Second } '*shared driver file is missing*'
 Assert-Test ($events.Count -eq 0) 'Missing shared file triggered a live driver repair'

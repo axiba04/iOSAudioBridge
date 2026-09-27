@@ -52,8 +52,10 @@ UsbConfigurationRestoreResult restore_usb_configuration(
             // transport so no error path can send the request a second time.
             logging::write(std::format(
                 "usb_configuration_restore backend={} action=disable_requested", backend));
-            deadline = std::chrono::steady_clock::now() + RestoreObservationWindow;
             try { disable(); } catch (...) {}
+            // The helper itself can wait up to 15 seconds for removal/arrival.
+            // Give Apple management its full observation window AFTER it exits.
+            deadline = std::chrono::steady_clock::now() + RestoreObservationWindow;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
@@ -71,6 +73,7 @@ UsbConfigurationRestoreResult restore_libusb0_configuration(
     bool primary_request_sent = false,
     std::chrono::milliseconds automatic_restore_grace = std::chrono::milliseconds(3000)) noexcept {
     bool restore_request_sent = primary_request_sent;
+    bool restore_switch_verified{};
     const auto filter_safety =
         device::inspect_apple_usb_filter_stack(identity.serial);
     // The exact-device helper now owns the old handle until removal/arrival is
@@ -90,7 +93,7 @@ UsbConfigurationRestoreResult restore_libusb0_configuration(
                 "usb_configuration_restore backend=libusb0 fallback=disabled diagnostic={}",
                 filter_safety.diagnostic));
     }
-    auto result = restore_usb_configuration("libusb0",
+    auto observe_configuration =
         [&, previous_state = std::optional<bool>{}, stable_normal = 0U,
             stable_quicktime_residual = 0U,
             automatic_restore_deadline = std::chrono::steady_clock::now() +
@@ -138,11 +141,33 @@ UsbConfigurationRestoreResult restore_libusb0_configuration(
             previous_state = normal;
         }
         return observation;
-    }, [&] {
+    };
+    auto result = restore_usb_configuration("libusb0", observe_configuration, [&] {
         restore_request_sent = true;
-        (void)transport::LibUsb0Connection::disable_quicktime_configuration(identity);
+        restore_switch_verified =
+            transport::LibUsb0Connection::disable_quicktime_configuration(identity);
     }, primary_request_sent);
+    if (!result.normal_observed && restore_switch_verified && fallback_allowed &&
+        device::is_apple_usb_parent_present(identity.serial)) {
+        // Some iPads return to normal descriptors after 0x52, but Apple USBMux
+        // loses the new management interface. Do not relax the success check:
+        // cycle this device once in a separate process, then verify discovery
+        // again. The helper requires a fresh exact serial and a normal active
+        // descriptor (no QuickTime/placeholder interface) before it can cycle.
+        // Never repeat 0x52 or retry a failed cycle.
+        logging::write("usb_configuration_restore backend=libusb0 action=reconnect_normal");
+        try {
+            if (transport::LibUsb0Connection::reconnect_normal_configuration(identity)) {
+                result = restore_usb_configuration("libusb0_reconnect",
+                    observe_configuration, [] {}, true);
+            }
+        } catch (const std::exception& error) {
+            logging::write(std::format("usb_configuration_restore reconnect_failed error={}",
+                error.what()));
+        } catch (...) {
+            logging::write("usb_configuration_restore reconnect_failed error=unknown");
+        }
+    }
     result.disable_requested = restore_request_sent;
     return result;
 }
-

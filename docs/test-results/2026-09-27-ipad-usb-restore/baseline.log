@@ -1,0 +1,14 @@
+
+=== iPhoneMirror capture session ===
+2026-09-27 10:02:56.932 [startup] session=000037C4-00000023013057C9 pid=14276 arch=x64 implicit=1 log_target=custom
+2026-09-27 10:02:56.933 [tid=2761244248320883312] [seq=1] [level=INFO] [category=usb] [session=000037C4-00000023013057C9] usb_configuration_helper operation=activate exit_code=0
+2026-09-27 10:02:56.945 [tid=2761244248320883312] [seq=2] [level=INFO] [category=libusb0] [session=000037C4-00000023013057C9] libusb0_quicktime_open claim=success configuration_initialized=true configuration=5 interface=2 exact_serial=true
+2026-09-27 10:03:02.935 [tid=2761244248320883312] [seq=3] [level=INFO] [category=audio] [session=000037C4-00000023013057C9] audio_stop_drain mode=fast reason=peer_stop_quiet elapsed_ms=314 releases=0/1 buffered_bytes=0
+2026-09-27 10:03:02.946 [tid=2761244248320883312] [seq=4] [level=INFO] [category=audio] [session=000037C4-00000023013057C9] audio_only stop releases=0/1 audio_packets=63 video_packets=0 video_bytes=0
+2026-09-27 10:03:02.951 [tid=2761244248320883312] [seq=5] [level=WARN] [category=usb_safety] [session=000037C4-00000023013057C9] usb_configuration_restore backend=libusb0 fallback=guarded_exact_pnp diagnostic=legacy libusb0 is stacked with AppleLowerFilter/AppleKmdfFilter
+2026-09-27 10:03:02.979 [tid=2761244248320883312] [seq=6] [level=INFO] [category=usb] [session=000037C4-00000023013057C9] usb_configuration_restore backend=libusb0 observation=missing usbmux_exact_present=true pnp_normal_stack=false parent_present=true mi00_media_started=false mi01_management_started=true request_sent=false stable_normal=0 stable_quicktime_residual=1
+2026-09-27 10:03:03.207 [tid=2761244248320883312] [seq=7] [level=INFO] [category=usb] [session=000037C4-00000023013057C9] usb_configuration_restore backend=libusb0 observation=missing usbmux_exact_present=true pnp_normal_stack=false parent_present=true mi00_media_started=false mi01_management_started=true request_sent=false stable_normal=0 stable_quicktime_residual=2
+2026-09-27 10:03:04.116 [tid=2761244248320883312] [seq=8] [level=INFO] [category=usb] [session=000037C4-00000023013057C9] usb_configuration_restore backend=libusb0 action=disable_requested
+2026-09-27 10:03:07.119 [tid=2761244248320883312] [seq=9] [level=INFO] [category=usb] [session=000037C4-00000023013057C9] usb_configuration_helper operation=restore exit_code=0
+2026-09-27 10:03:16.314 [tid=2761244248320883312] [seq=10] [level=INFO] [category=usb] [session=000037C4-00000023013057C9] usb_configuration_restore backend=libusb0 result=timeout disable_requested=true
+2026-09-27 10:03:16.314 [tid=2761244248320883312] [seq=11] [level=INFO] [category=audio] [session=000037C4-00000023013057C9] audio_stop_timing mode=fast output_ms=23 drain_ms=325 close_ms=0 restore_ms=13367 total_ms=13717 failure=true

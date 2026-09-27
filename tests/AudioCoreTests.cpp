@@ -4,6 +4,7 @@
 #include "Buffer/SpscPcmRing.h"
 #include "Buffer/ResumeBufferGate.h"
 #include "Capture/UsbConfigurationRestorePolicy.h"
+#include "Capture/UsbRestoreReconnectPolicy.h"
 #include "Capture/AudioStopDrainPolicy.h"
 #include <fstream>
 #include <iostream>
@@ -126,6 +127,14 @@ void restore_tests(){
     require(stable.observe(O::Normal)==A::Wait && stable.observe(O::VerifiedNormal)==A::Complete,"Stable PnP confirmation");
     require(!is_libusb0_quicktime_pnp_state(false,false,false,true),"Absent parent must not be opened during transition");
     require(stabilize_normal_configuration_observation(true,1)==O::Missing && stabilize_normal_configuration_observation(true,2)==O::VerifiedNormal,"Require repeated normal observations");
+    require(can_reconnect_restored_usb_device(true,3,5,true,false),"Normal iPad management configuration can reconnect");
+    require(can_reconnect_restored_usb_device(true,3,6,true,false),"Reconnect must not hard-code the QuickTime configuration");
+    require(!can_reconnect_restored_usb_device(false,3,5,true,false),"Topology without fresh serial must not authorize a port cycle");
+    require(!can_reconnect_restored_usb_device(true,0,5,true,false),"Unconfigured device must not cycle");
+    require(!can_reconnect_restored_usb_device(true,3,0,true,false),"Missing session identity must not authorize a port cycle");
+    require(!can_reconnect_restored_usb_device(true,5,5,true,false),"Active capture configuration must not cycle");
+    require(!can_reconnect_restored_usb_device(true,1,5,false,false),"A non-management configuration must not cycle");
+    require(!can_reconnect_restored_usb_device(true,4,5,true,true),"Capture or placeholder descriptors must not cycle");
 }
 void stop_drain_tests(){
     using P=audiobridge::AudioStopDrainPolicy;

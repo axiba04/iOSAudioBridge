@@ -1,0 +1,14 @@
+[
+  {
+    "id": 14,
+    "type": "USB",
+    "pid": 4779,
+    "connect": {
+      "MessageType": "Result",
+      "Number": 0
+    },
+    "model": "iPad13,4",
+    "os": "26.6.2",
+    "accessible": true
+  }
+]

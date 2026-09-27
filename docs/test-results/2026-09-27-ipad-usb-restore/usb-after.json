@@ -1,0 +1,121 @@
+[
+  {
+    "pid": "0x12ab",
+    "filename": "\\\\.\\libusb0-0001--0x05ac-0x12ab",
+    "configs": 4,
+    "opened": true,
+    "serial_match": true,
+    "get_configuration": 1,
+    "active_configuration": 3,
+    "descriptors": [
+      {
+        "index": 0,
+        "value": 1,
+        "interfaces": [
+          {
+            "number": 0,
+            "alt": 0,
+            "class": 6,
+            "subclass": 1,
+            "protocol": 1
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "value": 2,
+        "interfaces": [
+          {
+            "number": 0,
+            "alt": 0,
+            "class": 1,
+            "subclass": 1,
+            "protocol": 0
+          },
+          {
+            "number": 1,
+            "alt": 0,
+            "class": 1,
+            "subclass": 2,
+            "protocol": 0
+          },
+          {
+            "number": 1,
+            "alt": 1,
+            "class": 1,
+            "subclass": 2,
+            "protocol": 0
+          },
+          {
+            "number": 2,
+            "alt": 0,
+            "class": 3,
+            "subclass": 0,
+            "protocol": 0
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "value": 3,
+        "interfaces": [
+          {
+            "number": 0,
+            "alt": 0,
+            "class": 6,
+            "subclass": 1,
+            "protocol": 1
+          },
+          {
+            "number": 1,
+            "alt": 0,
+            "class": 255,
+            "subclass": 254,
+            "protocol": 2
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "value": 4,
+        "interfaces": [
+          {
+            "number": 0,
+            "alt": 0,
+            "class": 6,
+            "subclass": 1,
+            "protocol": 1
+          },
+          {
+            "number": 1,
+            "alt": 0,
+            "class": 255,
+            "subclass": 254,
+            "protocol": 2
+          },
+          {
+            "number": 2,
+            "alt": 0,
+            "class": 255,
+            "subclass": 253,
+            "protocol": 1
+          },
+          {
+            "number": 2,
+            "alt": 1,
+            "class": 255,
+            "subclass": 253,
+            "protocol": 1
+          },
+          {
+            "number": 2,
+            "alt": 2,
+            "class": 255,
+            "subclass": 253,
+            "protocol": 1
+          }
+        ]
+      }
+    ]
+  }
+]
