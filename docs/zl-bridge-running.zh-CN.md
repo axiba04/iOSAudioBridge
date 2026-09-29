@@ -4,7 +4,7 @@
 
 ## 运行
 
-打开 `dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe`，保留同目录的 `AudioBridge.UsbRestore.exe` 与 `libusb0.dll`。无需 VST Host 或 .NET。
+从 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 下载并完整解压 Windows x64 程序包，打开 `ZLUsbAudioBridge/ZLUsbAudioBridge.exe`；自行构建的程序位于 `dist/ZLUsbAudioBridge/`。保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe` 与 `libusb0.dll`。无需 VST Host 或 .NET。
 
 当前包使用 libusb-win32 1.4.0.2 DLL。系统驱动单独维护，本机升级及恢复方法见[驱动升级记录](driver-upgrade-evaluation.zh-CN.md)。
 
@@ -14,6 +14,7 @@
 4. 原版 Threshold、Ratio、Attack、Release、Knee、Makeup 可实时调整。原版曲线/电平显示处理器的信号；高级设置中的“设备输出”是最终音量和静音后的电平。因此静音时原版分析器仍有输入。
 5. 手机暂停播放会保持 USB，恢复后重新预填充缓冲。常规运行没有定时停止；断线或输出失败会结束会话并显示原因。
 6. 点击停止或关闭窗口后等待 USB 恢复完成。部分 iPad 在切回普通配置后仍需一次自动重新枚举，停止可能需要约 25 秒；看到“已停止，USB 已释放”后即可再次连接。修复说明见项目文档 `docs/usb-restore-ipad-fix.zh-CN.md`。
+7. 换机后 USB 连接失败、重开软件仍无效时，关闭其他使用该手机的软件，待本程序停止后选中故障手机，点击“修复 USB”并完成管理员授权。按钮只在未采集且有手机可选时启用，不要求已选择音频输出。修复不会开始监听，成功后手动点击“开始监听”。Windows 仍可识别、但 Apple 服务未发现的手机显示“USB 待检查”，也可以选中修复。设备未登记 filter 时先完成驱动安装。
 
 当前仅支持 48 kHz / PCM16 / 立体声 USB 输入，内部转为双通道 float 调用 ZL，再转 PCM16 输出。
 WASAPI 使用共享事件模式和 MMCSS Pro Audio。选定端点不支持原生格式时允许系统转换。
@@ -29,7 +30,7 @@ WASAPI 使用共享事件模式和 MMCSS Pro Audio。选定端点不支持原生
 整份预设/游戏预设在停止音频线程、完成 USB 恢复后应用；若原先在监听则重新连接。六项旋钮的实时调整不会重连。
 
 Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版界面属性使用重命名后的 `ZL USB Audio Bridge` 产品路径，与原 ZLCompressor 隔离。
-日志可通过环境变量 `IPHONE_MIRROR_LOG_FILE` 指定；默认使用后端的临时目录日志。
+日志可通过环境变量 `IPHONE_MIRROR_LOG_FILE` 指定；默认位置为 `%TEMP%\iOSAudioBridge-capture.log`。连接失败时，`usb_probe` 记录打开句柄、读取序列号、读取配置的具体阶段与错误码；`usb_repair` 记录手动修复结果。日志中的设备标识使用会话内指纹。详见[连接诊断与修复](usb-device-repair.zh-CN.md)。
 
 顶部控件和底部区域跟随 ZL 的背景与文字主题颜色。状态栏显示连接状态、静音和监听音量；缓冲、欠载、缺失帧和延迟信息位于“高级设置”。刷新设备时会尽量保留当前选择。
 
@@ -49,7 +50,7 @@ Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版
 构建脚本默认使用本机 `D:/GreenSoftware/iPhoneMirror-v1.8.3-win-x64/audio-only-work` 内的 MSVC/SDK、Ninja、CMake；其他机器需通过 `-ToolRoot` 提供相同目录结构。
 固定版本见 `third_party/ZLCompressor.pins.json`。Clang 编译使用 MSVC STL 和 Windows SDK；C++20、SSE2、静态 CRT。
 
-构建目录为 `build/zl-bridge`，发布目录为 `dist/ZLUsbAudioBridge`。
+构建目录为 `build/zl-bridge`，本地发布目录为 `dist/ZLUsbAudioBridge`。`dist/` 不纳入 Git，预编译程序和驱动 ZIP 作为 Release 附件分发。
 默认执行 Native、PCM 适配和 ZL DSP 三组回归；合成 DSP 检查不打开音频端点、不连接 USB。
 发布目录包含依赖许可和来源清单。对外分发时需同时提供本项目对应源码、固定依赖及构建材料，不能只发 EXE。
 

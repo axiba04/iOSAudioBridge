@@ -24,6 +24,9 @@ namespace iPhoneMirror::transport {
     bool use_identity_cache = true);
 [[nodiscard]] std::optional<AppleUsbDevice> find_libusb0_device(
     std::string_view serial);
+// Explicit capture/repair probe: logs each failing I/O stage and throws a
+// stage-specific error instead of collapsing all failures to an empty optional.
+[[nodiscard]] AppleUsbDevice probe_libusb0_device(std::string_view serial);
 [[nodiscard]] std::optional<AppleUsbDevice> find_libusb0_device(
     const AppleUsbIdentity& identity, bool require_quicktime = false);
 // A freshly activated legacy filter may need one SET_CONFIGURATION to build

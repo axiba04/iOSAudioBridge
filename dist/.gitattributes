@@ -1,3 +1,0 @@
-# Keep published files byte-for-byte identical to the local release package.
-ZLUsbAudioBridge/** -text -whitespace
-DriverInstallKit-x64-*.zip binary

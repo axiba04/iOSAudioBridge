@@ -1,6 +1,7 @@
 #include "Capture/UsbAudioSource.h"
 #include "Device/DeviceCatalog.h"
 #include "Device/AppleUsbDiscovery.h"
+#include "Device/UsbDeviceLease.h"
 #include "Transport/LibUsb0Transport.h"
 #include "Transport/UsbMuxClient.h"
 #include "Protocol/QuickTimeSession.h"
@@ -28,20 +29,6 @@ bool conservative_stop_mode() noexcept {
     return length!=0 && (length>=32 || std::wstring_view(mode)!=L"fast");
 }
 #include "Session/UsbRestore.inl"
-class DeviceLease {
-public:
-    explicit DeviceLease(std::string serial) {
-        serial.erase(std::remove(serial.begin(),serial.end(),'-'),serial.end());
-        std::transform(serial.begin(),serial.end(),serial.begin(),[](unsigned char c){return static_cast<char>(std::tolower(c));});
-        const auto name=L"Local\\iOSAudioBridge.USB."+widen(serial);
-        handle_=CreateMutexW(nullptr,FALSE,name.c_str());
-        if(!handle_) throw std::runtime_error("Cannot create device lease");
-        const auto wait=WaitForSingleObject(handle_,0);
-        if(wait!=WAIT_OBJECT_0 && wait!=WAIT_ABANDONED) { CloseHandle(handle_); handle_=nullptr; throw std::runtime_error("This iPhone is already used by another AudioBridge session"); }
-    }
-    ~DeviceLease(){ if(handle_){ReleaseMutex(handle_);CloseHandle(handle_);} }
-private: HANDLE handle_{};
-};
 }
 UsbAudioSource::UsbAudioSource(PcmPipe& pipe,SourceLifecycle lifecycle) : pipe_(pipe),lifecycle_(std::move(lifecycle)) { status_.struct_size=sizeof(status_);status_.version=AB_VERSION;status_.state=AB_STOPPED;copy_text(status_.message,L"未连接"); }
 UsbAudioSource::~UsbAudioSource(){ stop(); }
@@ -75,7 +62,7 @@ void UsbAudioSource::run(AB_Config config,std::stop_token token) noexcept {
     using namespace iPhoneMirror;
     transport::LibUsb0Connection usb;
     std::optional<transport::AppleUsbIdentity> identity;
-    std::unique_ptr<DeviceLease> lease;
+    std::unique_ptr<UsbDeviceLease> lease;
     bool opened=false,activated=false,restore_authorized=false,peer_stopped=false;
     quicktime::SessionProtocol protocol;
     quicktime::StreamDecoder decoder;
@@ -84,7 +71,7 @@ void UsbAudioSource::run(AB_Config config,std::stop_token token) noexcept {
     Clock::time_point peer_pause_started{};
     try {
         const auto serial=narrow(config.device_id);
-        lease=std::make_unique<DeviceLease>(serial);
+        lease=std::make_unique<UsbDeviceLease>(serial);
         if(!device::is_apple_usb_parent_present(serial)) throw std::runtime_error("Selected iPhone is not connected by USB");
         const auto filter=device::inspect_apple_usb_filter_stack(serial);
         if(filter.safety==device::AppleUsbFilterSafety::Indeterminate) throw std::runtime_error("Cannot verify Apple USB driver state: "+filter.diagnostic);
@@ -92,11 +79,9 @@ void UsbAudioSource::run(AB_Config config,std::stop_token token) noexcept {
         lifecycle_.prepare_output(config);
         if(token.stop_requested()) throw std::runtime_error("Connection cancelled");
         read_buffer.resize(1024*1024);
-        const auto selected=transport::find_libusb0_device(serial);
-        if(!selected || !selected->can_open || !selected->active_configuration_known)
-            throw std::runtime_error("Cannot open selected iPhone or read its USB configuration");
-        identity=transport::make_apple_usb_identity(*selected);
-        const bool adopted=transport::is_libusb0_quicktime_configuration_active(*selected);
+        const auto selected=transport::probe_libusb0_device(serial);
+        identity=transport::make_apple_usb_identity(selected);
+        const bool adopted=transport::is_libusb0_quicktime_configuration_active(selected);
         restore_authorized=adopted;
         if(!adopted) {
             state(AB_CONNECTING,L"等待 iPhone 切换至 USB 音频配置");

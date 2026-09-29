@@ -387,10 +387,23 @@ void refresh_usb_devices() {
     if (usb_find_devices() < 0) throw_last_error("usb_find_devices");
 }
 
+struct ProbeDiagnostics {
+    std::size_t candidates{}, opened{}, serials{};
+    std::string last_failure;
+    void failure(std::string_view topology, std::string_view stage, int result, DWORD error) {
+        // Snapshot libusb's thread-global text before another USB operation.
+        last_failure = std::format("stage={} result={} win32_error={} detail={}",
+            stage, result, error, usb_strerror());
+        logging::write(logging::Level::Warning, "usb_probe", std::format(
+            "candidate={} {}", logging::fingerprint(topology), last_failure));
+    }
+};
+
 struct usb_device* find_device(const AppleUsbIdentity& identity,
     usb_dev_handle** opened = nullptr, bool require_quicktime = false,
     AppleUsbDevice* selected_info = nullptr,
-    AppleUsbMatchKind* selected_match_kind = nullptr) {
+    AppleUsbMatchKind* selected_match_kind = nullptr,
+    ProbeDiagnostics* probe = nullptr) {
     refresh_usb_devices();
     std::vector<AppleUsbDevice> candidates;
     std::vector<struct usb_device*> raw_candidates;
@@ -427,6 +440,7 @@ struct usb_device* find_device(const AppleUsbIdentity& identity,
             raw_candidates.push_back(device);
         }
     }
+    if (probe) probe->candidates = candidates.size();
     auto selection = select_apple_usb_device(candidates, identity, false);
     usb_dev_handle* matched_handle{};
     if (!selection.index) {
@@ -451,19 +465,38 @@ struct usb_device* find_device(const AppleUsbIdentity& identity,
             auto& candidate = candidates[index];
             if (!candidate.serial.empty()) continue;
             auto* device = raw_candidates[index];
-            if (device->descriptor.iSerialNumber == 0) continue;
+            if (device->descriptor.iSerialNumber == 0) {
+                if (probe) logging::write(logging::Level::Warning, "usb_probe",
+                    std::format("candidate={} stage=serial_descriptor_missing", logging::fingerprint(candidate.topology_id)));
+                continue;
+            }
+            SetLastError(ERROR_SUCCESS);
             auto* handle = usb_open(device);
-            if (!handle) continue;
+            if (!handle) {
+                const auto error = GetLastError();
+                if (probe) probe->failure(candidate.topology_id, "open", -1, error);
+                continue;
+            }
+            if (probe) ++probe->opened;
             candidate.can_open = true;
             char value[256]{};
+            SetLastError(ERROR_SUCCESS);
             const int length = usb_get_string_simple(handle,
                 device->descriptor.iSerialNumber, value, sizeof(value));
+            if (probe) {
+                if (length > 0) ++probe->serials;
+                else probe->failure(candidate.topology_id, "read_serial", length, GetLastError());
+            }
             char active_configuration{};
-            if (usb_control_msg(handle, 0x80, 0x08, 0, 0,
-                    &active_configuration, 1, 1000) == 1) {
+            SetLastError(ERROR_SUCCESS);
+            const auto configuration_result = usb_control_msg(handle, 0x80, 0x08, 0, 0,
+                    &active_configuration, 1, 1000);
+            if (configuration_result == 1) {
                 candidate.active_configuration =
                     static_cast<std::uint8_t>(active_configuration);
                 candidate.active_configuration_known = true;
+            } else if (probe) {
+                probe->failure(candidate.topology_id, "read_configuration", configuration_result, GetLastError());
             }
             if (length > 0) candidate.serial.assign(value,
                 static_cast<std::size_t>(length));
@@ -503,8 +536,11 @@ struct usb_device* find_device(const AppleUsbIdentity& identity,
         if (selected_info && !identity.serial.empty() &&
             selected->descriptor.iSerialNumber != 0) {
             char serial[256]{};
+            SetLastError(ERROR_SUCCESS);
             const int length = usb_get_string_simple(active_configuration_handle,
                 selected->descriptor.iSerialNumber, serial, sizeof(serial));
+            if (length <= 0 && probe)
+                probe->failure(info.topology_id, "verify_serial", length, GetLastError());
             if (length > 0 && !apple_usb_serial_equal(
                     std::string_view(serial, static_cast<std::size_t>(length)),
                     identity.serial)) {
@@ -515,11 +551,16 @@ struct usb_device* find_device(const AppleUsbIdentity& identity,
             }
         }
         char active_configuration{};
-        if (usb_control_msg(active_configuration_handle, 0x80, 0x08, 0, 0,
-                &active_configuration, 1, 1000) == 1) {
+        info.active_configuration_known = false;
+        SetLastError(ERROR_SUCCESS);
+        const auto configuration_result = usb_control_msg(active_configuration_handle, 0x80, 0x08, 0, 0,
+                &active_configuration, 1, 1000);
+        if (configuration_result == 1) {
             info.active_configuration =
                 static_cast<std::uint8_t>(active_configuration);
             info.active_configuration_known = true;
+        } else if (probe) {
+            probe->failure(info.topology_id, "read_configuration", configuration_result, GetLastError());
         }
     }
     if (require_quicktime &&
@@ -767,6 +808,33 @@ std::vector<AppleUsbDevice> enumerate_libusb0(
 
 std::optional<AppleUsbDevice> find_libusb0_device(std::string_view serial) {
     return find_libusb0_device(AppleUsbIdentity{.serial = std::string(serial)});
+}
+
+AppleUsbDevice probe_libusb0_device(std::string_view serial) {
+    if (serial.empty()) throw std::invalid_argument("USB probe requires a device serial");
+    if (!libusb0_available()) throw std::runtime_error("USB runtime unavailable (libusb0.dll)");
+    std::unique_lock lock(api_mutex);
+    ProbeDiagnostics probe;
+    AppleUsbDevice info;
+    const auto found = find_device(AppleUsbIdentity{.serial = std::string(serial)},
+        nullptr, false, &info, nullptr, &probe);
+    const char* failure = nullptr;
+    if (!found) {
+        failure = probe.candidates == 0 ? "USB device not found in libusb enumeration" :
+            probe.opened == 0 ? "Cannot open USB device candidates" :
+            probe.serials == 0 ? "Cannot read USB device serial" :
+            "Cannot identify selected USB device among libusb candidates";
+    } else if (!info.can_open) failure = "Cannot open selected USB device";
+    else if (!info.active_configuration_known) failure = "Cannot read selected USB configuration";
+    if (failure) {
+        const auto message = std::format("{}; candidates={} opened={} serials_read={}; {}",
+            failure, probe.candidates, probe.opened, probe.serials, probe.last_failure);
+        logging::write(logging::Level::Error, "usb_probe", message);
+        throw std::runtime_error(message);
+    }
+    logging::write(std::format("usb_probe result=ready device={} configuration={}",
+        logging::fingerprint(serial), info.active_configuration));
+    return info;
 }
 
 std::optional<AppleUsbDevice> find_libusb0_device(

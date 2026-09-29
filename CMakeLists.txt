@@ -16,9 +16,10 @@ add_library(AudioCoreImpl STATIC
   ${CORE}/Media/CoreMedia.cpp ${CORE}/Transport/Socket.cpp ${CORE}/Transport/UsbMuxClient.cpp
   ${CORE}/Transport/LibUsb0Transport.cpp ${CORE}/Device/AppleUsbDiscovery.cpp
   ${CORE}/Logging.cpp ${CORE}/Device/DeviceCatalog.cpp
+  ${CORE}/Device/UsbDeviceRepair.cpp ${CORE}/Device/UsbRepairClient.cpp
   ${CORE}/Wasapi/WasapiOutput.cpp ${CORE}/Capture/UsbAudioSource.cpp ${CORE}/Engine/AudioEngine.cpp)
 target_include_directories(AudioCoreImpl PUBLIC src/AudioCore/include ${CORE} "${USB}/include")
-target_link_libraries(AudioCoreImpl PUBLIC ws2_32 bcrypt setupapi cfgmgr32 advapi32 ole32 avrt propsys
+target_link_libraries(AudioCoreImpl PUBLIC ws2_32 bcrypt setupapi cfgmgr32 advapi32 ole32 avrt propsys shell32
   "${USB}/lib/x64/libusb0-dynamic.lib")
 add_library(AudioCore SHARED ${CORE}/AudioCore.cpp)
 target_compile_definitions(AudioCore PRIVATE AUDIOCORE_EXPORTS)
@@ -27,6 +28,10 @@ target_link_options(AudioCore PRIVATE /DELAYLOAD:libusb0.dll)
 add_executable(AudioBridge.UsbRestore src/AudioBridge.UsbRestore/main.cpp)
 target_include_directories(AudioBridge.UsbRestore PRIVATE ${CORE} "${USB}/include")
 target_link_libraries(AudioBridge.UsbRestore PRIVATE cfgmgr32 "${USB}/lib/x64/libusb0-dynamic.lib")
+add_executable(AudioBridge.UsbRepair src/AudioBridge.UsbRepair/main.cpp
+  ${CORE}/Device/UsbDeviceRepair.cpp ${CORE}/Device/AppleUsbDiscovery.cpp)
+target_include_directories(AudioBridge.UsbRepair PRIVATE ${CORE})
+target_link_libraries(AudioBridge.UsbRepair PRIVATE setupapi cfgmgr32 advapi32)
 add_executable(AudioProbe tools/AudioProbe/main.cpp)
 target_link_libraries(AudioProbe PRIVATE AudioCore AudioCoreImpl)
 target_include_directories(AudioProbe PRIVATE src/AudioCore/include)
@@ -57,7 +62,8 @@ if(AB_BUILD_ZL)
   add_custom_target(ZLBridge.Runtime ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${USB}/bin/x64/libusb0.dll" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:AudioBridge.UsbRestore>" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
-    DEPENDS ZLCompressor_Standalone AudioBridge.UsbRestore)
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:AudioBridge.UsbRepair>" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
+    DEPENDS ZLCompressor_Standalone AudioBridge.UsbRestore AudioBridge.UsbRepair)
   add_test(NAME ZLBridge.Dsp COMMAND ZLCompressor_Standalone --self-test --result "${CMAKE_BINARY_DIR}/zl-self-test.json")
   set_tests_properties(ZLBridge.Dsp PROPERTIES TIMEOUT 60)
 endif()

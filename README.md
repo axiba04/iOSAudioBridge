@@ -9,9 +9,9 @@ iPhone USB → QuickTime 仅音频握手 → PCM16 / 48 kHz / Stereo
 
 ## 运行
 
-仓库附带已构建的 [Windows x64 程序及运行依赖](dist/ZLUsbAudioBridge/) 和 [驱动离线安装包](dist/DriverInstallKit-x64-1.4.0.2.zip)。克隆或下载仓库后即可使用；驱动 ZIP 需完整解压后按安装说明操作。
+预编译程序通过 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 分发：下载 [Windows x64 程序及运行依赖](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.2/ZLUsbAudioBridge-v0.2.0-preview.2-win-x64.zip) 和 [驱动离线安装包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.2/DriverInstallKit-x64-1.4.0.2.zip)。完整解压后使用；驱动按包内说明安装。仓库保留源码与构建材料，`dist/` 为本地构建输出，不再提交。
 
-运行 `dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe`，保留同目录的 `AudioBridge.UsbRestore.exe`、`libusb0.dll` 和许可证文件。
+运行解压后的 `ZLUsbAudioBridge/ZLUsbAudioBridge.exe`（自行构建时位于 `dist/` 下），保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll` 和许可证文件。
 
 1. 沿用已验证的 Apple USB 支持与 libusb-win32 filter，连接手机、解锁并信任电脑；关闭其他占用同一手机的程序。
 2. 刷新并选择手机和输出设备，点击“开始监听”。每次启动默认静音、监听音量 50%；需要出声时手动解除静音。
@@ -19,6 +19,8 @@ iPhone USB → QuickTime 仅音频握手 → PCM16 / 48 kHz / Stereo
 4. 停止或关闭窗口后等待 USB 恢复完成。手机暂停播放时保持连接，恢复播放后自动继续。
 
 iPad 停止后无法重新连接的问题已加入自动恢复，触发补救时可能需要约 25 秒，见[修复与实机验证](docs/usb-restore-ipad-fix.zh-CN.md)。
+
+换机后连接失败、退出重开仍无效时，可在停止状态选择故障手机，点击“修复 USB”，按 Windows 提示授权。程序只重启所选手机的设备节点，并验证 USB 通信；成功后手动开始监听。驱动检查 `READY` 只表示安装与设备登记通过，不能替代实际通信测试。见[连接诊断与手动恢复](docs/usb-device-repair.zh-CN.md)。
 
 详细操作、预设、日志和静音诊断入口见[使用与构建](docs/zl-bridge-running.zh-CN.md)。
 

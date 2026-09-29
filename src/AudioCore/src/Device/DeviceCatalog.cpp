@@ -1,5 +1,7 @@
 #include "Device/DeviceCatalog.h"
 #include "Device/AppleUsbDiscovery.h"
+#include "Device/UsbDeviceRepair.h"
+#include "Logging.h"
 #include "Transport/UsbMuxClient.h"
 #include "Wasapi/WinAudio.h"
 #include <functiondiscoverykeys_devpkey.h>
@@ -24,7 +26,8 @@ std::string narrow(std::wstring_view text) {
 std::vector<AB_Device> list_phones() {
     using namespace iPhoneMirror;
     std::vector<AB_Device> result;
-    if(!transport::Socket::probe_loopback(27015)) return result;
+    try {
+    if(transport::Socket::probe_loopback(27015)) {
     transport::UsbMuxClient mux(27015);
     for(const auto& d:mux.list_devices()) {
         if(d.connection_type!="USB" || !device::is_apple_mobile_capture_product_id(d.product_id)) continue;
@@ -49,6 +52,22 @@ std::vector<AB_Device> list_phones() {
                 if(auto v=values->find("ProductVersion")) copy_text(entry.os,widen(v->string_or()));
             }
         } catch(...) { /* Presence remains visible while locked/untrusted. */ }
+        result.push_back(entry);
+    }
+    }
+    } catch(const std::exception& error) {
+        logging::write(std::string("device_discovery usbmux_failed error=")+error.what());
+    }
+    // Keep physically present phones selectable for explicit repair even if
+    // Apple discovery has lost their management interfaces. Do not probe USB
+    // handles or change configuration while refreshing the list.
+    for(const auto& target:list_usb_repair_targets()) {
+        const auto found=std::any_of(result.begin(),result.end(),[&](const auto& entry){
+            return device::apple_usb_parent_instance_matches_serial(target.instance_id,narrow(entry.id));
+        });
+        if(found || target.serial.size()>=std::size(AB_Device{}.id)) continue;
+        AB_Device entry{};copy_text(entry.id,widen(target.serial));
+        copy_text(entry.name,target.name+L"（USB 待检查）");
         result.push_back(entry);
     }
     return result;

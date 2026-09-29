@@ -6,6 +6,10 @@
 #include "Capture/UsbConfigurationRestorePolicy.h"
 #include "Capture/UsbRestoreReconnectPolicy.h"
 #include "Capture/AudioStopDrainPolicy.h"
+#include "Device/UsbDeviceRepair.h"
+#include "Device/UsbDeviceLease.h"
+#include "Device/UsbRepairVerification.h"
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -156,5 +160,48 @@ void stop_drain_tests(){
     P stopped(start,true,false);P stopped_legacy(start,true,true);
     require(stopped.finished(start+250ms,false,true) && !stopped_legacy.finished(start+999ms,false,true) && stopped_legacy.finished(start+1s,false,true),"Already-stopped peer timing");
 }
+void usb_repair_tests(){
+    using namespace audiobridge;
+    const UsbRepairTarget first{L"USB\\VID_05AC&PID_12A8\\000081300011223344556677","00008130-0011223344556677",L"Phone A"};
+    const UsbRepairTarget second{L"USB\\VID_05AC&PID_12AB\\000081300011223344556688","000081300011223344556688",L"Phone B"};
+    require(valid_usb_repair_target(first)&&valid_usb_repair_target(second),"Exact supported composite parents are repairable");
+    const std::array targets{first,second};
+    require(select_usb_repair_target(targets,second.serial).instance_id==second.instance_id,"Repair must select B even when A is enumerated first");
+    require(select_usb_repair_target(targets,"000081300011223344556677").instance_id==first.instance_id,"USB and USBMux serial formats identify the same phone");
+    rejects([&]{(void)select_usb_repair_target(std::span(targets).subspan(1),first.serial);});
+    const std::array duplicates{first,first};
+    rejects([&]{(void)select_usb_repair_target(duplicates,first.serial);});
+    for(const auto& bad_id:{
+        L"USB\\VID_05AC&PID_110A\\000081300011223344556677",
+        L"USB\\VID_1234&PID_12A8\\000081300011223344556677",
+        L"USB\\VID_05AC&PID_12A8&MI_00\\000081300011223344556677",
+        L"USB\\VID_05AC&PID_12A8\\000081300011223344556688",
+        L"USB\\VID_05AC&PID_12A8\\000081300011223344556677\"",
+        L"USB\\VID_05AC&PID_12A8\\000081300011223344556677*"}) {
+        require(!valid_usb_repair_target({bad_id,first.serial,{}}),"Refuse accessories, non-Apple parents, children, mismatches and wildcard/quoted targets");
+    }
+    require(!valid_usb_repair_target({first.instance_id,"",{}}),"Unknown serial must not authorize restart");
+    require(restart_usb_device_node({first.instance_id,"wrong",{}})==ERROR_INVALID_PARAMETER,"Invalid target must be rejected before any Windows operation");
+    UsbRepairVerification readiness;
+    require(!readiness.observe(true,false)&&!readiness.observe(false,true),"PnP alone or cached USBMux alone is not recovery");
+    require(!readiness.observe(true,true),"One healthy observation is insufficient");
+    require(!readiness.observe(false,false),"Removal resets stability");
+    require(!readiness.observe(true,true)&&readiness.observe(true,true),"Two fresh healthy observations permit I/O verification");
+    require(!readiness.observe(true,false),"Subsequent discovery loss invalidates readiness");
+    // Real Windows mutex contention, using synthetic serials and a second
+    // thread (mutexes are recursive on their owning thread). No device I/O.
+    const auto synthetic="AudioBridgeRepairTest"+std::to_string(GetCurrentProcessId());
+    bool blocked{},other_allowed{};
+    {
+        UsbDeviceLease capture(synthetic);
+        std::jthread contender([&]{
+            try{UsbDeviceLease repair(synthetic);}catch(const std::exception&){blocked=true;}
+            try{UsbDeviceLease other(synthetic+"B");other_allowed=true;}catch(...){}
+        });
+        contender.join();
+    }
+    require(blocked&&other_allowed,"Capture blocks repair of the same phone, not a different phone");
+    UsbDeviceLease after_stop(synthetic);
 }
-int main(){try{protocol_tests();pause_resume_tests();ring_tests();abi_tests();restore_tests();stop_drain_tests();std::cout<<"PASS: framing, audio-only negotiation/teardown, AFMT fallback, PCM validation, SPSC boundaries and 500000-frame concurrency, ABI lifetime/errors, one-shot USB restoration policy, STOP/quiet/late-media/partial-packet/deadline behavior, peer pause/resume vs host teardown\n";return 0;}catch(const std::exception& e){std::cerr<<"FAIL: "<<e.what()<<"\n";return 1;}}
+}
+int main(){try{protocol_tests();pause_resume_tests();ring_tests();abi_tests();restore_tests();stop_drain_tests();usb_repair_tests();std::cout<<"PASS: protocol, PCM, ABI, USB restoration, exact-device repair targeting/exclusion/verification, pause/resume and stop drain\n";return 0;}catch(const std::exception& e){std::cerr<<"FAIL: "<<e.what()<<"\n";return 1;}}

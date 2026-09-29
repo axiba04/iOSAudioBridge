@@ -1,6 +1,7 @@
 # ZL 原版界面 USB 集成：实现与验收
 
 日期：2026-09-24。对应 `zl-standalone-usb-integration-plan.zh-CN.md`。
+2026-09-29 更新：新增“修复 USB”入口与分阶段连接诊断；三组原生/DSP 回归、助手目标拒绝检查和无设备 UI smoke 通过。真实故障恢复、UAC 交互与 A→B→A 换机尚待实机验证，见项目文档 `docs/test-results/2026-09-29-usb-repair/README.zh-CN.md`。
 2026-09-27 更新：iPad 停止后的自动 USB 恢复已修复，连续两轮主程序采集、停止及重新连接通过。触发补救时停止约 23 秒，详见项目文档 `docs/usb-restore-ipad-fix.zh-CN.md`；下方历史验收数据保持原样。
 当前交付为可运行的集成预览版，核心功能覆盖 A–D；尚未满足 A–D 全部交互、异常与实时性验收条目，E 长时间验收未执行。
 

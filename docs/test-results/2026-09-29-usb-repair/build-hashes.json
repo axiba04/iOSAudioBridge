@@ -1,0 +1,22 @@
+[
+  {
+    "file": "AudioBridge.UsbRepair.exe",
+    "bytes": 247296,
+    "sha256": "BA3C4C303FC27E3CCCB9EF4D0757CAAB11DF3FAB097E52AE42E49A01B29A642A"
+  },
+  {
+    "file": "AudioBridge.UsbRestore.exe",
+    "bytes": 524288,
+    "sha256": "7F4EF8DAF93F0A64F94B98B38F84D82680161D3B88B4AC8986ACBF77AA5CBFB5"
+  },
+  {
+    "file": "libusb0.dll",
+    "bytes": 123552,
+    "sha256": "0CD18719D5701E9CC642FC93A83F13830931D6F29F664FEDBDF212BCB7C349BD"
+  },
+  {
+    "file": "ZLUsbAudioBridge.exe",
+    "bytes": 7884288,
+    "sha256": "72619EC84C259677EA97D55344BC85008B93C317960941A682236D91005666CA"
+  }
+]

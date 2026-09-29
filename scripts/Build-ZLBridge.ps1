@@ -30,7 +30,7 @@ New-Item -ItemType Directory -Force -Path $dist | Out-Null
 $app=Get-ChildItem $build -Recurse -Filter ZLUsbAudioBridge.exe | Select-Object -First 1
 if(-not $app){throw 'Standalone executable missing'}
 Copy-Item -LiteralPath $app.FullName -Destination $dist -Force
-foreach($file in 'AudioBridge.UsbRestore.exe','libusb0.dll') {Copy-Item -LiteralPath "$build/bin/$file" -Destination $dist -Force}
+foreach($file in 'AudioBridge.UsbRestore.exe','AudioBridge.UsbRepair.exe','libusb0.dll') {Copy-Item -LiteralPath "$build/bin/$file" -Destination $dist -Force}
 $vendor=Join-Path $root 'third_party/ZLCompressor'
 $licenses=Join-Path $dist 'licenses'
 New-Item -ItemType Directory -Force $licenses | Out-Null
@@ -55,6 +55,7 @@ Copy-Item -LiteralPath "$root/THIRD_PARTY_NOTICES.md","$root/third_party/ZLCompr
 Copy-Item -LiteralPath "$root/docs/zl-bridge-running.zh-CN.md" -Destination "$dist/README.zh-CN.md" -Force
 Copy-Item -LiteralPath "$root/docs/zl-bridge-validation.zh-CN.md" -Destination "$dist/VALIDATION.zh-CN.md" -Force
 Copy-Item -LiteralPath "$root/docs/driver-upgrade-evaluation.zh-CN.md" -Destination $dist -Force
+Copy-Item -LiteralPath "$root/docs/usb-device-repair.zh-CN.md" -Destination $dist -Force
 $driverEvidence=Join-Path $dist 'test-results/2026-09-24-driver-upgrade'
 New-Item -ItemType Directory -Force -Path $driverEvidence | Out-Null
 Copy-Item -LiteralPath "$root/docs/test-results/2026-09-24-driver-upgrade/summary.json" -Destination $driverEvidence -Force
