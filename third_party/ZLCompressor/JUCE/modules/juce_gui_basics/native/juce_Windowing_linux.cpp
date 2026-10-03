@@ -288,15 +288,27 @@ public:
         return XWindowSystem::getInstance()->contains (windowH, localPos * getPlatformScaleFactor());
     }
 
+    bool shouldDeferFocusToEmbedder() const noexcept
+    {
+        const auto style = getStyleFlags();
+        return parentWindow != 0
+            && (style & ComponentPeer::windowIgnoresKeyPresses) != 0
+            && (style & ComponentPeer::windowIsTemporary) == 0;
+    }
+
     void toFront (bool makeActive) override
     {
         if (makeActive)
-        {
             setVisible (true);
-            grabFocus();
+
+        if (! shouldDeferFocusToEmbedder())
+        {
+            if (makeActive)
+                grabFocus();
+
+            XWindowSystem::getInstance()->toFront (windowH, makeActive);
         }
 
-        XWindowSystem::getInstance()->toFront (windowH, makeActive);
         handleBroughtToFront();
     }
 
@@ -323,16 +335,6 @@ public:
 
     void grabFocus() override
     {
-        const auto style = getStyleFlags();
-
-        const auto shouldDeferToEmbedder =
-            parentWindow != 0
-            && (style & ComponentPeer::windowIgnoresKeyPresses) != 0
-            && (style & ComponentPeer::windowIsTemporary) == 0;
-
-        if (shouldDeferToEmbedder)
-            return;
-
         if (XWindowSystem::getInstance()->grabFocus (windowH))
             isActiveApplication = true;
     }

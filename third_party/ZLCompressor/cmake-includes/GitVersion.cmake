@@ -1,7 +1,9 @@
 # Read version from git tag and write it to VERSION file
-find_package(Git)
+if (NOT DEFINED FOOBAR_VERSION OR NOT DEFINED FOOBAR_HASH)
+    find_package(Git)
+endif ()
 
-if (GIT_EXECUTABLE)
+if (GIT_EXECUTABLE AND NOT DEFINED FOOBAR_VERSION)
     # Generate a git-describe version string from Git repository tags
     execute_process(
             COMMAND ${GIT_EXECUTABLE} describe --tags --abbrev=0
@@ -14,6 +16,9 @@ if (GIT_EXECUTABLE)
         set(FOOBAR_VERSION ${GIT_DESCRIBE_VERSION})
         message(STATUS "Using the version \"${FOOBAR_VERSION}\".")
     endif ()
+endif ()
+
+if (GIT_EXECUTABLE AND NOT DEFINED FOOBAR_HASH)
     execute_process(
             COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"

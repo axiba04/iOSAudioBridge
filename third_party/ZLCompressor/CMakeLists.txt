@@ -261,3 +261,10 @@ target_link_libraries("${PROJECT_NAME}" PRIVATE SharedCode)
 # Pass some config to GA (like our PRODUCT_NAME)
 include(GitHubENV)
 
+# Refresh Windows version resources when the pinned upstream version changes.
+if(WIN32)
+    get_target_property(zl_generated_sources ${PROJECT_NAME} JUCE_GENERATED_SOURCES_DIRECTORY)
+    get_target_property(zl_info_file ${PROJECT_NAME} JUCE_INFO_FILE)
+    add_custom_command(OUTPUT "${zl_generated_sources}/${PROJECT_NAME}_resources.rc"
+        APPEND DEPENDS "${zl_info_file}")
+endif()

@@ -658,13 +658,19 @@ struct MenuWindow final : public Component, private AsyncUpdater
         if (! isShowing())
             return;
 
-        auto* accessibleFocus = std::invoke ([this]
+        auto* accessibleFocus = std::invoke ([this]() -> AccessibilityHandler*
         {
             if (currentChild != nullptr)
                 if (auto* childHandler = currentChild->getAccessibilityHandler())
                     return childHandler;
 
-            return getAccessibilityHandler();
+            if (auto* handler = getAccessibilityHandler())
+            {
+                const auto children = handler->getChildren();
+                return children.empty() ? handler : children.front();
+            }
+
+            return nullptr;
         });
 
         if (accessibleFocus != nullptr)
@@ -1563,7 +1569,18 @@ private:
 
         const auto reallyContained = window.reallyContains (localMousePos, true);
 
-        if (! window.doesAnyJuceCompHaveFocus() && ! reallyContained)
+        const auto dismissOnAppChange = [&]
+        {
+           #if JUCE_LINUX || JUCE_BSD
+            if (window.options.getParentComponent() != nullptr)
+                if (auto* peer = window.getPeer())
+                    if ((peer->getStyleFlags() & ComponentPeer::windowIgnoresKeyPresses) != 0)
+                        return false;
+           #endif
+            return true;
+        }();
+
+        if (dismissOnAppChange && ! window.doesAnyJuceCompHaveFocus() && ! reallyContained)
         {
             if (timeNow > window.lastFocusedTime + 10)
             {

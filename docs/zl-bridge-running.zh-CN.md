@@ -10,7 +10,7 @@
 
 1. 沿用这台机器已验证的 Apple USB 支持与 libusb-win32 filter；本程序不安装驱动。
 2. 连接并解锁手机，退出其他监听程序；刷新并选择手机、输出设备。
-3. 选齐设备后点击“开始监听”。未检测到手机或音频输出时，下拉框显示明确提示，“开始监听”不可用。首次打开及每次重启均默认静音，监听音量为 50%。主界面保留“静音输出”；点击“高级设置”可在底部展开“监听音量”和诊断信息，收起面板不会改变音量。它只调节本软件最终输出，不改变 Windows 音量。解除静音由使用者手动操作；自动验收始终静音。
+3. 选齐设备后点击“开始监听”。未检测到手机或音频输出时，下拉框显示明确提示，“开始监听”不可用。首次打开及每次重启均默认非静音，监听音量为 50%；需要静音时勾选主界面的“静音输出”。点击“高级设置”可在底部展开“监听音量”和诊断信息，收起面板不会改变音量。它只调节本软件最终输出，不改变 Windows 音量。自动验收始终静音。
 4. 原版 Threshold、Ratio、Attack、Release、Knee、Makeup 可实时调整。原版曲线/电平显示处理器的信号；高级设置中的“设备输出”是最终音量和静音后的电平。因此静音时原版分析器仍有输入。
 5. 手机暂停播放会保持 USB，恢复后重新预填充缓冲。常规运行没有定时停止；断线或输出失败会结束会话并显示原因。
 6. 点击停止或关闭窗口后等待 USB 恢复完成。部分 iPad 在切回普通配置后仍需一次自动重新枚举，停止可能需要约 25 秒；看到“已停止，USB 已释放”后即可再次连接。修复说明见项目文档 `docs/usb-restore-ipad-fix.zh-CN.md`。
@@ -45,13 +45,13 @@ Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版
 ./scripts/Build-ZLBridge.ps1
 ```
 
-仓库已包含 ZL 及其依赖的源码快照和集成修改，无需额外克隆或应用补丁。
+仓库已包含 ZLCompressor 0.6.1、JUCE 9.0.2 及其余依赖的源码快照和集成修改，无需额外克隆或应用补丁。
 准备脚本检查源码是否齐全；缺少 LLVM 时使用 curl、7z 下载 LLVM 22.1.0，校验压缩包 SHA-256 后仅解压到 `.tools`，不执行安装器或修改系统 PATH。
-构建脚本默认使用本机 `D:/GreenSoftware/iPhoneMirror-v1.8.3-win-x64/audio-only-work` 内的 MSVC/SDK、Ninja、CMake；其他机器需通过 `-ToolRoot` 提供相同目录结构。
+构建脚本默认使用本机 `D:/GreenSoftware/iPhoneMirror/audio-only-work` 内的 MSVC/SDK、Ninja、CMake；其他机器需通过 `-ToolRoot` 提供相同目录结构。升级依赖或移动工具链目录后，使用 `./scripts/Build-ZLBridge.ps1 -Fresh` 重新生成 CMake 配置。
 固定版本见 `third_party/ZLCompressor.pins.json`。Clang 编译使用 MSVC STL 和 Windows SDK；C++20、SSE2、静态 CRT。
 
 构建目录为 `build/zl-bridge`，本地发布目录为 `dist/ZLUsbAudioBridge`。`dist/` 不纳入 Git，预编译程序和驱动 ZIP 作为 Release 附件分发。
-默认执行 Native、PCM 适配和 ZL DSP 三组回归；合成 DSP 检查不打开音频端点、不连接 USB。
+默认执行 Native、PCM 适配和 ZL DSP 三组回归；合成 DSP 检查不打开音频端点、不连接 USB，包含 Normal→High→Normal 的 FFT 历史缓冲切换、频率/幅度检查和零 DSP 延迟检查。
 发布目录包含依赖许可和来源清单。对外分发时需同时提供本项目对应源码、固定依赖及构建材料，不能只发 EXE。
 
 ## 静音诊断入口

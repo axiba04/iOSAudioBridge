@@ -51,7 +51,7 @@ public:
             volume_.setVisible(open);volume_label_.setVisible(open);volume_hint_.setVisible(open);diagnostics_.setVisible(open);
             resized();repaint();
         };
-        mute_.setToggleState(true,juce::dontSendNotification);
+        mute_.setToggleState(false,juce::dontSendNotification);
         status_.setJustificationType(juce::Justification::centredLeft);
         syncTheme();
         start_.setEnabled(false);stop_.setEnabled(false);repair_.setEnabled(false);

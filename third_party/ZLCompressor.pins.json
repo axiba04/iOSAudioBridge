@@ -1,7 +1,7 @@
 {
-  "date": "2026-09-24",
-  "ZLCompressor": { "url": "https://github.com/ZL-Audio/ZLCompressor.git", "commit": "0e19ffcf3dcf7304ca2f650cd28267959bd40a21", "patch": "ZLCompressor.bridge.patch" },
-  "JUCE": { "url": "https://github.com/ZL-Audio/JUCE.git", "commit": "74c3b9a218f8552c7f33e176755d9020adcdb384" },
+  "date": "2026-10-03",
+  "ZLCompressor": { "url": "https://github.com/ZL-Audio/ZLCompressor.git", "version": "0.6.1", "commit": "6d8c79cff62b42b1d5e4cf60c8eda2ca90b7e938", "patch": "ZLCompressor.bridge.patch" },
+  "JUCE": { "url": "https://github.com/ZL-Audio/JUCE.git", "commit": "e66b82515320d92a2224651f8ecc1c888a8ec3d8" },
   "highway": { "url": "https://github.com/ZL-Audio/highway.git", "commit": "2607d3b5b0113992fe84d3848859eae13b3b52c1" },
   "zldsp_fft": { "url": "https://github.com/ZL-Audio/zldsp_fft.git", "commit": "b741fb7ac6ecdb9ea935730aa34fa89602f3e52f" },
   "toolchain": { "clang_cl": "22.1.0", "msvc_stl": "14.51.36231", "windows_sdk": "10.0.28000.0", "cmake": "3.31.8", "configuration": "Release / x64 / SSE2 / static CRT" },

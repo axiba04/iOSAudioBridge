@@ -1,8 +1,12 @@
 #include "SelfTests.h"
 #include "Wasapi/WasapiOutput.h"
 #include "Device/DeviceCatalog.h"
+#include "dsp/analyzer/fft_analyzer/fft_analyzer_receiver.hpp"
+#include <algorithm>
 #include <cstdlib>
 #include <new>
+#include <numbers>
+#include <vector>
 #include <malloc.h>
 
 namespace {
@@ -11,6 +15,42 @@ thread_local size_t traced_allocations=0;
 void record() noexcept {if(trace_allocations)++traced_allocations;}
 void require(bool result,const char* message){if(!result)throw std::runtime_error(message);}
 struct Trace {Trace(){trace_allocations=true;}~Trace(){trace_allocations=false;}};
+
+void checkFftHistoryModes() {
+    using namespace zldsp::analyzer;
+    FFTAnalyzerProcessor middle,large,small;
+    middle.prepare(12);large.prepare(14);small.prepare(10);
+    FFTAnalyzerReceiver receiver(middle);
+    receiver.setON(true);
+    // Reproduce Normal -> High -> Normal at 48 kHz, including a wrapped FIFO read.
+    // A 750 Hz sine lands exactly on a bin for each of the three FFT sizes.
+    for(const size_t history_size:{size_t(4096),size_t(16384),size_t(4096)}) {
+        receiver.prepare(2,history_size);
+        receiver.forward(StereoType::kStereoLR);
+        for(const float power:receiver.getAbsSqrFFTBuffer())
+            require(power==0.f,"FFT history retained samples after a quality switch");
+        std::vector<std::vector<float>> fifo(2,std::vector<float>(history_size));
+        for(size_t i=0;i<history_size;++i) {
+            const auto value=.4f*static_cast<float>(std::sin(2.0*std::numbers::pi*static_cast<double>(i)/64.0));
+            const auto index=(i+13)%history_size;
+            fifo[0][index]=value;fifo[1][index]=value*.5f;
+        }
+        zldsp::container::FIFORange range{};
+        range.start_index1=13;range.block_size1=static_cast<int>(history_size)-13;
+        range.start_index2=0;range.block_size2=13;
+        receiver.pull(range,fifo);receiver.pull(range,fifo);
+        for(auto* fft:{&middle,&large,&small}) {
+            if(history_size==4096 && fft!=&middle)continue;
+            std::vector<float> spectrum(fft->getFFTSize()/2+1);
+            receiver.forward(*fft,StereoType::kStereoLR,spectrum);
+            for(const float power:spectrum)require(std::isfinite(power)&&power>=0.f,"Invalid FFT power");
+            const auto peak=static_cast<size_t>(std::max_element(spectrum.begin(),spectrum.end())-spectrum.begin());
+            require(peak==fft->getFFTSize()/64,"FFT quality switch changed the detected frequency");
+            // Normalized Hann window: (0.4 / 2)^2 + (0.2 / 2)^2 = 0.05.
+            require(std::abs(spectrum[peak]-.05f)<.0001f,"FFT quality switch changed the measured level");
+        }
+    }
+}
 }
 // Diagnostic counters are disabled except around self-test processing calls.
 // Covers C++ new (including aligned new), not direct malloc in third-party code.
@@ -29,6 +69,11 @@ void operator delete[](void* p,std::size_t,std::align_val_t) noexcept {_aligned_
 
 juce::var runZlSelfTests(PluginProcessor& processor,ZlProcessorAdapter& adapter) {
     auto* result=new juce::DynamicObject;juce::var owned(result);
+    result->setProperty("zl_version",ZL_PLUGIN_CURRENT_VERSION);
+    result->setProperty("zl_commit",ZL_PLUGIN_CURRENT_HASH);
+    result->setProperty("juce_version",juce::SystemStats::getJUCEVersion());
+    checkFftHistoryModes();
+    result->setProperty("fft_history_normal_high_normal",true);
     std::array<float,4097> left{},right{};
     auto process=[&](size_t count){Trace trace;return adapter.process(left.data(),right.data(),count);};
     ZlProcessorAdapter::set(processor,"comp_on",0);adapter.prepare(48000,4096);
@@ -96,6 +141,8 @@ juce::var runZlSelfTests(PluginProcessor& processor,ZlProcessorAdapter& adapter)
     require(deferred,"Full state loading did not use the bridge coordinator");
     result->setProperty("preset_constraints",true);result->setProperty("state_load_deferred",true);
     ZlProcessorAdapter::gamePreset(processor);adapter.prepare(48000,4096);
+    require(processor.getLatencySamples()==0,"Bridge DSP introduced latency");
+    result->setProperty("dsp_latency_samples",processor.getLatencySamples());
     result->setProperty("passed",true);result->setProperty("allocation_coverage","C++ new only; direct malloc not instrumented");
     return owned;
 }

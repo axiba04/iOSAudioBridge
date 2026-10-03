@@ -60,10 +60,11 @@ remain intact. The combined application follows the AGPL source distribution
 path; the existing backend retains its GPL notices.
 
 - ZLCompressor: https://github.com/ZL-Audio/ZLCompressor, AGPL-3.0.
-  Commit `0e19ffcf3dcf7304ca2f650cd28267959bd40a21`.
-- JUCE: pinned ZL-Audio fork commit `74c3b9a218f8552c7f33e176755d9020adcdb384`.
+  Version 0.6.1, commit `6d8c79cff62b42b1d5e4cf60c8eda2ca90b7e938`, updated 2026-10-03.
+- JUCE: version 9.0.2, pinned ZL-Audio fork commit `e66b82515320d92a2224651f8ecc1c888a8ec3d8`.
   The actual submodule `JUCE/LICENSE.md` is copied, using its AGPL option.
   The stale top-level ZL copy of JUCE's license is not used for packaging.
+  Its dependency inventory `JUCE.spdx.json` is also included in the package.
 - Highway: `2607d3b5b0113992fe84d3848859eae13b3b52c1`, Apache-2.0.
 - zldsp_fft: `b741fb7ac6ecdb9ea935730aa34fa89602f3e52f`, Apache-2.0,
   header-only, depends on Highway; no further git submodules found.
@@ -78,7 +79,7 @@ path; the existing backend retains its GPL notices.
 The source checkout is `third_party/ZLCompressor/`; exact pins are in
 `third_party/ZLCompressor.pins.json` and local changes are exported in
 `third_party/ZLCompressor.bridge.patch`. Changes rename the product, fix embedded
-version lookup, constrain latency settings/state loading and provide a hidden
+version lookup using the dependency pins, constrain latency settings/state loading and provide a hidden
 editor test refresh hook. Root CMake provides the custom Standalone entry point.
 The complete project source plus these pinned dependency checkouts and build
 scripts are the corresponding source material; license files alone are not a

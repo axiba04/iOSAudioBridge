@@ -273,8 +273,10 @@ namespace zlgui {
         is_slider_double_click_open_editor_.store(loadPara(zlstate::PSliderDoubleClickFunc::kID) > .5f);
         refresh_rate_id_.store(
             static_cast<size_t>(std::round(state.getRawParameterValue(zlstate::PTargetRefreshSpeed::kID)->load())));
+        fft_quality_.store(static_cast<size_t>(std::round(loadPara(zlstate::PFFTQuality::kID))));
         fft_extra_tilt_.store(loadPara(zlstate::PFFTExtraTilt::kID));
         fft_extra_speed_.store(loadPara(zlstate::PFFTExtraSpeed::kID));
+        combobox_alignment_.store(static_cast<size_t>(std::round(loadPara(zlstate::PComboboxAlignment::kID))));
         mag_curve_thickness_.store(loadPara(zlstate::PMagCurveThickness::kID));
         eq_curve_thickness_.store(loadPara(zlstate::PEQCurveThickness::kID));
         tooltip_lang_id_.store(
@@ -324,8 +326,11 @@ namespace zlgui {
                  static_cast<float>(is_slider_double_click_open_editor_.load(std::memory_order::relaxed)));
         savePara(zlstate::PTargetRefreshSpeed::kID,
                  static_cast<float>(refresh_rate_id_.load(std::memory_order::relaxed)));
+        savePara(zlstate::PFFTQuality::kID, static_cast<float>(fft_quality_.load(std::memory_order::relaxed)));
         savePara(zlstate::PFFTExtraTilt::kID, fft_extra_tilt_.load(std::memory_order::relaxed));
         savePara(zlstate::PFFTExtraSpeed::kID, fft_extra_speed_.load(std::memory_order::relaxed));
+        savePara(zlstate::PComboboxAlignment::kID,
+                 static_cast<float>(combobox_alignment_.load(std::memory_order::relaxed)));
         savePara(zlstate::PMagCurveThickness::kID, mag_curve_thickness_.load(std::memory_order::relaxed));
         savePara(zlstate::PEQCurveThickness::kID, eq_curve_thickness_.load(std::memory_order::relaxed));
         savePara(zlstate::PTooltipLang::kID, static_cast<float>(tooltip_lang_id_));

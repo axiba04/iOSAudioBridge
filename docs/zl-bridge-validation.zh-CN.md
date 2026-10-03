@@ -1,11 +1,12 @@
 # ZL 原版界面 USB 集成：实现与验收
 
 日期：2026-09-24。对应 `zl-standalone-usb-integration-plan.zh-CN.md`。
+2026-10-03 更新：升级至 ZLCompressor 0.6.1 / JUCE 9.0.2，桥接补丁保留；构建、三组回归、无设备界面检查与静音 WASAPI 暂停/恢复通过，详见下方本轮验收。
 2026-09-29 更新：新增“修复 USB”入口与分阶段连接诊断；三组原生/DSP 回归、助手目标拒绝检查和无设备 UI smoke 通过。真实故障恢复、UAC 交互与 A→B→A 换机尚待实机验证，见项目文档 `docs/test-results/2026-09-29-usb-repair/README.zh-CN.md`。
 2026-09-27 更新：iPad 停止后的自动 USB 恢复已修复，连续两轮主程序采集、停止及重新连接通过。触发补救时停止约 23 秒，详见项目文档 `docs/usb-restore-ipad-fix.zh-CN.md`；下方历史验收数据保持原样。
 当前交付为可运行的集成预览版，核心功能覆盖 A–D；尚未满足 A–D 全部交互、异常与实时性验收条目，E 长时间验收未执行。
 
-后续界面更新：音量滑块已移入默认收起的“高级设置”，命名为“监听音量”；默认 50%，主界面保留静音。此项不改变音频处理链。下方手机短测与哈希仍对应当时的集成构建，当前包哈希见发布目录 `build-hashes.json`。
+后续界面更新：音量滑块已移入默认收起的“高级设置”，命名为“监听音量”；默认 50%，主界面保留静音。2026-10-03 升级完成后，常规启动改为默认非静音，自动验收仍强制静音。该改动后的最终构建三组回归全部通过，证据见 [构建日志](test-results/2026-10-03-zl-0.6.1/default-unmuted-build.log)、[CTest 日志](test-results/2026-10-03-zl-0.6.1/default-unmuted-ctest.log)、[DSP 结果](test-results/2026-10-03-zl-0.6.1/default-unmuted-dsp.json)与[二进制哈希](test-results/2026-10-03-zl-0.6.1/default-unmuted-build-hashes.json)。下方 UI/WASAPI 测试数据与截图仍对应调整前的构建；当前包哈希也见发布目录 `build-hashes.json`。
 
 ## 实际链路与改动
 
@@ -30,6 +31,22 @@ iPhone → 原仅音频 USB 协议 → UsbAudioSource → PcmPipe / SPSC
 新增应用按 AGPL-3.0 提供，来源和各组件许可见根目录 `THIRD_PARTY_NOTICES.md`。
 
 ## 已完成测试
+
+### 2026-10-03：ZLCompressor 0.6.1 升级
+
+本轮原始证据：[汇总](test-results/2026-10-03-zl-0.6.1/summary.json)、[构建日志](test-results/2026-10-03-zl-0.6.1/build.log)、[CTest 日志](test-results/2026-10-03-zl-0.6.1/ctest.log)、[二进制哈希](test-results/2026-10-03-zl-0.6.1/build-hashes.json)。
+
+- ZLCompressor 固定到 `6d8c79cff62b42b1d5e4cf60c8eda2ca90b7e938`，JUCE 固定到 `e66b82515320d92a2224651f8ecc1c888a8ec3d8`。Highway 和 zldsp_fft 保持 0.6.1 的原固定提交；未引入该版本之后的电平表布局改动。
+- JUCE 4,840 个普通文件与固定提交逐项核对通过（允许 Git 检出造成的 CRLF/LF 差异）；桥接补丁重新基于 0.6.1 导出，反向检查通过。
+- 从依赖清单读取 ZL 版本/提交号，补全 Windows 资源生成对版本信息的依赖。最终 EXE 的 FileVersion、ProductVersion 和 ZL 运行时版本均为 `0.6.1`，运行时 JUCE 为 `9.0.2`。
+- Release/x64/SSE2 构建完成，AudioCore.Tests、PcmProcessing.Tests、ZLBridge.Dsp 三组通过。[DSP 结果](test-results/2026-10-03-zl-0.6.1/dsp.json)确认压缩输出 −15.00515 dB、600 次参数切换输出有限、处理期间 C++ new 计数 0、预设低延迟约束与延后加载通过、DSP 延迟 0 帧。
+- 新增 FFT 历史缓冲回归：48 kHz / 750 Hz 合成信号经过 Normal→High→Normal 对应的 4096→16384→4096 历史缓冲切换；覆盖 FIFO 回绕读取、清空旧历史、High 模式三种 FFT 长度的频率/幅度一致性。这不是完整 GUI 设置交互测试。
+- [实际无手机 UI](test-results/2026-10-03-zl-0.6.1/ui.json)和[模拟无任何设备 UI](test-results/2026-10-03-zl-0.6.1/ui-empty.json)均通过，含合成信号分析器绘制、展开高级设置和 1000×780 最小窗口；无手机时“开始监听”“修复 USB”禁用。[默认窗口](test-results/2026-10-03-zl-0.6.1/ui.png)与[最小窗口](test-results/2026-10-03-zl-0.6.1/ui-empty-minimum.png)已检查。
+- [静音 WASAPI 测试](test-results/2026-10-03-zl-0.6.1/wasapi.json)：3 次暂停/恢复，处理 410,528 帧，欠载 0、缺失帧 0，period 480 帧，最大处理段 112 μs。
+
+本轮未连接手机采集，未进行有声听感或长时间稳定性测试；不能用合成测试替代这些验收。下方保留 2026-09-24 的历史数据。
+
+### 2026-09-24：初次集成
 
 原始结果目录：`docs/test-results/2026-09-24-zl-integration/`。
 

@@ -495,6 +495,15 @@ namespace zlstate {
         static constexpr int kDefaultI = 3;
     };
 
+    class PFFTQuality : public ChoiceParameters<PFFTQuality> {
+    public:
+        static constexpr auto kID = "fft_quality";
+        static constexpr auto kName = "";
+        inline static const auto kChoices = juce::StringArray{"Normal", "High"};
+        enum { kNormal, kHigh };
+        static constexpr int kDefaultI = kNormal;
+    };
+
     class PFFTExtraTilt : public FloatParameters<PFFTExtraTilt> {
     public:
         static constexpr auto kID = "fft_extra_tilt";
@@ -509,6 +518,15 @@ namespace zlstate {
         static constexpr auto kName = "";
         inline static const auto kRange = juce::NormalisableRange<float>(0.f, 2.f, .01f);
         static constexpr auto kDefaultV = 1.f;
+    };
+
+    class PComboboxAlignment : public ChoiceParameters<PComboboxAlignment> {
+    public:
+        static constexpr auto kID = "combobox_alignment";
+        static constexpr auto kName = "";
+        inline static const auto kChoices = juce::StringArray{"Left", "Center", "Right"};
+        enum { kLeft, kCenter, kRight };
+        static constexpr int kDefaultI = kCenter;
     };
 
     class PMagCurveThickness : public FloatParameters<PMagCurveThickness> {
@@ -643,7 +661,8 @@ namespace zlstate {
                    PEnterSoloMouse::get(), PEnterSoloKey::get(),
                    PExitSoloMouse::get(), PExitSoloKey::get(),
                    PTargetRefreshSpeed::get(),
-                   PFFTExtraTilt::get(), PFFTExtraSpeed::get(),
+                   PFFTQuality::get(), PFFTExtraTilt::get(), PFFTExtraSpeed::get(),
+                   PComboboxAlignment::get(),
                    PMagCurveThickness::get(), PEQCurveThickness::get(),
                    PTooltipLang::get());
 

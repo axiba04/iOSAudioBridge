@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-03",
+  "zl_version": "0.6.1",
+  "zl_commit": "6d8c79cff62b42b1d5e4cf60c8eda2ca90b7e938",
+  "juce_version": "9.0.2",
+  "juce_commit": "e66b82515320d92a2224651f8ecc1c888a8ec3d8",
+  "juce_snapshot_files_verified": 4840,
+  "juce_content_mismatches_ignoring_checkout_line_endings": 0,
+  "bridge_patch_reverse_check_passed": true,
+  "ctest_passed": 3,
+  "ctest_failed": 0,
+  "executable_file_version": "0.6.1",
+  "executable_product_version": "0.6.1",
+  "ui_smoke_passed": true,
+  "ui_empty_smoke_passed": true,
+  "wasapi_muted_smoke_passed": true,
+  "usb_capture_tested": false,
+  "physical_listening_tested": false
+}
