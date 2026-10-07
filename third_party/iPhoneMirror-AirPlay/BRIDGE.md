@@ -10,16 +10,19 @@ following integration changes are recorded in `pins.json`.
 
 Local changes:
 
-- `WirelessHost/WirelessHost.cpp`: `ZL_AIRPLAY_AUDIO_ONLY` skips video callbacks;
+- `WirelessHost/WirelessHost.cpp`: `ZL_AIRPLAY_AUDIO_ONLY` skips video callbacks
+  and disables the DLNA renderer independently of the AirPlay receiver mode;
   use a separate stable identity and pairing salt for ZL Audio Bridge.
 - `scripts/build_airplay_receiver.ps1`: adjust the receiver path to this layout.
 - Build the host and Windows DNS-SD shim through
   `src/AudioBridge.AirPlayHost/CMakeLists.txt`, with static CRT. The original
   upstream CMake file and tests remain here for reference.
 
-The bridge launches `AudioBridge.AirPlayHost.exe` in mirror mode (which includes
-RAOP music reception), with RAOP port 5002 and AirPlay port 7002. It does not
-launch DLNA. Use the iOS **Now Playing → AirPlay audio** picker. Selecting Screen
+The bridge launches `AudioBridge.AirPlayHost.exe` in combined mode, with RAOP
+port 5002 and AirPlay port 7002. The upstream mirror mode deliberately rejects
+audio-only SETUP/ANNOUNCE with RTSP 403, so it cannot be used for music reception.
+The bridge build disables DLNA even in combined mode.
+Use the iOS **Now Playing → AirPlay audio** picker. Selecting Screen
 Mirroring may still cause the sender/receiver to transmit/decode video; the
 bridge drops those frames. This integration does not advertise a new,
 unverified audio-only protocol feature mask.

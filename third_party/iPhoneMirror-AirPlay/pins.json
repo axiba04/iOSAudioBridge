@@ -145,7 +145,7 @@
     },
     {
       "path": "WirelessHost/WirelessHost.cpp",
-      "sha256": "c07b32e82356d794ae5690fde50a98a0e05fbef27a44b0a64c108f16a95aac46"
+      "sha256": "8b4521218600b26814e1cb5fdc6bf4d2f900868d8982299f21f8d56961efa323"
     },
     {
       "path": "WirelessHost/tests/DnsSdRegistrationPolicyTests.cpp",

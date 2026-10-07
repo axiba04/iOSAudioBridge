@@ -82,6 +82,9 @@ Get-ChildItem -LiteralPath "$root/docs/test-results/2026-10-03-zl-0.6.1" -File |
 $airplayEvidence=Join-Path $dist 'test-results/2026-10-07-airplay'
 New-Item -ItemType Directory -Force -Path $airplayEvidence | Out-Null
 Get-ChildItem -LiteralPath "$root/docs/test-results/2026-10-07-airplay" -File | Copy-Item -Destination $airplayEvidence -Force
+$airplayFixEvidence=Join-Path $dist 'test-results/2026-10-07-airplay-connect-fix'
+New-Item -ItemType Directory -Force -Path $airplayFixEvidence | Out-Null
+Get-ChildItem -LiteralPath "$root/docs/test-results/2026-10-07-airplay-connect-fix" -File | Copy-Item -Destination $airplayFixEvidence -Force
 Get-ChildItem $dist -Recurse -File | Where-Object { $_.Extension -in '.exe','.dll' } | ForEach-Object {
     [pscustomobject]@{file=[IO.Path]::GetRelativePath($dist,$_.FullName);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 } | ConvertTo-Json | Set-Content "$dist/build-hashes.json" -Encoding utf8

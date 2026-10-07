@@ -10,7 +10,7 @@ iPhone AirPlay → 独立接收进程解码 → PCM16 / 44.1 或 48 kHz / Stereo
 
 ## 运行
 
-预编译程序通过 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 分发：下载 [Windows x64 程序及运行依赖](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.4/ZLUsbAudioBridge-v0.2.0-preview.4-win-x64.zip)；使用 USB 时按需下载 [驱动离线安装包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.4/DriverInstallKit-x64-1.4.0.2.zip)。完整解压后使用；驱动按包内说明安装。仓库保留源码与构建材料，`dist/` 为本地构建输出，不再提交。
+预编译程序通过 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 分发：下载 [Windows x64 程序及运行依赖](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.5/ZLUsbAudioBridge-v0.2.0-preview.5-win-x64.zip)；使用 USB 时按需下载 [驱动离线安装包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.5/DriverInstallKit-x64-1.4.0.2.zip)。完整解压后使用；驱动按包内说明安装。仓库保留源码与构建材料，`dist/` 为本地构建输出，不再提交。
 
 运行解压后的 `ZLUsbAudioBridge/ZLUsbAudioBridge.exe`（自行构建时位于 `dist/` 下），保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll`、`Wireless/` 和许可证文件。
 
@@ -21,7 +21,7 @@ iPhone AirPlay → 独立接收进程解码 → PCM16 / 44.1 或 48 kHz / Stereo
 
 ### AirPlay 仅音频
 
-从 `v0.2.0-preview.4` 起支持 AirPlay 音频输入。
+请使用 `v0.2.0-preview.5` 或更新版本。`preview.4` 的接收模式会拒绝纯音频连接，导致 iPhone/iPad 提示“无法连接”；`preview.5` 修复此问题。
 
 1. 电脑与 iPhone/iPad 连接同一局域网，完整保留程序旁的 `Wireless/` 目录。
 2. 左上角输入选择 **AirPlay**，输出选择 Windows 上的耳机或 DAC，点击“开始监听”。
@@ -32,7 +32,7 @@ iPhone AirPlay → 独立接收进程解码 → PCM16 / 44.1 或 48 kHz / Stereo
 
 若发现不到接收端或连接后无声，检查同一局域网及 Windows 防火墙是否允许 `Wireless/AudioBridge.AirPlayHost.exe` 在专用网络收发。控制端口为 TCP 5002/7002，媒体端口动态协商；仅放行两个固定端口可能仍无声。程序不自动修改防火墙。
 
-AirPlay 的发送端缓冲和无线网络延迟不计入界面的“软件延迟估计”。对游戏实时监听仍建议 USB。编译、自动回归与本机检查记录见[集成验收](docs/zl-bridge-validation.zh-CN.md)；iPhone 无线实机试听待验证。
+AirPlay 的发送端缓冲和无线网络延迟不计入界面的“软件延迟估计”。对游戏实时监听仍建议 USB。编译、自动回归与实机记录见[集成验收](docs/zl-bridge-validation.zh-CN.md)；`preview.5` 已通过 iPad 连接及耳机有声复测，长时间无线稳定性仍待验证。
 
 iPad 停止后无法重新连接的问题已加入自动恢复，触发补救时可能需要约 25 秒，见[修复与实机验证](docs/usb-restore-ipad-fix.zh-CN.md)。
 
@@ -68,7 +68,7 @@ iPad 停止后无法重新连接的问题已加入自动恢复，触发补救时
 ```
 
 构建脚本默认使用 `D:/GreenSoftware/iPhoneMirror/audio-only-work` 中的 MSVC/Windows SDK、Ninja、CMake，以及 `.tools/llvm-22.1.0` 中的 Clang。下载 LLVM 时需要 curl 和 7z。
-输出为 `build/zl-bridge` 与 `dist/ZLUsbAudioBridge`。默认运行 AudioCore.Tests、PcmProcessing.Tests、ZLBridge.Dsp、AirPlay.Runtime、AirPlay.Tests 五组回归，不连接手机或打开音频端点。
+输出为 `build/zl-bridge` 与 `dist/ZLUsbAudioBridge`。默认运行 AudioCore.Tests、PcmProcessing.Tests、ZLBridge.Dsp、AirPlay.Runtime、AirPlay.Tests、AirPlay.ReceiverTests 六组回归，不连接手机或打开音频端点。真实接收 DLL 的握手测试会临时使用 TCP 5002/7002；运行测试前停止正在监听的桥接程序。
 
 ## 诊断与稳定性测试
 

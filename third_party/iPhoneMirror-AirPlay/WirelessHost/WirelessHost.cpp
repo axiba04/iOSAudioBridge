@@ -1441,8 +1441,13 @@ int wmain(int argc, wchar_t** argv) {
     }
 
     iPhoneMirror::wireless::DlnaRenderer dlna;
+#if defined(ZL_AIRPLAY_AUDIO_ONLY)
+    // Combined AirPlay permits RAOP music; this bridge still has no DLNA player.
+    constexpr bool dlna_enabled = false;
+#else
     const auto dlna_enabled = std::wstring_view(effective_mode) == L"media" ||
         std::wstring_view(effective_mode) == L"combined";
+#endif
     if (dlna_enabled) {
         const auto dlna_started = dlna.start(utf8(dlna_receiver_name(effective_receiver_name)),
             stable_dlna_uuid(pairing_seed), static_cast<std::uint16_t>(dlna_port),

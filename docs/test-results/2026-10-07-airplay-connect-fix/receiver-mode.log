@@ -1,0 +1,2 @@
+2026-10-07 19:26:36.944 [tid=1008724302515589407] [seq=1] [level=INFO] [category=airplay] [session=00001ABC-00000001589F6437] airplay_host wireless_host startup pid=24264 parent_arg=6844 mode_arg=combined capability=960x540@30 raop_port=5002 airplay_port=7002 dlna_port=8090 ssdp_port=1900
+2026-10-07 19:26:36.992 [tid=1008724302515589407] [seq=6] [level=INFO] [category=airplay] [session=00001ABC-00000001589F6437] airplay_host wireless_host receiver_ready mode=combined dlna_enabled=false

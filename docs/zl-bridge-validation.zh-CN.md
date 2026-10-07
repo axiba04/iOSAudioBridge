@@ -33,7 +33,15 @@ iPhone → 原仅音频 USB 协议 → UsbAudioSource → PcmPipe / SPSC
 
 ## 已完成测试
 
-### 2026-10-07：AirPlay 音频输入
+### 2026-10-07：AirPlay 纯音频连接修复（preview.5）
+
+用户 iPad 的请求已经到达接收进程，但 `preview.4` 启动时误用上游 `mirror` 模式；该模式会主动拒绝非镜像 RAOP 会话。真实 DLL 回归复现了 FairPlay 成功后，`isScreenMirroringSession=false` 的 SETUP 返回 `403 Forbidden`。修复改为 `combined` AirPlay 模式，并在桥接构建中单独禁用 DLNA，保留音频进入 ZL 的处理路径。
+
+六组 CTest 全部通过。新增 `AirPlay.ReceiverTests` 经实际 `AirPlayAudioSource` 启动实际接收 DLL，覆盖 FairPlay、纯音频会话 SETUP、无 type 110 视频流的 type 96 音频协商、有效音频端口、RECORD、TEARDOWN 及同一接收进程重新连接。SETUP 从 403 变为 200；时钟响应由测试发送端提供。日志确认 `mode=combined dlna_enabled=false`。证据与构建哈希见[连接修复记录](test-results/2026-10-07-airplay-connect-fix)。
+
+此次自动握手测试未发送压缩音频负载。随后用户用本地修复版重试，实机日志确认 `iPad13,4 / iPadOS 26.6.2` 已连接并连续接收至少 7,000 次 PCM 回调（超过 55 秒），格式为 44.1 kHz / 立体声 / 16 位；见 `ipad-pcm-reception.log`。用户随后明确确认“已连接且耳机有声”。长时间无线稳定性仍待验证。
+
+### 2026-10-07：AirPlay 音频输入（preview.4 历史记录）
 
 新增链路：`AirPlay/RAOP → AudioBridge.AirPlayHost → 本地命名管道 → AirPlayAudioSource → PcmPipe → ZL → WASAPI`。接收端固定到 iPhoneMirror `1270c443a29457751cadd20f6d7bbe1ce213b9db` 的 WirelessHost 和配套 AirPlayServer DLL。协议与解码保持独立进程；主程序没有另一条绕过 ZL 的播放路径。USB / AirPlay 互斥使用同一个处理器和输出端点，原 C ABI 保持 USB 兼容。
 

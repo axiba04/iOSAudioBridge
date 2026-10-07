@@ -4,6 +4,8 @@
 
 ## AirPlay 音频
 
+请使用 `v0.2.0-preview.5` 或更新版本。`preview.4` 误用上游仅镜像模式，会以 RTSP 403 拒绝纯音频连接；表现为能看到 **ZL Audio Bridge**，但 iPhone/iPad 提示“无法连接”。更新时退出旧程序，完整解压新版后重新启动监听并选择接收端。
+
 完整解压并保留 `Wireless/`。电脑与手机连接同一局域网，在程序左上角选择 **AirPlay**，选择 Windows 耳机 / DAC，点击“开始监听”。状态显示接收服务就绪后，在 iPhone/iPad 的控制中心“正在播放”面板打开 AirPlay 音频列表，选择 **ZL Audio Bridge**。不要用“屏幕镜像”入口发起纯音频传输。
 
 接收进程将解码的 PCM 直接交给 ZLCompressor，再经最终音量和 WASAPI 输出。支持 44.1 / 48 kHz、PCM16、立体声；ZL 按源采样率处理，设备格式转换交给 WASAPI。发送端 AirPlay 音量与本程序监听音量相乘，均作用于压缩处理后的输出。默认监听音量仍为 50%。
@@ -12,7 +14,7 @@
 
 AirPlay 不需要 USB filter、手机 USB 信任或 Bonjour。Windows 防火墙需允许 `Wireless/AudioBridge.AirPlayHost.exe` 在专用局域网通信；控制端口为 TCP 5002/7002，媒体端口动态协商，发现依赖 mDNS。程序不自动新增防火墙规则。发现不到设备时先检查同一网段、无线客户端隔离及防火墙；接收进程退出时状态栏会报错，可停止后重试。
 
-AirPlay 延迟包含发送端缓冲和网络抖动，界面延迟数字仅反映本机队列、WASAPI 和 DSP。对游戏低延迟监听优先使用 USB。仅音频路由已做程序和模拟流回归，具体 iPhone/iOS、Wi-Fi 环境下的连接与试听仍待实机验收。
+AirPlay 延迟包含发送端缓冲和网络抖动，界面延迟数字仅反映本机队列、WASAPI 和 DSP。对游戏低延迟监听优先使用 USB。`preview.5` 已通过真实接收 DLL 握手回归，以及 iPadOS 26.6.2 的连接和耳机有声复测；其他设备兼容性及长时间无线稳定性仍待验证。
 
 无设备诊断：`Wireless/AudioBridge.AirPlayHost.exe --check-runtime` 返回 0 表示接收库可加载；40 表示 Windows 代码完整性拒绝映像，41 表示依赖缺失或加载失败，42 表示接口不匹配。接收日志复用本程序的 capture 日志，条目前缀为 `airplay_host` / `airplay_source`。
 
@@ -65,7 +67,7 @@ Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版
 固定版本见 `third_party/ZLCompressor.pins.json`。Clang 编译使用 MSVC STL 和 Windows SDK；C++20、SSE2、静态 CRT。
 
 构建目录为 `build/zl-bridge`，本地发布目录为 `dist/ZLUsbAudioBridge`。`dist/` 不纳入 Git，预编译程序和驱动 ZIP 作为 Release 附件分发。
-默认执行 Native、PCM 适配、ZL DSP、AirPlay 运行库加载和 AirPlay IPC 五组回归；不打开音频端点、不连接 USB。DSP 检查包含 Normal→High→Normal 的 FFT 历史缓冲切换、频率/幅度、44.1↔48 kHz 切换后的真实压缩曲线和零 DSP 延迟检查。
+默认执行 Native、PCM 适配、ZL DSP、AirPlay 运行库加载、AirPlay IPC 和真实 DLL 纯音频握手六组回归；不打开音频端点、不连接 USB。握手测试覆盖 FairPlay、非镜像会话 SETUP、type 96 音频端口协商、RECORD、TEARDOWN 和重新连接；会临时使用 TCP 5002/7002，测试前需停止正在监听的桥接程序。DSP 检查包含 Normal→High→Normal 的 FFT 历史缓冲切换、频率/幅度、44.1↔48 kHz 切换后的真实压缩曲线和零 DSP 延迟检查。
 发布目录包含依赖许可和来源清单。对外分发时需同时提供本项目对应源码、固定依赖及构建材料，不能只发 EXE。
 
 ## 静音诊断入口

@@ -144,7 +144,7 @@ void AirPlayAudioSource::run(AB_Config config,std::filesystem::path host,std::ws
         if(!child.stop.value || GetLastError()==ERROR_ALREADY_EXISTS)throw std::runtime_error("Cannot create AirPlay stop event");
         auto command=quote(host.wstring())+L" --pipe "+quote(pipe_name)+L" --stop-event "+quote(stop_name)+
             L" --name "+quote(name)+L" --parent-pid "+std::to_wstring(GetCurrentProcessId())+
-            L" --mode mirror --width 960 --height 540 --fps 30 --raop-port 5002 --airplay-port 7002";
+            L" --mode combined --width 960 --height 540 --fps 30 --raop-port 5002 --airplay-port 7002";
         STARTUPINFOW startup{};startup.cb=sizeof(startup);PROCESS_INFORMATION info{};
         if(!CreateProcessW(host.c_str(),command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW,nullptr,
             host.parent_path().c_str(),&startup,&info))throw std::runtime_error(std::format("Cannot launch AirPlay host: {}",GetLastError()));

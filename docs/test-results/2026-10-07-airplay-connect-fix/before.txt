@@ -1,0 +1,4 @@
+FairPlay setup: RTSP/1.0 200 OK
+FairPlay handshake: RTSP/1.0 200 OK
+Audio-only session SETUP: RTSP/1.0 403 Forbidden
+Audio-only session SETUP rejected
