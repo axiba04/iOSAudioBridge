@@ -36,6 +36,14 @@ $pins=Get-Content -LiteralPath "$root/third_party/ZLCompressor.pins.json" -Raw |
 if($app.VersionInfo.FileVersion -ne $pins.ZLCompressor.version){throw 'EXE version does not match the pinned ZLCompressor version'}
 Copy-Item -LiteralPath $app.FullName -Destination $dist -Force
 foreach($file in 'AudioBridge.UsbRestore.exe','AudioBridge.UsbRepair.exe','libusb0.dll') {Copy-Item -LiteralPath "$build/bin/$file" -Destination $dist -Force}
+$wireless=Join-Path $dist 'Wireless'
+New-Item -ItemType Directory -Force -Path $wireless | Out-Null
+Get-ChildItem -LiteralPath "$build/bin/Wireless" -File | Where-Object { $_.Extension -in '.exe','.dll' } | Copy-Item -Destination $wireless -Force
+$airplay=Join-Path $root 'third_party/iPhoneMirror-AirPlay'
+$airplayLicenses=Join-Path $wireless 'licenses'
+New-Item -ItemType Directory -Force -Path $airplayLicenses | Out-Null
+Get-ChildItem -LiteralPath "$airplay/airplay-server" -File | Copy-Item -Destination $airplayLicenses -Force
+Copy-Item -LiteralPath "$airplay/LICENSE","$airplay/pins.json","$airplay/BRIDGE.md" -Destination $airplayLicenses -Force
 $vendor=Join-Path $root 'third_party/ZLCompressor'
 $licenses=Join-Path $dist 'licenses'
 New-Item -ItemType Directory -Force $licenses | Out-Null
@@ -71,7 +79,10 @@ Get-ChildItem -LiteralPath "$root/docs/test-results/2026-09-24-ui-theme" -File |
 $zlUpgradeEvidence=Join-Path $dist 'test-results/2026-10-03-zl-0.6.1'
 New-Item -ItemType Directory -Force -Path $zlUpgradeEvidence | Out-Null
 Get-ChildItem -LiteralPath "$root/docs/test-results/2026-10-03-zl-0.6.1" -File | Copy-Item -Destination $zlUpgradeEvidence -Force
-Get-ChildItem $dist -File | Where-Object { $_.Extension -in '.exe','.dll' } | ForEach-Object {
-    [pscustomobject]@{file=$_.Name;bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
+$airplayEvidence=Join-Path $dist 'test-results/2026-10-07-airplay'
+New-Item -ItemType Directory -Force -Path $airplayEvidence | Out-Null
+Get-ChildItem -LiteralPath "$root/docs/test-results/2026-10-07-airplay" -File | Copy-Item -Destination $airplayEvidence -Force
+Get-ChildItem $dist -Recurse -File | Where-Object { $_.Extension -in '.exe','.dll' } | ForEach-Object {
+    [pscustomobject]@{file=[IO.Path]::GetRelativePath($dist,$_.FullName);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 } | ConvertTo-Json | Set-Content "$dist/build-hashes.json" -Encoding utf8
 Write-Output "Published to $dist"

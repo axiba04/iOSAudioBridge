@@ -76,7 +76,7 @@ void UsbAudioSource::run(AB_Config config,std::stop_token token) noexcept {
         const auto filter=device::inspect_apple_usb_filter_stack(serial);
         if(filter.safety==device::AppleUsbFilterSafety::Indeterminate) throw std::runtime_error("Cannot verify Apple USB driver state: "+filter.diagnostic);
         if(!transport::libusb0_available()) throw std::runtime_error("libusb0 runtime/filter is not available; use the existing iPhoneMirror driver setup");
-        lifecycle_.prepare_output(config);
+        lifecycle_.prepare_output(config,48000);
         if(token.stop_requested()) throw std::runtime_error("Connection cancelled");
         read_buffer.resize(1024*1024);
         const auto selected=transport::probe_libusb0_device(serial);

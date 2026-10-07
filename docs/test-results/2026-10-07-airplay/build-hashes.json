@@ -1,0 +1,72 @@
+[
+  {
+    "file": "AudioBridge.UsbRepair.exe",
+    "bytes": 247296,
+    "sha256": "6CF398BA64A59D4440E6285A9EFE0D1248A55A29B5F96D8F56EF09D39CA43700"
+  },
+  {
+    "file": "AudioBridge.UsbRestore.exe",
+    "bytes": 524288,
+    "sha256": "2064AFF7F59C0E3BFC540D66C5DEF310BE55D9D3D9B27482A69F1FFB0EB91F36"
+  },
+  {
+    "file": "libusb0.dll",
+    "bytes": 123552,
+    "sha256": "0CD18719D5701E9CC642FC93A83F13830931D6F29F664FEDBDF212BCB7C349BD"
+  },
+  {
+    "file": "ZLUsbAudioBridge.exe",
+    "bytes": 7967744,
+    "sha256": "4CEB54E284C3D579D0671B8A90EEF32D874D23C18D29A4B0AC22A87700AB1012"
+  },
+  {
+    "file": "Wireless\\airplay2dll.dll",
+    "bytes": 1169920,
+    "sha256": "4A534DACAC5CD36F9AAA6E016DB75DB899E0678FFB8B0C191CABF230A2002BD9"
+  },
+  {
+    "file": "Wireless\\AudioBridge.AirPlayHost.exe",
+    "bytes": 783872,
+    "sha256": "C1B92A53105E6ED6596BF07A284B23D8866E20EB802CB276F71AD8D24549A197"
+  },
+  {
+    "file": "Wireless\\avcodec-58.dll",
+    "bytes": 59739648,
+    "sha256": "E785B030667C0F4709BA299CB494D405E58BCE6E3035D441832D35715FBADC3C"
+  },
+  {
+    "file": "Wireless\\avutil-56.dll",
+    "bytes": 893440,
+    "sha256": "33E0A0A733302BBB09456A6E6C4B5036278F0A6D95A0233FF7EDEB33B59EE05D"
+  },
+  {
+    "file": "Wireless\\dnssd.dll",
+    "bytes": 469504,
+    "sha256": "501D01AE03AB222D03EDA320CB0C2EAB48866736FE81DA50DA2FB2450E59350C"
+  },
+  {
+    "file": "Wireless\\msvcp140.dll",
+    "bytes": 643512,
+    "sha256": "7C26614E1D733892C2DEAC7E245CE115504B1D80592DD0A01B08E3E5A55F89CA"
+  },
+  {
+    "file": "Wireless\\swresample-3.dll",
+    "bytes": 432128,
+    "sha256": "BB8DEFD0517FD12379EDDB0B20B0998356BFD36862B6180A9D2315F3E6128117"
+  },
+  {
+    "file": "Wireless\\swscale-5.dll",
+    "bytes": 568320,
+    "sha256": "DB405507989AED9915287C79A34FD6421FC7683A98EDEBCF4BA370A917EEF311"
+  },
+  {
+    "file": "Wireless\\vcruntime140_1.dll",
+    "bytes": 50112,
+    "sha256": "A7146C08F89FE5B04541AB507CDB59FF7B44534D4BA3C668A426C6450A03434E"
+  },
+  {
+    "file": "Wireless\\vcruntime140.dll",
+    "bytes": 178616,
+    "sha256": "D1F4225DF2CD877DBF130D5668A021DCE3F94118455FF5EC952061C30AFC9CE7"
+  }
+]

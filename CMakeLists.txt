@@ -17,8 +17,10 @@ add_library(AudioCoreImpl STATIC
   ${CORE}/Transport/LibUsb0Transport.cpp ${CORE}/Device/AppleUsbDiscovery.cpp
   ${CORE}/Logging.cpp ${CORE}/Device/DeviceCatalog.cpp
   ${CORE}/Device/UsbDeviceRepair.cpp ${CORE}/Device/UsbRepairClient.cpp
-  ${CORE}/Wasapi/WasapiOutput.cpp ${CORE}/Capture/UsbAudioSource.cpp ${CORE}/Engine/AudioEngine.cpp)
+  ${CORE}/Wasapi/WasapiOutput.cpp ${CORE}/Capture/UsbAudioSource.cpp ${CORE}/Capture/AirPlayAudioSource.cpp ${CORE}/Engine/AudioEngine.cpp)
 target_include_directories(AudioCoreImpl PUBLIC src/AudioCore/include ${CORE} "${USB}/include")
+set(AIRPLAY "${CMAKE_CURRENT_SOURCE_DIR}/third_party/iPhoneMirror-AirPlay")
+target_include_directories(AudioCoreImpl PUBLIC "${AIRPLAY}/WirelessHost")
 target_link_libraries(AudioCoreImpl PUBLIC ws2_32 bcrypt setupapi cfgmgr32 advapi32 ole32 avrt propsys shell32
   "${USB}/lib/x64/libusb0-dynamic.lib")
 add_library(AudioCore SHARED ${CORE}/AudioCore.cpp)
@@ -38,6 +40,7 @@ target_include_directories(AudioProbe PRIVATE src/AudioCore/include)
 add_executable(AudioCore.Tests tests/AudioCoreTests.cpp)
 target_link_libraries(AudioCore.Tests PRIVATE AudioCoreImpl AudioCore)
 enable_testing()
+add_subdirectory(src/AudioBridge.AirPlayHost)
 add_test(NAME AudioCore.Tests COMMAND AudioCore.Tests)
 set_tests_properties(AudioCore.Tests PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 add_executable(PcmProcessing.Tests tests/PcmProcessingTests.cpp)
@@ -70,7 +73,8 @@ if(AB_BUILD_ZL)
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${USB}/bin/x64/libusb0.dll" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:AudioBridge.UsbRestore>" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:AudioBridge.UsbRepair>" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
-    DEPENDS ZLCompressor_Standalone AudioBridge.UsbRestore AudioBridge.UsbRepair)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Wireless" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>/Wireless"
+    DEPENDS ZLCompressor_Standalone AudioBridge.UsbRestore AudioBridge.UsbRepair AudioBridge.AirPlayHost)
   add_test(NAME ZLBridge.Dsp COMMAND ZLCompressor_Standalone --self-test --result "${CMAKE_BINARY_DIR}/zl-self-test.json")
   set_tests_properties(ZLBridge.Dsp PROPERTIES TIMEOUT 60)
 endif()

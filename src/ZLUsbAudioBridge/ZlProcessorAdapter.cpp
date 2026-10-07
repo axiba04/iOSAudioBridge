@@ -13,7 +13,8 @@ void ZlProcessorAdapter::gamePreset(PluginProcessor& p) {
     for(const auto& [id,value]:settings)set(p,id,value);
 }
 void ZlProcessorAdapter::prepare(double sample_rate,size_t max_frames) {
-    if(sample_rate!=48000 || max_frames>4096)throw std::runtime_error("ZL bridge requires 48 kHz and at most 4096 frames");
+    if((sample_rate!=44100 && sample_rate!=48000) || !max_frames || max_frames>4096)
+        throw std::runtime_error("ZL bridge requires 44.1/48 kHz and at most 4096 frames");
     auto layout=processor_.getBusesLayout();
     layout.inputBuses.set(0,juce::AudioChannelSet::stereo());layout.inputBuses.set(1,juce::AudioChannelSet::disabled());
     layout.outputBuses.set(0,juce::AudioChannelSet::stereo());

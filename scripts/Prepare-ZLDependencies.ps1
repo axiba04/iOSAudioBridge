@@ -2,6 +2,14 @@ param([switch]$SkipLLVM)
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 $vendor=Join-Path $root 'third_party/ZLCompressor'
+$airplay=Join-Path $root 'third_party/iPhoneMirror-AirPlay'
+$airplayPins=Get-Content -LiteralPath "$airplay/pins.json" -Raw | ConvertFrom-Json
+foreach($entry in $airplayPins.files) {
+    $file=Join-Path $airplay $entry.path
+    if(-not(Test-Path -LiteralPath $file -PathType Leaf) -or (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -ne $entry.sha256) {
+        throw "AirPlay dependency missing or changed: $($entry.path)"
+    }
+}
 # Patched source snapshots are tracked by the parent repository; nested Git
 # metadata is neither present nor needed in a fresh checkout.
 foreach($file in 'CMakeLists.txt','source/PluginProcessor.cpp','JUCE/CMakeLists.txt','highway/CMakeLists.txt','zldsp_fft/src/zldsp_fft_rfft.hpp') {

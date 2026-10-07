@@ -1,0 +1,175 @@
+{
+  "repository": "https://github.com/RayrenSX/iPhoneMirror",
+  "commit": "1270c443a29457751cadd20f6d7bbe1ce213b9db",
+  "imported": "2026-10-07",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "0b383d5a63da644f628d99c33976ea6487ed89aaa59f0b3257992deac1171e6b"
+    },
+    {
+      "path": "airplay-server/LICENSE-FFMPEG-LGPL-2.1.txt",
+      "sha256": "92a759ec0febde4750821736bbde642a3b835c0604fc81bee62f9e428f86981f"
+    },
+    {
+      "path": "airplay-server/LICENSE-MIT.txt",
+      "sha256": "d56353bd12a62cf0d5a60b856b16dbb048d88bafdf2c992025d7854837de4d77"
+    },
+    {
+      "path": "airplay-server/LICENSE-PLAYFAIR-GPL-3.0.md",
+      "sha256": "0b7cf235e6136b426f00870c3200bac308950973d062a733bdc3fc1eca36fa06"
+    },
+    {
+      "path": "airplay-server/NOTICE-FDK-AAC.txt",
+      "sha256": "d393aa0e9ec2360bda9d8afcde85024bc8ae8ab784e1386ffec2c9bf96607c70"
+    },
+    {
+      "path": "airplay-server/SHA256SUMS.txt",
+      "sha256": "70ce0288ce735e5218f332f160d78b68550ed4dce2813c70554944b6281a024d"
+    },
+    {
+      "path": "airplay-server/SOURCE.md",
+      "sha256": "1c8d34924d351abb1abd0fedcf226913e4a01aed8381dfa50ef9364aa1c501a1"
+    },
+    {
+      "path": "airplay-server/bin/x64/airplay2dll.dll",
+      "sha256": "4a534dacac5cd36f9aaa6e016db75db899e0678ffb8b0c191cabf230a2002bd9"
+    },
+    {
+      "path": "airplay-server/bin/x64/avcodec-58.dll",
+      "sha256": "e785b030667c0f4709ba299cb494d405e58bce6e3035d441832d35715fbadc3c"
+    },
+    {
+      "path": "airplay-server/bin/x64/avutil-56.dll",
+      "sha256": "33e0a0a733302bbb09456a6e6c4b5036278f0a6d95a0233ff7edeb33b59ee05d"
+    },
+    {
+      "path": "airplay-server/bin/x64/dnssd.dll",
+      "sha256": "003eeb7ea109df21e62d236e24937971bd9738b6648df81f6effb810524d92bd"
+    },
+    {
+      "path": "airplay-server/bin/x64/swresample-3.dll",
+      "sha256": "bb8defd0517fd12379eddb0b20b0998356bfd36862b6180a9d2315f3e6128117"
+    },
+    {
+      "path": "airplay-server/bin/x64/swscale-5.dll",
+      "sha256": "db405507989aed9915287c79a34fd6421fc7683a98edebcf4ba370a917eef311"
+    },
+    {
+      "path": "airplay-server/patches/Apply-AirPlayAudioNegotiationPatch.ps1",
+      "sha256": "81b3aa85bcde82067deb22ee28cd798a67a9f98aa4ba38719b0750e7da9f56f1"
+    },
+    {
+      "path": "airplay-server/patches/Apply-AirPlayCompatibilityPatch.ps1",
+      "sha256": "0a793582904681f0f73962b6df6260d5aa318356be445ba0cb3e31fde1df9b78"
+    },
+    {
+      "path": "airplay-server/patches/Apply-AirPlayMirrorRecoveryPatch.ps1",
+      "sha256": "80e38959f2b6e4593279b078795a7ddfb913a2bf5069ba1066d9097eef5294c5"
+    },
+    {
+      "path": "airplay-server/patches/Apply-AirPlayOrientationAccessUnitPatch.ps1",
+      "sha256": "cd67f2042a40aba5ffb9f01afd8259a05131c8a4a1d67c5477ca27f712280c4f"
+    },
+    {
+      "path": "airplay-server/patches/Apply-AudioCodecPatch.ps1",
+      "sha256": "143dd1850e5c926d08b33f5272f599b49be65d804ebb8920eef89b36ed840509"
+    },
+    {
+      "path": "airplay-server/patches/Apply-DeviceMetadataPatch.ps1",
+      "sha256": "28178013aa3e3cdee3c6931159e9b7f5e4c43569009b3787b4357d58277240b1"
+    },
+    {
+      "path": "airplay-server/patches/Apply-DisplayCapabilityPatch.ps1",
+      "sha256": "ddf436f18efe80f10ccace15df8e69fe5b1c2d89721ac8f222c473a21024694e"
+    },
+    {
+      "path": "airplay-server/patches/Apply-NetworkRoutePatch.ps1",
+      "sha256": "c4516d95089ca76e44850920e6d2269ea0060a3eebb00c288081ad1439ad2180"
+    },
+    {
+      "path": "airplay-server/patches/Apply-ScreenMirroringOnlyPatch.ps1",
+      "sha256": "9e90a309f557e08df44123a8e14cc6173e05ab2c0a246cd4639cbb6b36f85e8f"
+    },
+    {
+      "path": "msvc-runtime/msvcp140.dll",
+      "sha256": "7c26614e1d733892c2deac7e245ce115504b1d80592dd0a01b08e3e5a55f89ca"
+    },
+    {
+      "path": "msvc-runtime/vcruntime140_1.dll",
+      "sha256": "a7146c08f89fe5b04541ab507cdb59ff7b44534d4ba3c668a426c6450a03434e"
+    },
+    {
+      "path": "msvc-runtime/vcruntime140.dll",
+      "sha256": "d1f4225df2cd877dbf130d5668a021dce3f94118455ff5ec952061c30afc9ce7"
+    },
+    {
+      "path": "scripts/build_airplay_receiver.ps1",
+      "sha256": "bbce2ddeb1a1b3299a6a0165799d091464d162303c4971445285511fd43789d7"
+    },
+    {
+      "path": "WirelessHost/CMakeLists.txt",
+      "sha256": "53ccb16bf4e810eb6bb5e00117cf35ce7f0e2b7ec8474ce9ea4a8d6d047edd48"
+    },
+    {
+      "path": "WirelessHost/DlnaRenderer.cpp",
+      "sha256": "764a88e462ce6eacae953fc3a05fe040287ff22e3cea462846bd6cf690de4ed2"
+    },
+    {
+      "path": "WirelessHost/DlnaRenderer.h",
+      "sha256": "f4663e4cce6a4d6905992cf8022e4f7537b79f093fcecd4bc0e5695f553b951f"
+    },
+    {
+      "path": "WirelessHost/DnsSdAdvertisementPolicy.h",
+      "sha256": "c39f0297da0492ea7dd54b34f3046596cedebeca64ae6482209f90f43e3eb186"
+    },
+    {
+      "path": "WirelessHost/DnsSdRegistrationPolicy.h",
+      "sha256": "6fac21facc76d9a864f4fd906c605615a258a03ddc91862a019a4b4fd3cbe23f"
+    },
+    {
+      "path": "WirelessHost/DnsSdShim.cpp",
+      "sha256": "c29483c9853a471f6dadbac786e689ac853a0270c0e26b869886c4224a18f830"
+    },
+    {
+      "path": "WirelessHost/DnsSdShim.def",
+      "sha256": "d95520832101d38d8cee08a5152385585b5b20581911f02d4378a3b43667aa37"
+    },
+    {
+      "path": "WirelessHost/HttpUrl.h",
+      "sha256": "99324fa3f84562be49f0d32243f7b84c6dcb0ca98ab8352aa9df27ea03fa81c7"
+    },
+    {
+      "path": "WirelessHost/IpcProtocol.h",
+      "sha256": "62b4f1adab9b424c2c22ef9722e0844463e2fe3f21a5c34f241ff9cf65347363"
+    },
+    {
+      "path": "WirelessHost/WirelessHost.cpp",
+      "sha256": "c07b32e82356d794ae5690fde50a98a0e05fbef27a44b0a64c108f16a95aac46"
+    },
+    {
+      "path": "WirelessHost/tests/DnsSdRegistrationPolicyTests.cpp",
+      "sha256": "97f9b5ae0942ac978310254158c611e04cad31e14c6cfc6a1c648abd2c5e03a6"
+    },
+    {
+      "path": "WirelessHost/tests/WirelessHostPreflightSmoke.cpp",
+      "sha256": "684ed8429be270a1a8657cf63af64f1d4b91bc4a4bbd715ec505b0bc90dc3b1f"
+    },
+    {
+      "path": "WirelessHost/tests/WirelessHostSmoke.cpp",
+      "sha256": "7a2b3d4977e1cb8596ba92632af0f2f444b224c91790b4380ce743f479974112"
+    },
+    {
+      "path": "WirelessHost/tests/WirelessHostStub.cpp",
+      "sha256": "326b8cebb665d44c33336794ebcfff10f2fa6ba97fcd5c6a3c4403b6c96a3894"
+    },
+    {
+      "path": "WirelessHost/tests/WirelessHostStub.def",
+      "sha256": "62ec77977e1b9dd40048bad7607f3ac8b0a3e0969a37253f1504201c087c2cfd"
+    },
+    {
+      "path": "WirelessHost/tests/WirelessReceiverProtocolSmoke.cpp",
+      "sha256": "b841b3f14155f1dac137559e24fc5429440e88ec3f6ae9a0fb8ca4b3fd0b7b1b"
+    }
+  ]
+}

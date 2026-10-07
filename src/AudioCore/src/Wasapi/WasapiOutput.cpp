@@ -26,8 +26,10 @@ void WasapiOutput::create_events() {
     }
 }
 WasapiOutput::~WasapiOutput(){ stop(); CloseHandle(stop_event_); CloseHandle(render_event_); }
-void WasapiOutput::start(const std::wstring& endpoint,uint32_t startup,uint32_t high_water,float volume_value,IBlockProcessor* processor) {
+void WasapiOutput::start(const std::wstring& endpoint,uint32_t startup,uint32_t high_water,float volume_value,IBlockProcessor* processor,uint32_t sample_rate) {
+    if(sample_rate!=44100 && sample_rate!=48000) throw std::invalid_argument("Unsupported PCM sample rate");
     stop(); pipe_->reset(); block_renderer_.reset();processor_=processor?processor:&passthrough_; ResetEvent(stop_event_); ResetEvent(render_event_);
+    sample_rate_=sample_rate;
     startup_=startup; high_water_=high_water; volume_=volume_value;
     rendered_=0;underruns_=0;missing_=0;requested_=0;max_render_us_=0;first_underrun_ms_=0;last_underrun_ms_=0;clipped_=0;nonfinite_=0;min_queue_=8192;max_queue_=0;
     period_=0; endpoint_frames_=0; padding_=0; stream_ms_=0;
@@ -46,7 +48,7 @@ void WasapiOutput::snapshot(AB_Status& s) const noexcept {
     s.queued_frames=static_cast<uint32_t>(pipe_->ring.available()); s.capacity_frames=static_cast<uint32_t>(pipe_->ring.capacity());
     s.rendered_frames=rendered_; s.dropped_frames=pipe_->dropped; s.underruns=underruns_; s.missing_frames=missing_;
     s.input_left_db=in_l_; s.input_right_db=in_r_; s.output_left_db=out_l_; s.output_right_db=out_r_;
-    s.host_latency_ms=(s.queued_frames+padding_.load())/48.0f;
+    s.host_latency_ms=(s.queued_frames+padding_.load())*1000.0f/sample_rate_.load();
     s.stream_latency_ms=stream_ms_; s.autoconvert=autoconvert_; s.source_idle=pipe_->paused.load() || idle_.load();
 }
 AudioTelemetry WasapiOutput::telemetry() const noexcept {
@@ -62,8 +64,8 @@ void WasapiOutput::run(std::wstring endpoint,std::promise<void> ready) noexcept 
         ComPtr<IMMDevice> device;
         if(endpoint.empty()) check_hr(enumerator->GetDefaultAudioEndpoint(eRender,eMultimedia,&device),"Default output");
         else check_hr(enumerator->GetDevice(endpoint.c_str(),&device),"Selected output unavailable");
-        WAVEFORMATEX format{}; format.wFormatTag=WAVE_FORMAT_PCM; format.nChannels=2; format.nSamplesPerSec=48000;
-        format.wBitsPerSample=16; format.nBlockAlign=4; format.nAvgBytesPerSec=192000;
+        WAVEFORMATEX format{}; format.wFormatTag=WAVE_FORMAT_PCM; format.nChannels=2; format.nSamplesPerSec=sample_rate_;
+        format.wBitsPerSample=16; format.nBlockAlign=4; format.nAvgBytesPerSec=format.nSamplesPerSec*4;
         ComPtr<IAudioClient> client; ComPtr<IAudioClient3> client3;
         HRESULT init=device->Activate(__uuidof(IAudioClient3),CLSCTX_ALL,nullptr,reinterpret_cast<void**>(client3.GetAddressOf()));
         if(SUCCEEDED(init)) {
@@ -82,7 +84,7 @@ void WasapiOutput::run(std::wstring endpoint,std::promise<void> ready) noexcept 
             client3.Reset();
             check_hr(device->Activate(__uuidof(IAudioClient),CLSCTX_ALL,nullptr,reinterpret_cast<void**>(client.GetAddressOf())),"Audio client");
             check_hr(client->Initialize(AUDCLNT_SHAREMODE_SHARED,AUDCLNT_STREAMFLAGS_EVENTCALLBACK|AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM|AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY,0,0,&format,nullptr),"Shared PCM16 conversion");
-            REFERENCE_TIME normal{},minimum{}; if(SUCCEEDED(client->GetDevicePeriod(&normal,&minimum))) period_=static_cast<uint32_t>(normal*48000/10000000);
+            REFERENCE_TIME normal{},minimum{}; if(SUCCEEDED(client->GetDevicePeriod(&normal,&minimum))) period_=static_cast<uint32_t>(normal*format.nSamplesPerSec/10000000);
             autoconvert_=true;
         }
         check_hr(client->SetEventHandle(render_event_),"Audio event");
@@ -132,7 +134,7 @@ void WasapiOutput::run(std::wstring endpoint,std::promise<void> ready) noexcept 
             }
             requested_.fetch_add(frames,std::memory_order_relaxed);
             PcmBlockRenderer::Levels levels;
-            const auto processed=block_renderer_.render(scratch.data(),frames,volume_.load(std::memory_order_relaxed),*processor_,levels);
+            const auto processed=block_renderer_.render(scratch.data(),frames,volume_.load(std::memory_order_relaxed)*pipe_->remote_gain.load(std::memory_order_relaxed),*processor_,levels);
             clipped_.fetch_add(levels.clipped,std::memory_order_relaxed);nonfinite_.fetch_add(levels.nonfinite,std::memory_order_relaxed);
             in_l_=db(levels.in_l);in_r_=db(levels.in_r);out_l_=db(levels.out_l);out_r_=db(levels.out_r);
             LARGE_INTEGER ended{};QueryPerformanceCounter(&ended);

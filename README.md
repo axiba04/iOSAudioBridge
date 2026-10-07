@@ -1,22 +1,38 @@
 # iOS Audio Bridge — ZL USB Audio Bridge
 
-Windows x64 原生音频程序：接收 iPhone USB 音频，使用 ZLCompressor 原版界面和处理器，经 WASAPI 输出到耳机或 DAC。基于 C++20 / JUCE，无需 .NET 或 VST Host。这是社区集成预览版，不是 ZL-Audio 官方发行版。
+Windows x64 原生音频程序：接收 iPhone USB 或 AirPlay 音频，使用 ZLCompressor 原版界面和处理器，经 WASAPI 输出到连接在 Windows 上的耳机或 DAC。基于 C++20 / JUCE，无需 .NET 或 VST Host。这是社区集成预览版，不是 ZL-Audio 官方发行版。
 
 ```text
 iPhone USB → QuickTime 仅音频握手 → PCM16 / 48 kHz / Stereo
-           → SPSC → ZL Processor → 最终音量/静音 → WASAPI Shared → 耳机 / DAC
+iPhone AirPlay → 独立接收进程解码 → PCM16 / 44.1 或 48 kHz / Stereo
+           → SPSC → ZL Processor → 最终音量/静音 → WASAPI Shared → Windows 耳机 / DAC
 ```
 
 ## 运行
 
-预编译程序通过 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 分发：下载 [Windows x64 程序及运行依赖](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.3/ZLUsbAudioBridge-v0.2.0-preview.3-win-x64.zip) 和 [驱动离线安装包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.3/DriverInstallKit-x64-1.4.0.2.zip)。完整解压后使用；驱动按包内说明安装。仓库保留源码与构建材料，`dist/` 为本地构建输出，不再提交。
+预编译程序通过 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 分发：下载 [Windows x64 程序及运行依赖](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.4/ZLUsbAudioBridge-v0.2.0-preview.4-win-x64.zip)；使用 USB 时按需下载 [驱动离线安装包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.4/DriverInstallKit-x64-1.4.0.2.zip)。完整解压后使用；驱动按包内说明安装。仓库保留源码与构建材料，`dist/` 为本地构建输出，不再提交。
 
-运行解压后的 `ZLUsbAudioBridge/ZLUsbAudioBridge.exe`（自行构建时位于 `dist/` 下），保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll` 和许可证文件。
+运行解压后的 `ZLUsbAudioBridge/ZLUsbAudioBridge.exe`（自行构建时位于 `dist/` 下），保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll`、`Wireless/` 和许可证文件。
 
 1. 沿用已验证的 Apple USB 支持与 libusb-win32 filter，连接手机、解锁并信任电脑；关闭其他占用同一手机的程序。
 2. 刷新并选择手机和输出设备，点击“开始监听”。每次启动默认非静音、监听音量 50%；需要静音时勾选“静音输出”。
 3. 压缩器参数可实时调整；“高级设置”中的“监听音量”只影响本程序最终输出。
 4. 停止或关闭窗口后等待 USB 恢复完成。手机暂停播放时保持连接，恢复播放后自动继续。
+
+### AirPlay 仅音频
+
+从 `v0.2.0-preview.4` 起支持 AirPlay 音频输入。
+
+1. 电脑与 iPhone/iPad 连接同一局域网，完整保留程序旁的 `Wireless/` 目录。
+2. 左上角输入选择 **AirPlay**，输出选择 Windows 上的耳机或 DAC，点击“开始监听”。
+3. 在 iPhone 控制中心的“正在播放”面板打开 **AirPlay 音频**列表，选择 **ZL Audio Bridge**，再播放音乐。
+4. 音频直接进入 ZLCompressor；压缩器、监听音量和静音照常使用。手机端 AirPlay 音量也会作用于最终输出。
+
+使用“正在播放”的音频路由即可只传音频，无需开启屏幕镜像。一次处理一台发送设备；切换 USB / AirPlay 前先停止。AirPlay 模式不需要 USB filter 或 Bonjour。
+
+若发现不到接收端或连接后无声，检查同一局域网及 Windows 防火墙是否允许 `Wireless/AudioBridge.AirPlayHost.exe` 在专用网络收发。控制端口为 TCP 5002/7002，媒体端口动态协商；仅放行两个固定端口可能仍无声。程序不自动修改防火墙。
+
+AirPlay 的发送端缓冲和无线网络延迟不计入界面的“软件延迟估计”。对游戏实时监听仍建议 USB。编译、自动回归与本机检查记录见[集成验收](docs/zl-bridge-validation.zh-CN.md)；iPhone 无线实机试听待验证。
 
 iPad 停止后无法重新连接的问题已加入自动恢复，触发补救时可能需要约 25 秒，见[修复与实机验证](docs/usb-restore-ipad-fix.zh-CN.md)。
 
@@ -52,7 +68,7 @@ iPad 停止后无法重新连接的问题已加入自动恢复，触发补救时
 ```
 
 构建脚本默认使用 `D:/GreenSoftware/iPhoneMirror/audio-only-work` 中的 MSVC/Windows SDK、Ninja、CMake，以及 `.tools/llvm-22.1.0` 中的 Clang。下载 LLVM 时需要 curl 和 7z。
-输出为 `build/zl-bridge` 与 `dist/ZLUsbAudioBridge`。默认运行 AudioCore.Tests、PcmProcessing.Tests、ZLBridge.Dsp 三组回归，不连接手机或打开音频端点。
+输出为 `build/zl-bridge` 与 `dist/ZLUsbAudioBridge`。默认运行 AudioCore.Tests、PcmProcessing.Tests、ZLBridge.Dsp、AirPlay.Runtime、AirPlay.Tests 五组回归，不连接手机或打开音频端点。
 
 ## 诊断与稳定性测试
 
@@ -75,6 +91,7 @@ ZL 集成测试结果与边界见[集成验收](docs/zl-bridge-validation.zh-CN.
 | `src/ZLUsbAudioBridge/` | JUCE 程序、原版 ZL 编辑器集成、处理器适配及自测 |
 | `src/AudioCore/` | USB 协议、设备发现、PCM 队列、音频引擎、WASAPI 和诊断 C ABI |
 | `src/AudioBridge.UsbRestore/` | 独立 USB 配置恢复辅助程序 |
+| `src/AudioBridge.AirPlayHost/` | 独立 AirPlay 接收进程构建，源码及运行库固定在 `third_party/iPhoneMirror-AirPlay/` |
 | `tests/`、`tools/AudioProbe/` | 协议 fixtures、Native/PCM/ABI 回归、命令行诊断 |
 | `third_party/` | 上游源码快照、依赖、补丁、版本与许可证 |
 | `scripts/` | 依赖准备、ZL 构建打包、稳定性测试及驱动备份与试切换 |
@@ -83,7 +100,7 @@ WPF 前端、旧发布脚本和一次性基线导入脚本已移除，需要追�
 
 ## 当前限制
 
-- 输入固定为 48 kHz / PCM16 / 立体声，WASAPI 使用共享事件模式；不支持独占输出。
+- USB 为 48 kHz，AirPlay 支持 44.1 / 48 kHz；均为 PCM16 / 立体声，WASAPI 使用共享事件模式；不支持独占输出。
 - Lookahead、Oversampling 和外部侧链固定关闭；预设导入也受相同约束。原版压缩器其他参数仍可调节。
 - 延迟显示是软件队列、WASAPI padding 和 DSP 延迟的估计，不是实测端到端延迟。
 - 尚未实现自动连接、开机启动和时钟漂移补偿。长时间游戏、目标 DAC 听感及异常交互验收仍待完成。

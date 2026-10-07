@@ -1,6 +1,7 @@
 # ZL 原版界面 USB 集成：实现与验收
 
 日期：2026-09-24。对应 `zl-standalone-usb-integration-plan.zh-CN.md`。
+2026-10-07 更新：加入 AirPlay 纯音频输入，接收 PCM 直接进入 ZL，再输出到 Windows 耳机 / DAC；支持 44.1 / 48 kHz。历史 USB 记录保留，新增验收如下。
 2026-10-03 更新：升级至 ZLCompressor 0.6.1 / JUCE 9.0.2，桥接补丁保留；构建、三组回归、无设备界面检查与静音 WASAPI 暂停/恢复通过，详见下方本轮验收。
 2026-09-29 更新：新增“修复 USB”入口与分阶段连接诊断；三组原生/DSP 回归、助手目标拒绝检查和无设备 UI smoke 通过。真实故障恢复、UAC 交互与 A→B→A 换机尚待实机验证，见项目文档 `docs/test-results/2026-09-29-usb-repair/README.zh-CN.md`。
 2026-09-27 更新：iPad 停止后的自动 USB 恢复已修复，连续两轮主程序采集、停止及重新连接通过。触发补救时停止约 23 秒，详见项目文档 `docs/usb-restore-ipad-fix.zh-CN.md`；下方历史验收数据保持原样。
@@ -31,6 +32,18 @@ iPhone → 原仅音频 USB 协议 → UsbAudioSource → PcmPipe / SPSC
 新增应用按 AGPL-3.0 提供，来源和各组件许可见根目录 `THIRD_PARTY_NOTICES.md`。
 
 ## 已完成测试
+
+### 2026-10-07：AirPlay 音频输入
+
+新增链路：`AirPlay/RAOP → AudioBridge.AirPlayHost → 本地命名管道 → AirPlayAudioSource → PcmPipe → ZL → WASAPI`。接收端固定到 iPhoneMirror `1270c443a29457751cadd20f6d7bbe1ce213b9db` 的 WirelessHost 和配套 AirPlayServer DLL。协议与解码保持独立进程；主程序没有另一条绕过 ZL 的播放路径。USB / AirPlay 互斥使用同一个处理器和输出端点，原 C ABI 保持 USB 兼容。
+
+- 构建成功，5 组 CTest 全通过：[日志](test-results/2026-10-07-airplay/ctest.log)。AirPlay 测试覆盖分片 IPC、先于 Connected 的音频、44.1→48→44.1 kHz 切换、手机端初始静音与音量、压缩后样本、第二发送端隔离、断开重连、非法头、进程退出、阻塞连接/半包时停止及并发输入启动。
+- 真实 AirPlay 接收 DLL 加载、真实接收进程 Ready→Stop 已通过；未修改防火墙，未连接手机。
+- ZL 在 44.1/48 kHz 切换后压缩曲线及立体声保持通过，DSP 延迟 0 帧：[DSP 报告](test-results/2026-10-07-airplay/dsp.json)。
+- 真实 WASAPI 静音合成流：44.1 kHz 渲染 410,237 帧，48 kHz 渲染 410,528 帧；各 3 次暂停/恢复，欠载和缺失帧均为 0：[44.1 kHz](test-results/2026-10-07-airplay/wasapi-44100.json)、[48 kHz](test-results/2026-10-07-airplay/wasapi-48000.json)。这些是本机输出检查，不是无线端到端延迟测量。
+- 隐藏界面验证通过：AirPlay 在没有 USB 手机且有输出设备时可以开始，USB 无手机时不能开始，AirPlay 无输出时不能开始；所有这些场景的“修复 USB”按钮禁用。主界面、高级设置、最小窗口截图保存在[本轮目录](test-results/2026-10-07-airplay)。
+
+尚未完成：真实 iPhone/iPad 的局域网发现、音乐 App 投送、Wi-Fi 抖动下长时间播放、设备音量与耳机试听。选择 iOS“正在播放 → AirPlay 音频”才是纯音频传输；如果误选屏幕镜像，上游仍可能接收并解码视频，本桥接程序只丢弃视频回调。界面的软件延迟不包含 AirPlay 发送端和网络缓冲。
 
 ### 2026-10-03：ZLCompressor 0.6.1 升级
 

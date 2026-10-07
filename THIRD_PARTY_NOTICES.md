@@ -46,9 +46,31 @@ The new PowerShell installation scripts are part of this GPL-3.0 project.
 fixtures from https://github.com/danielpaulus/quicktime_video_hack.
 Copyright (c) 2019 danielpaulus; MIT license, included alongside the fixtures.
 
-The current application does not bundle .NET, WPF, FFmpeg, AirPlay, libusb-1.0
+The current application does not bundle .NET, WPF, libusb-1.0
 or a VST host. Microsoft/Apple device support
 and the existing libusb filter must already be installed on the test machine.
+
+## AirPlay audio input (2026-10-07)
+
+`third_party/iPhoneMirror-AirPlay/` imports the WirelessHost and Windows DNS-SD
+shim from https://github.com/RayrenSX/iPhoneMirror at commit
+`1270c443a29457751cadd20f6d7bbe1ce213b9db`, GPL-3.0-only. Integration changes,
+dependency hashes, source rebuilding instructions and Microsoft runtime
+provenance are recorded in its `BRIDGE.md` and `pins.json`.
+
+The independent `AudioBridge.AirPlayHost.exe` loads the pinned patched
+AirPlayServer v1.1.2 receiver and sends decoded PCM through a local named pipe.
+Its runtime includes AirPlayServer (MIT wrapper), PlayFair (GPL-3.0), FFmpeg
+4.4.2 (LGPL-2.1-or-later) and FDK AAC (Fraunhofer FDK AAC license). Original
+notices, license texts and source links are retained in
+`third_party/iPhoneMirror-AirPlay/airplay-server/` and copied into the
+distribution's `Wireless/licenses/`. The corresponding source and patches
+must accompany binary distribution under the applicable component licenses.
+
+App-local Microsoft Visual C++ runtime DLLs are included for AirPlayServer;
+their Microsoft signatures were verified on import. AirPlay is an Apple
+protocol and trademark; this is an unofficial compatible receiver. AirPlay
+mode does not require the USB drivers mentioned above.
 
 ## ZL USB Audio Bridge (2026-09-24 integration)
 

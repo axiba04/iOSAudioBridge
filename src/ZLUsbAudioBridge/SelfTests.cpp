@@ -95,6 +95,17 @@ juce::var runZlSelfTests(PluginProcessor& processor,ZlProcessorAdapter& adapter)
     require(std::abs(output_db-expected_db)<.3f,"Compression ratio/threshold steady state differs from expected curve");
     require(std::abs(right[479]/left[479]-.5f)<1e-5f,"Fully linked compression changed stereo balance");
     result->setProperty("compressed_db",output_db);result->setProperty("expected_db",expected_db);result->setProperty("stereo_link",true);
+    // Reconnect an AirPlay music route, then switch back to USB. Verify real
+    // ZL compression at each rate, not just the engine's reported format.
+    for(const auto rate:{44100,48000,44100}){
+        adapter.release();adapter.prepare(rate,4096);
+        require(processor.getSampleRate()==rate,"ZL did not adopt the input sample rate");
+        for(int block=0;block<100;++block){left.fill(.5f);right.fill(.25f);require(process(441),"AirPlay ZL processing failed");}
+        const auto level=20.f*std::log10(std::abs(left[440]));
+        require(std::abs(level-expected_db)<.3f,"AirPlay compression curve changed with sample rate");
+        require(std::abs(right[440]/left[440]-.5f)<1e-5f,"AirPlay stereo balance changed");
+    }
+    result->setProperty("airplay_sample_rate_switches",true);
     auto constant=[&](float amplitude,int blocks){
         for(int i=0;i<blocks;++i){left.fill(amplitude);right.fill(amplitude*.5f);require(process(480),"Envelope processing failed");}
         return 20.f*std::log10(std::abs(left[479])/amplitude);
@@ -147,13 +158,13 @@ juce::var runZlSelfTests(PluginProcessor& processor,ZlProcessorAdapter& adapter)
     return owned;
 }
 
-juce::var runZlWasapiTest(ZlProcessorAdapter& adapter) {
-    adapter.prepare(48000,4096);
-    audiobridge::WasapiOutput output;output.start(L"",3072,4096,0,&adapter);
+juce::var runZlWasapiTest(ZlProcessorAdapter& adapter,uint32_t sample_rate) {
+    adapter.prepare(sample_rate,4096);
+    audiobridge::WasapiOutput output;output.start(L"",3072,4096,0,&adapter,sample_rate);
     std::vector<audiobridge::StereoFrame> samples(1024,{8000,-4000});
     auto feed=[&](int blocks){
         auto at=std::chrono::steady_clock::now();
-        for(int i=0;i<blocks;++i){output.enqueue(std::span(reinterpret_cast<const uint8_t*>(samples.data()),samples.size()*4));at+=std::chrono::microseconds(21333);std::this_thread::sleep_until(at);}
+        for(int i=0;i<blocks;++i){output.enqueue(std::span(reinterpret_cast<const uint8_t*>(samples.data()),samples.size()*4));at+=std::chrono::microseconds(1024LL*1000000/sample_rate);std::this_thread::sleep_until(at);}
     };
     feed(100);
     for(int cycle=0;cycle<3;++cycle) {
@@ -170,6 +181,7 @@ juce::var runZlWasapiTest(ZlProcessorAdapter& adapter) {
     require(status.output_left_db<=-120&&status.output_right_db<=-120,"ZL WASAPI mute failed");
     auto* result=new juce::DynamicObject;
     result->setProperty("passed",true);result->setProperty("pause_cycles",3);result->setProperty("muted",true);
+    result->setProperty("sample_rate",static_cast<int>(sample_rate));
     result->setProperty("rendered_frames",static_cast<juce::int64>(status.rendered_frames));result->setProperty("underruns",static_cast<juce::int64>(status.underruns));
     result->setProperty("missing_frames",static_cast<juce::int64>(status.missing_frames));result->setProperty("max_render_us",static_cast<juce::int64>(telemetry.max_render_us));
     result->setProperty("period_frames",static_cast<int>(status.engine_period_frames));return juce::var(result);

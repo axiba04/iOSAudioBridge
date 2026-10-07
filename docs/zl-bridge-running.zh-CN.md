@@ -1,10 +1,24 @@
 # ZL USB Audio Bridge 使用与构建
 
-2026-09-24：Windows x64 本地集成预览版。保留 ZLCompressor 原版编辑器、压缩器和分析器；输入改为 iPhone USB 仅音频流。不是 ZL-Audio 官方发行版。
+2026-10-07：Windows x64 本地集成预览版。保留 ZLCompressor 原版编辑器、压缩器和分析器；输入支持 iPhone USB 与 AirPlay 仅音频流。不是 ZL-Audio 官方发行版。
+
+## AirPlay 音频
+
+完整解压并保留 `Wireless/`。电脑与手机连接同一局域网，在程序左上角选择 **AirPlay**，选择 Windows 耳机 / DAC，点击“开始监听”。状态显示接收服务就绪后，在 iPhone/iPad 的控制中心“正在播放”面板打开 AirPlay 音频列表，选择 **ZL Audio Bridge**。不要用“屏幕镜像”入口发起纯音频传输。
+
+接收进程将解码的 PCM 直接交给 ZLCompressor，再经最终音量和 WASAPI 输出。支持 44.1 / 48 kHz、PCM16、立体声；ZL 按源采样率处理，设备格式转换交给 WASAPI。发送端 AirPlay 音量与本程序监听音量相乘，均作用于压缩处理后的输出。默认监听音量仍为 50%。
+
+仅第一台发出音频的手机进入当前压缩器，其他手机不会混音；已选手机断开后可接收下一台。暂停时保留连接，断开后服务继续等待。停止监听会关闭接收进程和网络服务，再切回 USB 即可使用原链路。切换预设时仍按现有流程停止并重启输入，AirPlay 发送端可能需要重新选择接收端。
+
+AirPlay 不需要 USB filter、手机 USB 信任或 Bonjour。Windows 防火墙需允许 `Wireless/AudioBridge.AirPlayHost.exe` 在专用局域网通信；控制端口为 TCP 5002/7002，媒体端口动态协商，发现依赖 mDNS。程序不自动新增防火墙规则。发现不到设备时先检查同一网段、无线客户端隔离及防火墙；接收进程退出时状态栏会报错，可停止后重试。
+
+AirPlay 延迟包含发送端缓冲和网络抖动，界面延迟数字仅反映本机队列、WASAPI 和 DSP。对游戏低延迟监听优先使用 USB。仅音频路由已做程序和模拟流回归，具体 iPhone/iOS、Wi-Fi 环境下的连接与试听仍待实机验收。
+
+无设备诊断：`Wireless/AudioBridge.AirPlayHost.exe --check-runtime` 返回 0 表示接收库可加载；40 表示 Windows 代码完整性拒绝映像，41 表示依赖缺失或加载失败，42 表示接口不匹配。接收日志复用本程序的 capture 日志，条目前缀为 `airplay_host` / `airplay_source`。
 
 ## 运行
 
-从 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 下载并完整解压 Windows x64 程序包，打开 `ZLUsbAudioBridge/ZLUsbAudioBridge.exe`；自行构建的程序位于 `dist/ZLUsbAudioBridge/`。保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe` 与 `libusb0.dll`。无需 VST Host 或 .NET。
+从 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 下载并完整解压 Windows x64 程序包，打开 `ZLUsbAudioBridge/ZLUsbAudioBridge.exe`；自行构建的程序位于 `dist/ZLUsbAudioBridge/`。保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll` 与 `Wireless/`。无需 VST Host 或 .NET。AirPlay 音频输入从 `v0.2.0-preview.4` 起提供。
 
 当前包使用 libusb-win32 1.4.0.2 DLL。系统驱动单独维护，本机升级及恢复方法见[驱动升级记录](driver-upgrade-evaluation.zh-CN.md)。
 
@@ -51,7 +65,7 @@ Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版
 固定版本见 `third_party/ZLCompressor.pins.json`。Clang 编译使用 MSVC STL 和 Windows SDK；C++20、SSE2、静态 CRT。
 
 构建目录为 `build/zl-bridge`，本地发布目录为 `dist/ZLUsbAudioBridge`。`dist/` 不纳入 Git，预编译程序和驱动 ZIP 作为 Release 附件分发。
-默认执行 Native、PCM 适配和 ZL DSP 三组回归；合成 DSP 检查不打开音频端点、不连接 USB，包含 Normal→High→Normal 的 FFT 历史缓冲切换、频率/幅度检查和零 DSP 延迟检查。
+默认执行 Native、PCM 适配、ZL DSP、AirPlay 运行库加载和 AirPlay IPC 五组回归；不打开音频端点、不连接 USB。DSP 检查包含 Normal→High→Normal 的 FFT 历史缓冲切换、频率/幅度、44.1↔48 kHz 切换后的真实压缩曲线和零 DSP 延迟检查。
 发布目录包含依赖许可和来源清单。对外分发时需同时提供本项目对应源码、固定依赖及构建材料，不能只发 EXE。
 
 ## 静音诊断入口
@@ -60,12 +74,16 @@ Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版
 ./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --self-test --result E:/Code/iOSAudioBridge/build/dsp.json
 ./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --ui-smoke --result E:/Code/iOSAudioBridge/build/ui.json
 ./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --ui-smoke --ui-empty --result E:/Code/iOSAudioBridge/build/ui-empty.json
+./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --ui-smoke --airplay --result E:/Code/iOSAudioBridge/build/ui-airplay.json
 ./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --wasapi-smoke --result E:/Code/iOSAudioBridge/build/wasapi.json
+./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --wasapi-smoke --wasapi-rate 44100 --result E:/Code/iOSAudioBridge/build/wasapi-44100.json
 # 仅在手机已准备好时运行；使用已保存/默认输出，强制静音
 ./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --capture-muted 60 --result E:/Code/iOSAudioBridge/build/capture.json
+# AirPlay 静音实机验收：运行后在手机上选择接收端并播放
+./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --airplay --capture-muted 60 --result E:/Code/iOSAudioBridge/build/capture-airplay.json
 ```
 
-UI smoke 只枚举 USB、用合成信号绘制隐藏界面，并输出主界面、展开高级设置（`-advanced.png`）、最小窗口（`-minimum.png`）截图；附加 `--ui-empty` 可在枚举后清空测试用设备列表，验证无手机和无输出时的提示及按钮状态，不修改系统设备。WASAPI smoke 向默认端点提交静音合成音频，检查 3 次暂停/恢复。
+UI smoke 枚举设备、用合成信号绘制隐藏界面，并输出主界面、展开高级设置（`-advanced.png`）、最小窗口（`-minimum.png`）截图；附加 `--airplay` 检查 AirPlay 入口（不启动接收服务、不枚举 USB），附加 `--ui-empty` 可清空测试用设备列表，验证无设备时的提示及按钮状态。WASAPI smoke 向默认端点提交静音合成音频，检查 3 次暂停/恢复；`--wasapi-rate 44100` 验证 AirPlay 常见采样率。
 capture-muted 包含连接启动时间，音频持续时间可能略短于指定秒数，结束还需等待 USB 释放；同时输出每秒 JSONL。
 测试程序退出码 0 不代替检查报告中的欠载、缺失帧、丢帧、视频包、静音和最终 USB 状态。
 

@@ -27,12 +27,16 @@ public:
         editor_.reset(processor_.createEditorAndMakeActive());
         editor_->setResizable(false,false);
         addAndMakeVisible(*editor_);
-        for(auto* c : std::array<juce::Component*,13>{&phones_,&outputs_,&refresh_,&start_,&stop_,&repair_,&preset_,&mute_,&advanced_,&status_,&output_status_,&phone_label_,&output_label_})addAndMakeVisible(c);
+        for(auto* c : std::array<juce::Component*,15>{&source_,&receiver_,&phones_,&outputs_,&refresh_,&start_,&stop_,&repair_,&preset_,&mute_,&advanced_,&status_,&output_status_,&phone_label_,&output_label_})addAndMakeVisible(c);
         for(auto* c : std::array<juce::Component*,4>{&volume_,&volume_label_,&volume_hint_,&diagnostics_})addChildComponent(c);
         for(auto* c:chromeControls())c->setLookAndFeel(&chrome_);
         phone_label_.setText(juce::String::fromUTF8("USB 设备"),juce::dontSendNotification);
         output_label_.setText(juce::String::fromUTF8("音频输出"),juce::dontSendNotification);
         phones_.setName(juce::String::fromUTF8("USB 设备"));outputs_.setName(juce::String::fromUTF8("音频输出"));
+        source_.addItem("USB",1);source_.addItem("AirPlay",2);source_.setSelectedId(1,juce::dontSendNotification);
+        source_.setName(juce::String::fromUTF8("音频来源"));
+        receiver_.setText("ZL Audio Bridge",juce::dontSendNotification);
+        receiver_.setTooltip(juce::String::fromUTF8("开始监听后，在 iPhone 正在播放面板的 AirPlay 音频列表中选择 ZL Audio Bridge"));
         phones_.setTextWhenNoChoicesAvailable(juce::String::fromUTF8("未检测到 iPhone / iPad"));
         outputs_.setTextWhenNoChoicesAvailable(juce::String::fromUTF8("未检测到音频输出设备"));
         volume_.setRange(0,100,1);volume_.setValue(50,juce::dontSendNotification);
@@ -40,7 +44,7 @@ public:
         volume_.setTextValueSuffix(" %");volume_.setName(juce::String::fromUTF8("监听音量"));
         volume_label_.setText(juce::String::fromUTF8("监听音量"),juce::dontSendNotification);
         volume_hint_.setText(juce::String::fromUTF8("仅调节本软件输出，不改变 Windows 音量"),juce::dontSendNotification);
-        for(auto* label:{&status_,&output_status_,&phone_label_,&output_label_,&volume_label_,&volume_hint_,&diagnostics_})
+        for(auto* label:{&receiver_,&status_,&output_status_,&phone_label_,&output_label_,&volume_label_,&volume_hint_,&diagnostics_})
             label->setFont(BridgeLookAndFeel::controlFont());
         output_status_.setJustificationType(juce::Justification::centredRight);
         diagnostics_.setJustificationType(juce::Justification::centredLeft);
@@ -58,6 +62,7 @@ public:
         repair_.setTooltip(juce::String::fromUTF8("修复所选手机的 USB 连接，需要管理员授权。请先关闭其他使用该手机的软件。"));
         repair_.onClick=[this]{repairConnection();};
         phones_.onChange=[this]{repair_notice_.clear();};
+        source_.onChange=[this]{refreshDevices();resized();};
         refresh_.onClick=[this]{refreshDevices();};start_.onClick=[this]{startCapture();};stop_.onClick=[this]{stopCapture();};
         preset_.onClick=[this]{pending_preset_=true;restart_after_=isRunning();stopCapture();};
         mute_.onClick=[this]{engine_.volume(gain());};volume_.onValueChange=[this]{engine_.volume(gain());};
@@ -66,8 +71,12 @@ public:
             pending_state_=std::move(state);restart_after_=isRunning();stopCapture();
         };
         const auto settings=settingsFolder().getChildFile("devices.json");
-        if(settings.existsAsFile())saved_output_=juce::JSON::parse(settings)["output"].toString();
+        if(settings.existsAsFile()){
+            const auto saved=juce::JSON::parse(settings);saved_output_=saved["output"].toString();
+            if(saved["source"].toString()=="airplay")source_.setSelectedId(2,juce::dontSendNotification);
+        }
         auto tokens=juce::StringArray::fromTokens(arguments_,true);
+        if(arguments_.contains("--"))source_.setSelectedId(tokens.contains("--airplay")?2:1,juce::dontSendNotification);
         const auto capture=tokens.indexOf("--capture-muted");
         if(capture>=0) {
             capture_seconds_=capture+1<tokens.size()?tokens[capture+1].getIntValue():30;
@@ -90,7 +99,7 @@ public:
         if(task_.valid())task_.wait();
         engine_.stop();editor_.reset();
         for(auto* c:chromeControls())c->setLookAndFeel(nullptr);
-        if(!test_)try{auto* o=new juce::DynamicObject;o->setProperty("output",saved_output_);writeJson(settingsFolder().getChildFile("devices.json"),o);}catch(...){}
+        if(!test_)try{auto* o=new juce::DynamicObject;o->setProperty("output",saved_output_);o->setProperty("source",isAirPlay()?"airplay":"usb");writeJson(settingsFolder().getChildFile("devices.json"),o);}catch(...){}
     }
     bool testMode() const noexcept{return test_;}
     void close() {closing_=true;if(!busy())stopCapture();}
@@ -104,7 +113,10 @@ public:
     void resized() override {
         auto bounds=getLocalBounds();auto top=bounds.removeFromTop(92).reduced(16,10);
         auto row=top.removeFromTop(32);refresh_.setBounds(row.removeFromRight(76));row.removeFromRight(8);
-        phone_label_.setBounds(row.removeFromLeft(72));phones_.setBounds(row.removeFromLeft(juce::roundToInt(getWidth()*.29f)));
+        source_.setBounds(row.removeFromLeft(104));row.removeFromLeft(8);
+        phone_label_.setText(juce::String::fromUTF8(isAirPlay()?"接收名称":"USB 设备"),juce::dontSendNotification);
+        phone_label_.setBounds(row.removeFromLeft(72));phones_.setBounds(row.removeFromLeft(juce::roundToInt(getWidth()*.22f)));
+        receiver_.setBounds(phones_.getBounds());receiver_.setVisible(isAirPlay());phones_.setVisible(!isAirPlay());
         row.removeFromLeft(16);output_label_.setBounds(row.removeFromLeft(72));outputs_.setBounds(row);
         top.removeFromTop(8);auto actions=top.removeFromTop(32);
         start_.setBounds(actions.removeFromLeft(116));actions.removeFromLeft(8);stop_.setBounds(actions.removeFromLeft(80));
@@ -127,8 +139,8 @@ public:
         editor_->setTransform(juce::AffineTransform::scale(scale).translated(static_cast<float>(bounds.getX()),static_cast<float>(bounds.getY())));
     }
 private:
-    std::array<juce::Component*,18> chromeControls() {
-        return {&phones_,&outputs_,&refresh_,&start_,&stop_,&repair_,&preset_,&mute_,&advanced_,&status_,&output_status_,&phone_label_,&output_label_,&volume_,&volume_label_,&volume_hint_,&diagnostics_,&tooltips_};
+    std::array<juce::Component*,20> chromeControls() {
+        return {&source_,&receiver_,&phones_,&outputs_,&refresh_,&start_,&stop_,&repair_,&preset_,&mute_,&advanced_,&status_,&output_status_,&phone_label_,&output_label_,&volume_,&volume_label_,&volume_hint_,&diagnostics_,&tooltips_};
     }
     void syncTheme() {
         const auto colour=[this](const juce::String& name) {
@@ -145,9 +157,10 @@ private:
     }
     bool hasSelection() const {
         const auto phone=phones_.getSelectedItemIndex(),output=outputs_.getSelectedItemIndex();
-        return phone>=0 && static_cast<size_t>(phone)<phone_items_.size() && output>=0 && static_cast<size_t>(output)<output_items_.size();
+        return (isAirPlay() || (phone>=0 && static_cast<size_t>(phone)<phone_items_.size())) && output>=0 && static_cast<size_t>(output)<output_items_.size();
     }
-    bool hasPhone() const {const auto index=phones_.getSelectedItemIndex();return index>=0&&static_cast<size_t>(index)<phone_items_.size();}
+    bool isAirPlay() const {return source_.getSelectedId()==2;}
+    bool hasPhone() const {const auto index=phones_.getSelectedItemIndex();return !isAirPlay()&&index>=0&&static_cast<size_t>(index)<phone_items_.size();}
     bool busy() const{return task_.valid();}
     bool isRunning() const {const auto s=engine_.status().state;return s==AB_CONNECTING||s==AB_READY||s==AB_STREAMING||s==AB_STOPPING;}
     float gain() const{return (test_||mute_.getToggleState())?0.f:static_cast<float>(volume_.getValue()/100.0);}
@@ -160,7 +173,7 @@ private:
         refresh_.setButtonText(juce::String::fromUTF8("刷新中…"));start_.setEnabled(false);
         phones_.setEnabled(false);outputs_.setEnabled(false);refresh_.setEnabled(false);
         pending_=Pending::refresh;
-        task_=std::async(std::launch::async,[this]{new_phones_=list_phones();new_outputs_=list_outputs();});
+        task_=std::async(std::launch::async,[this,airplay=isAirPlay()]{new_phones_=airplay?std::vector<AB_Device>{}:list_phones();new_outputs_=list_outputs();});
     }
     void repairConnection() {
         if(busy()||closing_||isRunning()||!hasPhone())return;
@@ -175,11 +188,17 @@ private:
     void startCapture() {
         if(busy()||closing_||isRunning())return;
         const auto phone=phones_.getSelectedItemIndex(),output=outputs_.getSelectedItemIndex();
-        if(!hasSelection()){error_=juce::String::fromUTF8("请选择已连接的手机和输出设备");return;}
+        if(!hasSelection()){error_=juce::String::fromUTF8(isAirPlay()?"请选择耳机或音频输出设备":"请选择已连接的手机和输出设备");return;}
         AB_Config c{};c.struct_size=sizeof(c);c.version=AB_VERSION;c.volume=gain();
-        copy_text(c.device_id,phone_items_[static_cast<size_t>(phone)].id);copy_text(c.output_id,output_items_[static_cast<size_t>(output)].id);
+        if(!isAirPlay())copy_text(c.device_id,phone_items_[static_cast<size_t>(phone)].id);
+        copy_text(c.output_id,output_items_[static_cast<size_t>(output)].id);
         saved_output_=juce::String(c.output_id);error_.clear();repair_notice_.clear();editor_->setEnabled(false);
-        try{engine_.start(c);capture_started_=std::chrono::steady_clock::now();capture_begun_=true;}
+        try{
+            if(isAirPlay())engine_.startAirPlay(c,std::filesystem::path(juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+                .getSiblingFile("Wireless").getChildFile("AudioBridge.AirPlayHost.exe").getFullPathName().toWideCharPointer()));
+            else engine_.start(c);
+            capture_started_=std::chrono::steady_clock::now();capture_begun_=true;
+        }
         catch(const std::exception& e){error_=e.what();}
     }
     void stopCapture() {
@@ -191,6 +210,7 @@ private:
         const auto s=engine_.status();const auto t=engine_.telemetry();
         auto* o=new juce::DynamicObject;
         o->setProperty("state",static_cast<int>(s.state));o->setProperty("message",juce::String(s.message));
+        o->setProperty("source",isAirPlay()?"airplay":"usb");o->setProperty("sample_rate",static_cast<int>(s.sample_rate));
         o->setProperty("audio_packets",static_cast<juce::int64>(s.audio_packets));o->setProperty("video_packets",static_cast<juce::int64>(s.video_packets));
         o->setProperty("video_bytes",static_cast<juce::int64>(s.video_bytes));o->setProperty("rendered_frames",static_cast<juce::int64>(s.rendered_frames));
         o->setProperty("underruns",static_cast<juce::int64>(s.underruns));o->setProperty("missing_frames",static_cast<juce::int64>(s.missing_frames));
@@ -251,6 +271,7 @@ private:
             }
             syncTheme();
             const auto s=engine_.status();const auto t=engine_.telemetry();const auto running=isRunning();
+            source_.setEnabled(!busy()&&!running&&!closing_);
             phones_.setEnabled(!busy()&&!running&&!closing_&&!phone_items_.empty());outputs_.setEnabled(!busy()&&!running&&!closing_&&!output_items_.empty());refresh_.setEnabled(!busy()&&!running&&!closing_);
             start_.setEnabled(!busy()&&!running&&!closing_&&hasSelection());stop_.setEnabled(!busy()&&running&&!closing_);preset_.setEnabled(!busy()&&!closing_);
             repair_.setEnabled(!busy()&&!running&&!closing_&&hasPhone());
@@ -261,12 +282,13 @@ private:
             else if(!repair_notice_.isEmpty())message=repair_notice_;
             else if(s.state==AB_ERROR)message=juce::String(s.message);
             else if(pending_==Pending::refresh)message=juce::String::fromUTF8("正在刷新设备…");
-            else if(closing_||s.state==AB_STOPPING||pending_==Pending::stop)message=juce::String::fromUTF8("正在停止并恢复 USB，请稍候…");
-            else if(s.state==AB_CONNECTING)message=juce::String::fromUTF8("正在连接 USB 设备…");
-            else if(s.state==AB_STREAMING)message=juce::String::fromUTF8("正在监听");
-            else if(s.state==AB_READY)message=juce::String::fromUTF8("已连接，等待音频…");
-            else if(phone_items_.empty())message=juce::String::fromUTF8("请连接并解锁 iPhone / iPad，然后点击刷新");
+            else if(closing_||s.state==AB_STOPPING||pending_==Pending::stop)message=juce::String::fromUTF8(isAirPlay()?"正在停止 AirPlay，请稍候…":"正在停止并恢复 USB，请稍候…");
+            else if(s.state==AB_CONNECTING)message=juce::String::fromUTF8(isAirPlay()?"正在启动 AirPlay…":"正在连接 USB 设备…");
+            else if(s.state==AB_STREAMING)message=juce::String::fromUTF8(s.source_idle?"已连接，等待音频…":"正在监听");
+            else if(s.state==AB_READY)message=isAirPlay()?juce::String(s.message):juce::String::fromUTF8("已连接，等待音频…");
+            else if(!isAirPlay()&&phone_items_.empty())message=juce::String::fromUTF8("请连接并解锁 iPhone / iPad，然后点击刷新");
             else if(output_items_.empty())message=juce::String::fromUTF8("请连接或启用音频输出设备，然后点击刷新");
+            else if(isAirPlay())message=juce::String::fromUTF8("点击开始监听，再从 iPhone 的 AirPlay 音频列表选择 ZL Audio Bridge");
             else message=juce::String::fromUTF8("设备已就绪，点击“开始监听”");
             status_.setText(message,juce::dontSendNotification);status_.setTooltip(message);
             output_status_.setText(juce::String::fromUTF8((test_||mute_.getToggleState())?"输出已静音":"输出已开启")+juce::String::fromUTF8(" · 音量 ")+juce::String(volume_.getValue(),0)+"%",juce::dontSendNotification);
@@ -274,8 +296,9 @@ private:
                 juce::String::fromUTF8("设备输出 ")+juce::String(s.output_left_db,1)+" / "+juce::String(s.output_right_db,1)+" dB   "+
                 juce::String::fromUTF8("缓冲 ")+juce::String(s.queued_frames)+" / "+juce::String(s.capacity_frames)+"\n"+
                 juce::String::fromUTF8("欠载 ")+juce::String(static_cast<juce::int64>(s.underruns))+juce::String::fromUTF8("  缺失帧 ")+juce::String(static_cast<juce::int64>(s.missing_frames))+
-                juce::String::fromUTF8("  软件延迟估计 ")+juce::String(s.host_latency_ms+processor_.getLatencySamples()/48.0f,1)+" ms   DSP "+juce::String(processor_.getLatencySamples())+
-                juce::String::fromUTF8(" 帧\n48 kHz / PCM16 / 立体声 · WASAPI 共享模式 · Lookahead 0 / Oversampling Off"),juce::dontSendNotification);
+                juce::String::fromUTF8("  软件延迟估计 ")+juce::String(s.host_latency_ms+processor_.getLatencySamples()*1000.0f/(s.sample_rate?s.sample_rate:48000),1)+" ms   DSP "+juce::String(processor_.getLatencySamples())+
+                juce::String::fromUTF8(" 帧\n")+(s.sample_rate?juce::String(s.sample_rate/1000.0,1):juce::String("--"))+
+                juce::String::fromUTF8(" kHz / PCM16 / 立体声 · WASAPI 共享模式 · Lookahead 0 / Oversampling Off"),juce::dontSendNotification);
             const auto now=std::chrono::steady_clock::now();
             if(smoke_&&!busy()&&!closing_) {
                 static_cast<PluginEditor*>(editor_.get())->bridgeOffscreenRefresh();
@@ -321,7 +344,7 @@ private:
     juce::String arguments_,saved_output_,error_,repair_notice_;std::function<void(int)> finished_;
     std::unique_ptr<juce::AudioProcessorEditor> editor_;
     BridgeLookAndFeel chrome_;
-    juce::ComboBox phones_,outputs_;
+    juce::ComboBox source_,phones_,outputs_;juce::Label receiver_;
     juce::TextButton refresh_{juce::String::fromUTF8("刷新")},start_{juce::String::fromUTF8("开始监听")},stop_{juce::String::fromUTF8("停止")},preset_{juce::String::fromUTF8("PUBG 调试预设")};
     juce::TextButton advanced_{juce::String::fromUTF8("高级设置")};
     juce::ToggleButton mute_{juce::String::fromUTF8("静音输出")};juce::Slider volume_;juce::Label status_,volume_label_,volume_hint_,diagnostics_,output_status_,phone_label_,output_label_;
@@ -370,7 +393,9 @@ public:
                 auto tokens=juce::StringArray::fromTokens(arguments,true);const auto index=tokens.indexOf("--result");
                 test_report_=index>=0&&index+1<tokens.size()?juce::File::getCurrentWorkingDirectory().getChildFile(tokens[index+1].unquoted()):
                     juce::File::getSpecialLocation(juce::File::currentExecutableFile).getSiblingFile("wasapi-test.json");
-                test_task_=std::async(std::launch::async,[this]{return runZlWasapiTest(*adapter_);});startTimer(100);return;
+                const auto rateIndex=tokens.indexOf("--wasapi-rate");
+                const auto rate=rateIndex>=0&&rateIndex+1<tokens.size()?static_cast<uint32_t>(tokens[rateIndex+1].getIntValue()):48000u;
+                test_task_=std::async(std::launch::async,[this,rate]{return runZlWasapiTest(*adapter_,rate);});startTimer(100);return;
             }
             engine_=std::make_unique<audiobridge::AudioEngine>(adapter_.get());
             window_=std::make_unique<BridgeWindow>(new BridgePanel(*processor_,*adapter_,*engine_,arguments,[this](int code){setApplicationReturnValue(code);quit();}));

@@ -7,6 +7,8 @@ build/
 **/bin/
 !third_party/libusb-win32/bin/
 !third_party/libusb-win32/bin/**
+!third_party/iPhoneMirror-AirPlay/airplay-server/bin/
+!third_party/iPhoneMirror-AirPlay/airplay-server/bin/**
 **/obj/
 *.user
 *.log

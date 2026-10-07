@@ -1,16 +1,11 @@
 #pragma once
 #include "AudioCore.h"
 #include "Buffer/PcmPipe.h"
+#include "Capture/SourceLifecycle.h"
 #include <functional>
 #include <thread>
 #include <mutex>
 namespace audiobridge {
-// Engine lifecycle hooks run on the session worker, never on the render thread.
-struct SourceLifecycle {
-    std::function<void(const AB_Config&)> prepare_output;
-    std::function<void()> check_output;
-    std::function<void()> stop_output;
-};
 class UsbAudioSource {
 public:
     UsbAudioSource(PcmPipe& pipe,SourceLifecycle lifecycle);

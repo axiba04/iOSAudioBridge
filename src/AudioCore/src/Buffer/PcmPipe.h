@@ -18,7 +18,7 @@ public:
     PcmPipe& operator=(const PcmPipe&)=delete;
     // Reset only after both queue owners have stopped.
     void reset() noexcept {
-        ring.reset();paused=false;packet_max=0;last_packet_ms=0;received=0;dropped=0;max_gap_us=0;
+        ring.reset();paused=false;remote_gain=1;packet_max=0;last_packet_ms=0;received=0;dropped=0;max_gap_us=0;
         last_tick_=0;ResetEvent(data_event_);++generation;
     }
     void enqueue(std::span<const uint8_t> pcm) noexcept {
@@ -36,6 +36,7 @@ public:
     HANDLE data_event() const noexcept { return data_event_; }
     SpscPcmRing ring;
     std::atomic<bool> paused{};
+    std::atomic<float> remote_gain{1};
     std::atomic<uint32_t> packet_max{};
     std::atomic<uint64_t> last_packet_ms{},received{},dropped{},max_gap_us{},generation{};
 private:
