@@ -1,5 +1,6 @@
 .research/
 .tools/
+third_party/rplayhub/deps/
 .nuget/
 .dotnet-home/
 build/

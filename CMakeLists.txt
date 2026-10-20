@@ -17,7 +17,8 @@ add_library(AudioCoreImpl STATIC
   ${CORE}/Transport/LibUsb0Transport.cpp ${CORE}/Device/AppleUsbDiscovery.cpp
   ${CORE}/Logging.cpp ${CORE}/Device/DeviceCatalog.cpp
   ${CORE}/Device/UsbDeviceRepair.cpp ${CORE}/Device/UsbRepairClient.cpp
-  ${CORE}/Wasapi/WasapiOutput.cpp ${CORE}/Capture/UsbAudioSource.cpp ${CORE}/Capture/AirPlayAudioSource.cpp ${CORE}/Engine/AudioEngine.cpp)
+  ${CORE}/Wasapi/WasapiOutput.cpp ${CORE}/Capture/UsbAudioSource.cpp ${CORE}/Capture/AirPlayAudioSource.cpp
+  ${CORE}/Capture/CoreDeviceAudioSource.cpp ${CORE}/Engine/AudioEngine.cpp)
 target_include_directories(AudioCoreImpl PUBLIC src/AudioCore/include ${CORE} "${USB}/include")
 set(AIRPLAY "${CMAKE_CURRENT_SOURCE_DIR}/third_party/iPhoneMirror-AirPlay")
 target_include_directories(AudioCoreImpl PUBLIC "${AIRPLAY}/WirelessHost")
@@ -41,6 +42,7 @@ add_executable(AudioCore.Tests tests/AudioCoreTests.cpp)
 target_link_libraries(AudioCore.Tests PRIVATE AudioCoreImpl AudioCore)
 enable_testing()
 add_subdirectory(src/AudioBridge.AirPlayHost)
+add_subdirectory(src/AudioBridge.CoreDeviceHost)
 add_test(NAME AudioCore.Tests COMMAND AudioCore.Tests)
 set_tests_properties(AudioCore.Tests PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 add_executable(PcmProcessing.Tests tests/PcmProcessingTests.cpp)
@@ -75,6 +77,11 @@ if(AB_BUILD_ZL)
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:AudioBridge.UsbRepair>" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Wireless" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>/Wireless"
     DEPENDS ZLCompressor_Standalone AudioBridge.UsbRestore AudioBridge.UsbRepair AudioBridge.AirPlayHost)
+  if(TARGET CoreDevice.Runtime)
+    add_custom_command(TARGET ZLBridge.Runtime POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/CoreDevice" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>/CoreDevice")
+    add_dependencies(ZLBridge.Runtime CoreDevice.Runtime)
+  endif()
   add_test(NAME ZLBridge.Dsp COMMAND ZLCompressor_Standalone --self-test --result "${CMAKE_BINARY_DIR}/zl-self-test.json")
   set_tests_properties(ZLBridge.Dsp PROPERTIES TIMEOUT 60)
 endif()

@@ -39,6 +39,9 @@ foreach($file in 'AudioBridge.UsbRestore.exe','AudioBridge.UsbRepair.exe','libus
 $wireless=Join-Path $dist 'Wireless'
 New-Item -ItemType Directory -Force -Path $wireless | Out-Null
 Get-ChildItem -LiteralPath "$build/bin/Wireless" -File | Where-Object { $_.Extension -in '.exe','.dll' } | Copy-Item -Destination $wireless -Force
+if(Test-Path "$build/bin/CoreDevice/AudioBridge.CoreDeviceHost.exe") {
+    Copy-Item -LiteralPath "$build/bin/CoreDevice" -Destination $dist -Recurse -Force
+}
 $airplay=Join-Path $root 'third_party/iPhoneMirror-AirPlay'
 $airplayLicenses=Join-Path $wireless 'licenses'
 New-Item -ItemType Directory -Force -Path $airplayLicenses | Out-Null
@@ -67,6 +70,7 @@ Get-ChildItem "$vendor/JUCE/modules" -Recurse -File | Where-Object { $_.Name -ma
 }
 Copy-Item -LiteralPath "$root/THIRD_PARTY_NOTICES.md","$root/third_party/ZLCompressor.pins.json","$root/third_party/ZLCompressor.bridge.patch" -Destination $dist -Force
 Copy-Item -LiteralPath "$root/docs/zl-bridge-running.zh-CN.md" -Destination "$dist/README.zh-CN.md" -Force
+Copy-Item -LiteralPath "$root/docs/coredevice-audio.zh-CN.md" -Destination "$dist/COREDEVICE.zh-CN.md" -Force
 Copy-Item -LiteralPath "$root/docs/zl-bridge-validation.zh-CN.md" -Destination "$dist/VALIDATION.zh-CN.md" -Force
 Copy-Item -LiteralPath "$root/docs/driver-upgrade-evaluation.zh-CN.md" -Destination $dist -Force
 Copy-Item -LiteralPath "$root/docs/usb-device-repair.zh-CN.md" -Destination $dist -Force

@@ -2,6 +2,11 @@
 
 Windows x64 原生音频程序：接收 iPhone USB 或 AirPlay 音频，使用 ZLCompressor 原版界面和处理器，经 WASAPI 输出到连接在 Windows 上的耳机或 DAC。基于 C++20 / JUCE，无需 .NET 或 VST Host。这是社区集成预览版，不是 ZL-Audio 官方发行版。
 
+本分支新增 **CoreDevice USB** 输入：复用 rPlayHub 已验证的纯音频路线，经 AAC-ELD
+解码后进入同一压缩器/输出链。需要 iOS/iPadOS 27+、开发者模式和 DDI，无需 libusb
+filter。准备、使用和构建见 [CoreDevice 音频说明](docs/coredevice-audio.zh-CN.md)。
+现有 `v0.2.0-preview.5` 发布包不含此入口，需使用本分支构建产物。
+
 ```text
 iPhone USB → QuickTime 仅音频握手 → PCM16 / 48 kHz / Stereo
 iPhone AirPlay → 独立接收进程解码 → PCM16 / 44.1 或 48 kHz / Stereo

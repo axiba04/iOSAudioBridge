@@ -1,5 +1,16 @@
 # Third-party notices
 
+## CoreDevice audio route (2026-10-20)
+
+The selected rPlayHub C protocol engine is included under `third_party/rplayhub`
+under GPL-3.0. Its origin and the local post-DDI discovery fix are recorded in
+`third_party/rplayhub/PROVENANCE.md`. The CoreDevice helper links libimobiledevice,
+libusbmuxd, libplist, OpenSSL, zlib, lwIP 2.2.1, and FFmpeg's AAC decoder. The
+runtime builder copies imported MSYS2 DLLs and their available license notices.
+Apple DDI images are user-supplied or downloaded separately and are not committed.
+Keep applicable notices and corresponding source/build materials with distributed
+binaries. The existing AGPL/GPL licensing of the integrated program is unchanged.
+
 iOSAudioBridge is a GPL-3.0 derivative of the verified audio-only iPhoneMirror
 branch. The root `LICENSE` contains the GPL text. Native protocol, CoreMedia,
 USB transport/discovery, restore helper and logging code originate from
