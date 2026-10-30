@@ -97,7 +97,7 @@ foreach ($relative in @('System32/libusb0.dll','SysWOW64/libusb0.dll')) {
     $path = Join-Path $env:SystemRoot $relative
     if (Test-Path -LiteralPath $path) { $files.Add((Copy-EvidenceFile $path $relative)) }
 }
-foreach ($relative in @('third_party/libusb-win32/bin/x64/libusb0.dll','dist/ZLUsbAudioBridge/libusb0.dll')) {
+foreach ($relative in @('third_party/libusb-win32/bin/x64/libusb0.dll','dist/AudioBridge/libusb0.dll')) {
     $path = Join-Path $root $relative
     if (Test-Path -LiteralPath $path) { $files.Add((Copy-EvidenceFile $path ('workspace/' + $relative))) }
 }

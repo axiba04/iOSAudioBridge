@@ -50,7 +50,7 @@ if ($missing.Count -or -not $newExports.Count) { throw "Missing exports: $($miss
 # A separate application copy avoids changing the daily-use package during evaluation.
 $runtime = Join-Path $directory 'runtime'
 New-Item -ItemType Directory -Force -Path $runtime | Out-Null
-Get-ChildItem -LiteralPath (Join-Path $root 'dist/ZLUsbAudioBridge') | Copy-Item -Destination $runtime -Recurse -Force
+Get-ChildItem -LiteralPath (Join-Path $root 'dist/AudioBridge') | Copy-Item -Destination $runtime -Recurse -Force
 foreach ($file in @('AudioCore.dll','AudioProbe.exe')) {
     Copy-Item -LiteralPath (Join-Path $root "build/zl-bridge/bin/$file") -Destination $runtime -Force
 }

@@ -1,0 +1,57 @@
+Prepared scrcpy 5.0.1 audio runtime: D:\Code\repos\iOSAudioBridge\.tools\scrcpy\Android
+-- Major version: 0
+-- Formats are Standalone
+-- Sanitizers: ASan=OFF TSan=OFF
+-- Configuring juceaide
+-- Building juceaide
+-- Exporting juceaide
+-- Testing juceaide
+-- Finished setting up juceaide
+-- Maximum over-sampling rate is 3
+-- SIMD target is SSE2
+CMake Deprecation Warning at third_party/ZLCompressor/highway/CMakeLists.txt:28 (cmake_policy):
+  The OLD behavior for policy CMP0111 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+
+
+-- Configuring done (0.8s)
+-- Generating done (0.1s)
+-- Build files have been written to: D:/Code/repos/iOSAudioBridge/build/zl-bridge
+[0/2] Re-checking globbed directories...
+[1/13] Generating ZLCompressor_artefacts/JuceLibraryCode/ZLCompressor_resources.rc
+[2/12] Building CXX object CMakeFiles\AudioCoreImpl.dir\src\AudioCore\src\Capture\AirPlayAudioSource.cpp.obj
+[3/12] Linking CXX static library AudioCoreImpl.lib
+[4/12] Linking CXX executable bin\AirPlay.Tests.exe
+[5/12] Linking CXX executable bin\Scrcpy.Tests.exe
+[6/12] Linking CXX shared library bin\AudioCore.dll
+[7/12] Linking CXX executable bin\AudioCore.Tests.exe
+[8/12] Linking CXX executable bin\AirPlay.ReceiverTests.exe
+[9/12] Linking CXX executable bin\AudioProbe.exe
+[10/12] Linking CXX executable third_party\ZLCompressor\ZLCompressor_artefacts\Release\Standalone\AudioBridge.exe
+[11/12] C:\Windows\system32\cmd.exe /C "cd /D D:\Code\repos\iOSAudioBridge\build\zl-bridge && D:\Code\repos\iOSAudioBridge\.tools\build-tools\cmake\cmake-3.31.8-windows-x86_64\bin\cmake.exe -E copy_if_different D:/Code/repos/iOSAudioBridge/third_party/libusb-win32/bin/x64/libusb0.dll D:/Code/repos/iOSAudioBridge/build/zl-bridge/third_party/ZLCompressor/ZLCompressor_artefacts/Release/Standalone && D:\Code\repos\iOSAudioBridge\.tools\build-tools\cmake\cmake-3.31.8-windows-x86_64\bin\cmake.exe -E copy_if_different D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/AudioBridge.UsbRestore.exe D:/Code/repos/iOSAudioBridge/build/zl-bridge/third_party/ZLCompressor/ZLCompressor_artefacts/Release/Standalone && D:\Code\repos\iOSAudioBridge\.tools\build-tools\cmake\cmake-3.31.8-windows-x86_64\bin\cmake.exe -E copy_if_different D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/AudioBridge.UsbRepair.exe D:/Code/repos/iOSAudioBridge/build/zl-bridge/third_party/ZLCompressor/ZLCompressor_artefacts/Release/Standalone && D:\Code\repos\iOSAudioBridge\.tools\build-tools\cmake\cmake-3.31.8-windows-x86_64\bin\cmake.exe -E copy_directory D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/Wireless D:/Code/repos/iOSAudioBridge/build/zl-bridge/third_party/ZLCompressor/ZLCompressor_artefacts/Release/Standalone/Wireless && D:\Code\repos\iOSAudioBridge\.tools\build-tools\cmake\cmake-3.31.8-windows-x86_64\bin\cmake.exe -E copy_directory_if_different D:/Code/repos/iOSAudioBridge/.tools/scrcpy/Android D:/Code/repos/iOSAudioBridge/build/zl-bridge/third_party/ZLCompressor/ZLCompressor_artefacts/Release/Standalone/Android"
+Internal ctest changing into directory: D:/Code/repos/iOSAudioBridge/build/zl-bridge
+Test project D:/Code/repos/iOSAudioBridge/build/zl-bridge
+    Start 1: AudioCore.Tests
+1/7 Test #1: AudioCore.Tests ..................   Passed    0.03 sec
+    Start 2: PcmProcessing.Tests
+2/7 Test #2: PcmProcessing.Tests ..............   Passed    0.00 sec
+    Start 3: Scrcpy.Tests
+3/7 Test #3: Scrcpy.Tests .....................   Passed    6.48 sec
+    Start 4: ZLBridge.Dsp
+4/7 Test #4: ZLBridge.Dsp .....................   Passed    0.04 sec
+    Start 5: AirPlay.Runtime
+5/7 Test #5: AirPlay.Runtime ..................   Passed    0.01 sec
+    Start 6: AirPlay.Tests
+6/7 Test #6: AirPlay.Tests ....................   Passed    0.42 sec
+    Start 7: AirPlay.ReceiverTests
+7/7 Test #7: AirPlay.ReceiverTests ............   Passed    2.96 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   9.95 sec
+Published to D:\Code\repos\iOSAudioBridge\dist\AudioBridge

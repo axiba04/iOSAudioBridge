@@ -1,5 +1,5 @@
 param(
-    [string]$ToolRoot = 'D:/GreenSoftware/iPhoneMirror/audio-only-work',
+    [string]$ToolRoot = '',
     [int]$Jobs = 4,
     [switch]$SkipTests,
     [switch]$NoPublish,
@@ -7,6 +7,11 @@ param(
 )
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
+if(-not $ToolRoot){
+    $ToolRoot=Join-Path $root '.tools/build-tools'
+    if(-not(Test-Path -LiteralPath "$ToolRoot/msvc")){$ToolRoot='D:/GreenSoftware/iPhoneMirror/audio-only-work'}
+}
+& "$PSScriptRoot/Prepare-Scrcpy.ps1"
 $llvm=Join-Path $root '.tools/llvm-22.1.0/bin'
 if(-not(Test-Path "$llvm/clang-cl.exe")){throw 'Run scripts/Prepare-ZLDependencies.ps1 first (LLVM 22.1.0 required).'}
 $vc=Get-ChildItem "$ToolRoot/msvc/VC/Tools/MSVC" -Directory | Sort-Object Name -Descending | Select-Object -First 1
@@ -28,13 +33,21 @@ if(-not $SkipTests){
     if($LASTEXITCODE){throw 'Native tests failed'}
 }
 if($NoPublish){return}
-$dist=Join-Path $root 'dist/ZLUsbAudioBridge'
+$dist=Join-Path $root 'dist/AudioBridge'
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
-$app=Get-ChildItem $build -Recurse -Filter ZLUsbAudioBridge.exe | Select-Object -First 1
+$app=Get-ChildItem $build -Recurse -Filter AudioBridge.exe | Select-Object -First 1
 if(-not $app){throw 'Standalone executable missing'}
 $pins=Get-Content -LiteralPath "$root/third_party/ZLCompressor.pins.json" -Raw | ConvertFrom-Json
 if($app.VersionInfo.FileVersion -ne $pins.ZLCompressor.version){throw 'EXE version does not match the pinned ZLCompressor version'}
 Copy-Item -LiteralPath $app.FullName -Destination $dist -Force
+$android=Join-Path $dist 'Android'
+New-Item -ItemType Directory -Force -Path $android | Out-Null
+Get-ChildItem -LiteralPath "$root/.tools/scrcpy/Android" -File | ForEach-Object {
+    $target=Join-Path $android $_.Name
+    if(-not(Test-Path -LiteralPath $target) -or (Get-FileHash -LiteralPath $_.FullName).Hash -ne (Get-FileHash -LiteralPath $target).Hash){
+        Copy-Item -LiteralPath $_.FullName -Destination $target -Force
+    }
+}
 foreach($file in 'AudioBridge.UsbRestore.exe','AudioBridge.UsbRepair.exe','libusb0.dll') {Copy-Item -LiteralPath "$build/bin/$file" -Destination $dist -Force}
 $wireless=Join-Path $dist 'Wireless'
 New-Item -ItemType Directory -Force -Path $wireless | Out-Null
@@ -67,6 +80,7 @@ Get-ChildItem "$vendor/JUCE/modules" -Recurse -File | Where-Object { $_.Name -ma
 }
 Copy-Item -LiteralPath "$root/THIRD_PARTY_NOTICES.md","$root/third_party/ZLCompressor.pins.json","$root/third_party/ZLCompressor.bridge.patch" -Destination $dist -Force
 Copy-Item -LiteralPath "$root/docs/zl-bridge-running.zh-CN.md" -Destination "$dist/README.zh-CN.md" -Force
+Copy-Item -LiteralPath "$root/docs/android-scrcpy.zh-CN.md" -Destination $dist -Force
 Copy-Item -LiteralPath "$root/docs/zl-bridge-validation.zh-CN.md" -Destination "$dist/VALIDATION.zh-CN.md" -Force
 Copy-Item -LiteralPath "$root/docs/driver-upgrade-evaluation.zh-CN.md" -Destination $dist -Force
 Copy-Item -LiteralPath "$root/docs/usb-device-repair.zh-CN.md" -Destination $dist -Force
@@ -85,7 +99,7 @@ Get-ChildItem -LiteralPath "$root/docs/test-results/2026-10-07-airplay" -File | 
 $airplayFixEvidence=Join-Path $dist 'test-results/2026-10-07-airplay-connect-fix'
 New-Item -ItemType Directory -Force -Path $airplayFixEvidence | Out-Null
 Get-ChildItem -LiteralPath "$root/docs/test-results/2026-10-07-airplay-connect-fix" -File | Copy-Item -Destination $airplayFixEvidence -Force
-Get-ChildItem $dist -Recurse -File | Where-Object { $_.Extension -in '.exe','.dll' } | ForEach-Object {
+Get-ChildItem $dist -Recurse -File | Where-Object { $_.Extension -in '.exe','.dll' -or $_.Name -eq 'scrcpy-server' } | ForEach-Object {
     [pscustomobject]@{file=[IO.Path]::GetRelativePath($dist,$_.FullName);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 } | ConvertTo-Json | Set-Content "$dist/build-hashes.json" -Encoding utf8
 Write-Output "Published to $dist"

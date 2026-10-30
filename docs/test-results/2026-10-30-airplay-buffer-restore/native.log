@@ -1,0 +1,60 @@
+
+=== iPhoneMirror capture session ===
+2026-10-30 09:00:19.729 [startup] session=000023FC-0000000136DF1020 pid=9212 arch=x64 implicit=1 log_target=custom
+2026-10-30 09:00:19.730 [tid=12935601914732545639] [seq=1] [level=ERROR] [category=scrcpy] [session=000023FC-0000000136DF1020] scrcpy_source failed: Invalid scrcpy raw audio packet
+2026-10-30 09:00:20.198 [tid=18425363754989658747] [seq=2] [level=ERROR] [category=scrcpy] [session=000023FC-0000000136DF1020] scrcpy_source failed: Android 音频采集不可用：需要 Android 11+，Android 11 启动时请解锁屏幕
+2026-10-30 09:00:20.557 [tid=9831021080870747841] [seq=3] [level=ERROR] [category=scrcpy] [session=000023FC-0000000136DF1020] scrcpy_source failed: Android 音频连接已断开，请检查 USB / Wi-Fi 后重新开始。
+2026-10-30 09:00:20.604 [tid=13019585005766952623] [seq=4] [level=ERROR] [category=scrcpy] [session=000023FC-0000000136DF1020] scrcpy_source failed: ADB: device unauthorized
+2026-10-30 09:00:20.684 [tid=13933961681272551644] [seq=5] [level=ERROR] [category=scrcpy] [session=000023FC-0000000136DF1020] scrcpy_source failed: scrcpy 音频需要 Android 11 或更新版本
+2026-10-30 09:00:21.993 [tid=2640133711125084063] [seq=6] [level=ERROR] [category=scrcpy] [session=000023FC-0000000136DF1020] scrcpy_source failed: Simulated output disconnection
+
+=== iPhoneMirror capture session ===
+2026-10-30 09:00:22.066 [startup] session=000044DC-000000013702B92E pid=17628 arch=x64 implicit=1 log_target=custom
+2026-10-30 09:00:22.067 [tid=4627125045493473619] [seq=1] [level=INFO] [category=airplay] [session=000044DC-000000013702B92E] airplay_source buffer_config startup_frames=4096 high_water_frames=6144
+2026-10-30 09:00:22.136 [tid=4627125045493473619] [seq=2] [level=INFO] [category=airplay] [session=000044DC-000000013702B92E] airplay_source buffer_config startup_frames=4096 high_water_frames=6144
+2026-10-30 09:00:22.257 [tid=4627125045493473619] [seq=3] [level=INFO] [category=airplay] [session=000044DC-000000013702B92E] airplay_source buffer_config startup_frames=4096 high_water_frames=6144
+2026-10-30 09:00:22.380 [tid=4627125045493473619] [seq=4] [level=INFO] [category=airplay] [session=000044DC-000000013702B92E] airplay_source buffer_config startup_frames=4096 high_water_frames=6144
+2026-10-30 09:00:22.390 [tid=13379803411610298634] [seq=5] [level=ERROR] [category=airplay] [session=000044DC-000000013702B92E] airplay_source failed: Invalid AirPlay IPC header
+2026-10-30 09:00:22.395 [tid=4627125045493473619] [seq=6] [level=INFO] [category=airplay] [session=000044DC-000000013702B92E] airplay_source buffer_config startup_frames=4096 high_water_frames=6144
+2026-10-30 09:00:22.405 [tid=18425363754989658747] [seq=7] [level=ERROR] [category=airplay] [session=000044DC-000000013702B92E] airplay_source failed: AirPlay receiver pipe closed
+2026-10-30 09:00:22.410 [tid=4627125045493473619] [seq=8] [level=INFO] [category=airplay] [session=000044DC-000000013702B92E] airplay_source buffer_config startup_frames=4096 high_water_frames=6144
+2026-10-30 09:00:22.475 [tid=5815467650086147409] [seq=9] [level=INFO] [category=airplay] [session=000044DC-000000013702B92E] airplay_source buffer_config startup_frames=4096 high_water_frames=6144
+
+=== iPhoneMirror capture session ===
+2026-10-30 09:00:22.491 [startup] session=00003154-000000013709354E pid=12628 arch=x64 implicit=1 log_target=custom
+2026-10-30 09:00:22.492 [tid=2772107139893437895] [seq=1] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_source buffer_config startup_frames=4096 high_water_frames=6144
+2026-10-30 09:00:22.503 [tid=1255193275512171770] [seq=2] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host wireless_host startup pid=18004 parent_arg=12628 mode_arg=combined capability=960x540@30 raop_port=5002 airplay_port=7002 dlna_port=8090 ssdp_port=1900
+2026-10-30 09:00:22.505 [tid=1255193275512171770] [seq=3] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host wireless_host server_start receiver_fp=anon-b2e5aca3124f0db893409a10 capability=960x540@30 mode=combined raop_port=5002 airplay_port=7002 dlna_port=8090 dlna_ssdp_port=1900
+2026-10-30 09:00:22.508 [tid=1255193275512171770] [seq=4] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=28 message_fp=anon-3ea8d2b6cacb6b4323bb8572
+2026-10-30 09:00:22.519 [tid=1255193275512171770] [seq=5] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=37 message_fp=anon-6da64939d86fdac3237d8536
+2026-10-30 09:00:22.519 [tid=1255193275512171770] [seq=6] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host wireless_host pairing_public_key_valid=true bytes=64
+2026-10-30 09:00:22.519 [tid=1255193275512171770] [seq=7] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host wireless_host receiver_ready mode=combined dlna_enabled=false
+2026-10-30 09:00:22.519 [tid=1255193275512171770] [seq=8] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host wireless_host ready_ipc sent=true
+2026-10-30 09:00:22.522 [tid=1255193275512171770] [seq=9] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=34 message_fp=anon-efa438182f298580189d3fdd
+2026-10-30 09:00:22.522 [tid=1255193275512171770] [seq=10] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=16 message_fp=anon-b2ec9cbcb15cb3018d40cf4a
+2026-10-30 09:00:22.522 [tid=1255193275512171770] [seq=11] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=17 message_fp=anon-ad0534b625fe5ea4f85baec1
+2026-10-30 09:00:22.522 [tid=1255193275512171770] [seq=12] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=15 message_fp=anon-8b5b6a9875b30fd8194e6ddf
+2026-10-30 09:00:22.522 [tid=1255193275512171770] [seq=13] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host device metadata device_fp=anon-d6f6ab8b90349a70216b59f5 model=iPhone14,2 os=18.0 sent=true
+2026-10-30 09:00:22.523 [tid=1255193275512171770] [seq=14] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=15 message_fp=anon-8b5b6a9875b30fd8194e6ddf
+2026-10-30 09:00:22.523 [tid=1255193275512171770] [seq=15] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=20 message_fp=anon-7a7150732e572066bc535e85
+2026-10-30 09:00:22.523 [tid=1255193275512171770] [seq=16] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=60 message_fp=anon-ba018615a9eb504342e33b7c
+2026-10-30 09:00:22.523 [tid=1255193275512171770] [seq=17] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=57 message_fp=anon-56b2811e76585bfadbb9466e
+2026-10-30 09:00:22.523 [tid=1255193275512171770] [seq=18] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=43 message_fp=anon-efa02bed47d820440bc78020
+2026-10-30 09:00:22.537 [tid=1255193275512171770] [seq=19] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=38 message_fp=anon-92bc2b5104c641a333c4cd55
+2026-10-30 09:00:24.059 [tid=1255193275512171770] [seq=20] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=39 message_fp=anon-8390713139ec667ef244d724
+2026-10-30 09:00:24.059 [tid=1255193275512171770] [seq=21] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=32 message_fp=anon-abe4820f99e8a66d1992ab79
+2026-10-30 09:00:24.059 [tid=1255193275512171770] [seq=22] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=24 message_fp=anon-f7242b40de2313b7287735cf
+2026-10-30 09:00:24.074 [tid=1255193275512171770] [seq=23] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=34 message_fp=anon-aa31b9ad2fe9a3b753293733
+2026-10-30 09:00:24.074 [tid=1255193275512171770] [seq=24] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=16 message_fp=anon-b2ec9cbcb15cb3018d40cf4a
+2026-10-30 09:00:24.074 [tid=1255193275512171770] [seq=25] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=17 message_fp=anon-ad0534b625fe5ea4f85baec1
+2026-10-30 09:00:24.074 [tid=1255193275512171770] [seq=26] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=15 message_fp=anon-8b5b6a9875b30fd8194e6ddf
+2026-10-30 09:00:24.074 [tid=1255193275512171770] [seq=27] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host device metadata device_fp=anon-d6f6ab8b90349a70216b59f5 model=iPhone14,2 os=18.0 sent=true
+2026-10-30 09:00:24.075 [tid=1255193275512171770] [seq=28] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=15 message_fp=anon-8b5b6a9875b30fd8194e6ddf
+2026-10-30 09:00:24.075 [tid=1255193275512171770] [seq=29] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=20 message_fp=anon-7a7150732e572066bc535e85
+2026-10-30 09:00:24.075 [tid=1255193275512171770] [seq=30] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=60 message_fp=anon-ba018615a9eb504342e33b7c
+2026-10-30 09:00:24.075 [tid=1255193275512171770] [seq=31] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=57 message_fp=anon-56b2811e76585bfadbb9466e
+2026-10-30 09:00:24.075 [tid=1255193275512171770] [seq=32] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=43 message_fp=anon-f2916f5d8a9cc504d055ad57
+2026-10-30 09:00:24.089 [tid=1255193275512171770] [seq=33] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=38 message_fp=anon-92bc2b5104c641a333c4cd55
+2026-10-30 09:00:25.164 [tid=1255193275512171770] [seq=34] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=39 message_fp=anon-8390713139ec667ef244d724
+2026-10-30 09:00:25.164 [tid=1255193275512171770] [seq=35] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=32 message_fp=anon-671e180c8893bde12e3c5d45
+2026-10-30 09:00:25.164 [tid=1255193275512171770] [seq=36] [level=INFO] [category=airplay] [session=00003154-000000013709354E] airplay_host airplay level=6 message_bytes=24 message_fp=anon-f7242b40de2313b7287735cf

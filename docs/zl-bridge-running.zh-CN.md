@@ -1,12 +1,14 @@
-# ZL USB Audio Bridge 使用与构建
+# AudioBridge 使用与构建
 
-2026-10-07：Windows x64 本地集成预览版。保留 ZLCompressor 原版编辑器、压缩器和分析器；输入支持 iPhone USB 与 AirPlay 仅音频流。不是 ZL-Audio 官方发行版。
+2026-10-30：Windows x64 本地集成预览版。保留 ZLCompressor 原版编辑器、压缩器和分析器；输入支持 iOS USB、iOS AirPlay、Android USB / Wi-Fi（scrcpy）。每次监听一个输入，停止后切换。不是 ZL-Audio 官方发行版。
+
+Android 连接、无线配对、固定依赖版本与实机验收边界见 [Android 使用说明](android-scrcpy.zh-CN.md)。Android 无需 Apple USB filter；旧的 iOS Release 程序不包含 Android 功能。
 
 ## AirPlay 音频
 
 请使用 `v0.2.0-preview.5` 或更新版本。`preview.4` 误用上游仅镜像模式，会以 RTSP 403 拒绝纯音频连接；表现为能看到 **ZL Audio Bridge**，但 iPhone/iPad 提示“无法连接”。更新时退出旧程序，完整解压新版后重新启动监听并选择接收端。
 
-完整解压并保留 `Wireless/`。电脑与手机连接同一局域网，在程序左上角选择 **AirPlay**，选择 Windows 耳机 / DAC，点击“开始监听”。状态显示接收服务就绪后，在 iPhone/iPad 的控制中心“正在播放”面板打开 AirPlay 音频列表，选择 **ZL Audio Bridge**。不要用“屏幕镜像”入口发起纯音频传输。
+完整解压并保留 `Wireless/`。电脑与手机连接同一局域网，在程序左上角选择 **iOS AirPlay**，选择 Windows 耳机 / DAC，点击“开始监听”。状态显示接收服务就绪后，在 iPhone/iPad 的控制中心“正在播放”面板打开 AirPlay 音频列表，选择 **AudioBridge**。不要用“屏幕镜像”入口发起纯音频传输。
 
 接收进程将解码的 PCM 直接交给 ZLCompressor，再经最终音量和 WASAPI 输出。支持 44.1 / 48 kHz、PCM16、立体声；ZL 按源采样率处理，设备格式转换交给 WASAPI。发送端 AirPlay 音量与本程序监听音量相乘，均作用于压缩处理后的输出。默认监听音量仍为 50%。
 
@@ -16,11 +18,13 @@ AirPlay 不需要 USB filter、手机 USB 信任或 Bonjour。Windows 防火墙�
 
 AirPlay 延迟包含发送端缓冲和网络抖动，界面延迟数字仅反映本机队列、WASAPI 和 DSP。对游戏低延迟监听优先使用 USB。`preview.5` 已通过真实接收 DLL 握手回归，以及 iPadOS 26.6.2 的连接和耳机有声复测；其他设备兼容性及长时间无线稳定性仍待验证。
 
+2026-10-30：AirPlay 默认缓冲已从 1024 / 2048 帧低延迟实验档恢复为原来的起播预填充 4096 帧、队列高水位 6144 帧，为网络抖动预留更多余量。起播预留在 44.1 / 48 kHz 下约为 92.9 / 85.3 ms；实际阈值还受 WASAPI 缓冲和单包帧数限制，这些数值不是端到端延迟。接收日志的 `airplay_source buffer_config` 会记录本次采用的帧数。调用方显式指定的缓冲值仍然有效，iOS USB 和 Android 默认缓冲不变。
+
 无设备诊断：`Wireless/AudioBridge.AirPlayHost.exe --check-runtime` 返回 0 表示接收库可加载；40 表示 Windows 代码完整性拒绝映像，41 表示依赖缺失或加载失败，42 表示接口不匹配。接收日志复用本程序的 capture 日志，条目前缀为 `airplay_host` / `airplay_source`。
 
 ## 运行
 
-从 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 下载并完整解压 Windows x64 程序包，打开 `ZLUsbAudioBridge/ZLUsbAudioBridge.exe`；自行构建的程序位于 `dist/ZLUsbAudioBridge/`。保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll` 与 `Wireless/`。无需 VST Host 或 .NET。AirPlay 音频输入从 `v0.2.0-preview.4` 起提供。
+从 [v0.3.0-preview.1 Release](https://github.com/axiba04/iOSAudioBridge/releases/tag/v0.3.0-preview.1) 下载程序包并完整解压，运行 `AudioBridge/AudioBridge.exe`；本地构建程序位于 `dist/AudioBridge/AudioBridge.exe`。保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll`、`Wireless/` 与 `Android/`。无需 VST Host 或 .NET。旧 `v0.2.0-preview.5` 为 iOS 版本，Android 输入需使用本次新版本。
 
 当前包使用 libusb-win32 1.4.0.2 DLL。系统驱动单独维护，本机升级及恢复方法见[驱动升级记录](driver-upgrade-evaluation.zh-CN.md)。
 
@@ -45,7 +49,7 @@ WASAPI 使用共享事件模式和 MMCSS Pro Audio。选定端点不支持原生
 其余原版功能可以改变声音，包括 Side Out、Delta 和侧链 EQ，请留意当前状态。
 整份预设/游戏预设在停止音频线程、完成 USB 恢复后应用；若原先在监听则重新连接。六项旋钮的实时调整不会重连。
 
-Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版界面属性使用重命名后的 `ZL USB Audio Bridge` 产品路径，与原 ZLCompressor 隔离。
+Processor 状态与设备选择保存在 `%APPDATA%/AudioBridge/`；首次正常启动会从旧 `%APPDATA%/iOSAudioBridge-ZL/` 复制尚不存在的设置，保留原文件。原版界面属性和预设使用 `AudioBridge` 产品路径，与原 ZLCompressor 隔离。
 日志可通过环境变量 `IPHONE_MIRROR_LOG_FILE` 指定；默认位置为 `%TEMP%\iOSAudioBridge-capture.log`。连接失败时，`usb_probe` 记录打开句柄、读取序列号、读取配置的具体阶段与错误码；`usb_repair` 记录手动修复结果。日志中的设备标识使用会话内指纹。详见[连接诊断与修复](usb-device-repair.zh-CN.md)。
 
 顶部控件和底部区域跟随 ZL 的背景与文字主题颜色。状态栏显示连接状态、静音和监听音量；缓冲、欠载、缺失帧和延迟信息位于“高级设置”。刷新设备时会尽量保留当前选择。
@@ -58,31 +62,31 @@ Processor 状态与设备选择保存在 `%APPDATA%/iOSAudioBridge-ZL/`；原版
 
 ```powershell
 ./scripts/Prepare-ZLDependencies.ps1
-./scripts/Build-ZLBridge.ps1
+./scripts/Build-AudioBridge.ps1
 ```
 
 仓库已包含 ZLCompressor 0.6.1、JUCE 9.0.2 及其余依赖的源码快照和集成修改，无需额外克隆或应用补丁。
 准备脚本检查源码是否齐全；缺少 LLVM 时使用 curl、7z 下载 LLVM 22.1.0，校验压缩包 SHA-256 后仅解压到 `.tools`，不执行安装器或修改系统 PATH。
-构建脚本默认使用本机 `D:/GreenSoftware/iPhoneMirror/audio-only-work` 内的 MSVC/SDK、Ninja、CMake；其他机器需通过 `-ToolRoot` 提供相同目录结构。升级依赖或移动工具链目录后，使用 `./scripts/Build-ZLBridge.ps1 -Fresh` 重新生成 CMake 配置。
+构建脚本优先使用 `.tools/build-tools` 内的 MSVC/SDK、Ninja、CMake，缺失时回退到原 `D:/GreenSoftware/iPhoneMirror/audio-only-work`；其他机器通过 `-ToolRoot` 提供相同目录结构。升级依赖或移动工具链目录后，使用 `./scripts/Build-AudioBridge.ps1 -Fresh` 重新生成 CMake 配置。构建会自动下载并校验固定 scrcpy 运行库；旧 `Build-ZLBridge.ps1` 入口仍可用。
 固定版本见 `third_party/ZLCompressor.pins.json`。Clang 编译使用 MSVC STL 和 Windows SDK；C++20、SSE2、静态 CRT。
 
-构建目录为 `build/zl-bridge`，本地发布目录为 `dist/ZLUsbAudioBridge`。`dist/` 不纳入 Git，预编译程序和驱动 ZIP 作为 Release 附件分发。
-默认执行 Native、PCM 适配、ZL DSP、AirPlay 运行库加载、AirPlay IPC 和真实 DLL 纯音频握手六组回归；不打开音频端点、不连接 USB。握手测试覆盖 FairPlay、非镜像会话 SETUP、type 96 音频端口协商、RECORD、TEARDOWN 和重新连接；会临时使用 TCP 5002/7002，测试前需停止正在监听的桥接程序。DSP 检查包含 Normal→High→Normal 的 FFT 历史缓冲切换、频率/幅度、44.1↔48 kHz 切换后的真实压缩曲线和零 DSP 延迟检查。
+构建目录为 `build/zl-bridge`，本地发布目录为 `dist/AudioBridge`。`dist/` 不纳入 Git。
+默认执行 Native、PCM 适配、scrcpy 协议/进程、ZL DSP、AirPlay 运行库加载、AirPlay IPC 和真实 DLL 纯音频握手七组回归；不打开音频端点、不连接 USB。握手测试覆盖 FairPlay、非镜像会话 SETUP、type 96 音频端口协商、RECORD、TEARDOWN 和重新连接；会临时使用 TCP 5002/7002，测试前需停止正在监听的桥接程序。DSP 检查包含 Normal→High→Normal 的 FFT 历史缓冲切换、频率/幅度、44.1↔48 kHz 切换后的真实压缩曲线和零 DSP 延迟检查。
 发布目录包含依赖许可和来源清单。对外分发时需同时提供本项目对应源码、固定依赖及构建材料，不能只发 EXE。
 
 ## 静音诊断入口
 
 ```powershell
-./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --self-test --result E:/Code/iOSAudioBridge/build/dsp.json
-./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --ui-smoke --result E:/Code/iOSAudioBridge/build/ui.json
-./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --ui-smoke --ui-empty --result E:/Code/iOSAudioBridge/build/ui-empty.json
-./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --ui-smoke --airplay --result E:/Code/iOSAudioBridge/build/ui-airplay.json
-./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --wasapi-smoke --result E:/Code/iOSAudioBridge/build/wasapi.json
-./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --wasapi-smoke --wasapi-rate 44100 --result E:/Code/iOSAudioBridge/build/wasapi-44100.json
+./dist/AudioBridge/AudioBridge.exe --self-test --result ./build/dsp.json
+./dist/AudioBridge/AudioBridge.exe --ui-smoke --result ./build/ui.json
+./dist/AudioBridge/AudioBridge.exe --ui-smoke --ui-empty --result ./build/ui-empty.json
+./dist/AudioBridge/AudioBridge.exe --ui-smoke --airplay --result ./build/ui-airplay.json
+./dist/AudioBridge/AudioBridge.exe --wasapi-smoke --result ./build/wasapi.json
+./dist/AudioBridge/AudioBridge.exe --wasapi-smoke --wasapi-rate 44100 --result ./build/wasapi-44100.json
 # 仅在手机已准备好时运行；使用已保存/默认输出，强制静音
-./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --capture-muted 60 --result E:/Code/iOSAudioBridge/build/capture.json
+./dist/AudioBridge/AudioBridge.exe --capture-muted 60 --result ./build/capture.json
 # AirPlay 静音实机验收：运行后在手机上选择接收端并播放
-./dist/ZLUsbAudioBridge/ZLUsbAudioBridge.exe --airplay --capture-muted 60 --result E:/Code/iOSAudioBridge/build/capture-airplay.json
+./dist/AudioBridge/AudioBridge.exe --airplay --capture-muted 60 --result ./build/capture-airplay.json
 ```
 
 UI smoke 枚举设备、用合成信号绘制隐藏界面，并输出主界面、展开高级设置（`-advanced.png`）、最小窗口（`-minimum.png`）截图；附加 `--airplay` 检查 AirPlay 入口（不启动接收服务、不枚举 USB），附加 `--ui-empty` 可清空测试用设备列表，验证无设备时的提示及按钮状态。WASAPI smoke 向默认端点提交静音合成音频，检查 3 次暂停/恢复；`--wasapi-rate 44100` 验证 AirPlay 常见采样率。

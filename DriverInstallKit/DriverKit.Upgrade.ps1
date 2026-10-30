@@ -33,7 +33,7 @@ function Get-UpgradeFileState([object[]]$Files) {
 }
 
 function Assert-UpgradeIdle {
-    if (Get-Process ZLUsbAudioBridge,AudioProbe,iPhoneMirror,'iPhoneMirror.UsbAudioOnly','AudioBridge.UsbRestore' -ErrorAction SilentlyContinue) {
+    if (Get-Process AudioBridge,ZLUsbAudioBridge,AudioProbe,iPhoneMirror,'iPhoneMirror.UsbAudioOnly','AudioBridge.UsbRestore' -ErrorAction SilentlyContinue) {
         throw 'Close all phone capture applications before upgrading or restoring.'
     }
 }

@@ -110,12 +110,15 @@ void AirPlayAudioSource::start(const AB_Config& source,const std::filesystem::pa
     if(running_)throw std::runtime_error("AirPlay receiver is already running");
     if(worker_.joinable())worker_.join();
     AB_Config config=source;
+    // Original AirPlay buffering; retain caller-supplied buffer sizes.
     if(!config.startup_frames)config.startup_frames=4096;
     if(!config.high_water_frames)config.high_water_frames=6144;
     if(config.startup_frames<128 || config.high_water_frames<config.startup_frames || config.high_water_frames>7168 ||
        !std::isfinite(config.volume) || config.volume<0 || config.volume>1 || name.empty() || name.size()>80 ||
        name.find(L'\0')!=std::wstring::npos || !std::filesystem::is_regular_file(host))
         throw std::invalid_argument("Invalid AirPlay configuration or missing Wireless/AudioBridge.AirPlayHost.exe");
+    iPhoneMirror::logging::write(std::format("airplay_source buffer_config startup_frames={} high_water_frames={}",
+        config.startup_frames,config.high_water_frames));
     {std::scoped_lock status_lock(status_mutex_);status_={};status_.struct_size=sizeof(status_);status_.version=AB_VERSION;}
     state(AB_CONNECTING,L"正在启动 AirPlay 接收服务");running_=true;
     try{worker_=std::jthread([this,config,host,name=std::move(name)](std::stop_token token){run(config,host,name,token);});}

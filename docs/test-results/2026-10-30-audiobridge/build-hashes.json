@@ -1,0 +1,92 @@
+[
+  {
+    "file": "AudioBridge.exe",
+    "bytes": 8139776,
+    "sha256": "94CB19094122D1FE1F4D41BA8719138219C3F7036EC3483F64C45CB05AB4667C"
+  },
+  {
+    "file": "AudioBridge.UsbRepair.exe",
+    "bytes": 247296,
+    "sha256": "4AFDEEFCDF633976435A4C9909E2095F9DCAE33379B63B81FA1BC32479320D2A"
+  },
+  {
+    "file": "AudioBridge.UsbRestore.exe",
+    "bytes": 524288,
+    "sha256": "8C7871A81D7CB9C1B0C6061E8B28AFD10B9DEE3A0980B53D4B263E29279CA86C"
+  },
+  {
+    "file": "libusb0.dll",
+    "bytes": 123552,
+    "sha256": "0CD18719D5701E9CC642FC93A83F13830931D6F29F664FEDBDF212BCB7C349BD"
+  },
+  {
+    "file": "Android\\adb.exe",
+    "bytes": 8273560,
+    "sha256": "B4A6B455702684652CCCF7B46258B29E653538904359A58FD4931CF3EF286B3F"
+  },
+  {
+    "file": "Android\\AdbWinApi.dll",
+    "bytes": 108184,
+    "sha256": "C1D653030B4BDE65D3E07E4D0B0979E17BE56DF1436CDD15528630F27808050D"
+  },
+  {
+    "file": "Android\\AdbWinUsbApi.dll",
+    "bytes": 73368,
+    "sha256": "0710E894D9B40F71A670C13C694079D564C92C1279DA382CFE4850983AAEBE1B"
+  },
+  {
+    "file": "Android\\scrcpy-server",
+    "bytes": 733930,
+    "sha256": "764EB6F79811D5211FE9DF341120882BA9994C7A61B897D7BF3FB662E53BC536"
+  },
+  {
+    "file": "Wireless\\airplay2dll.dll",
+    "bytes": 1169920,
+    "sha256": "4A534DACAC5CD36F9AAA6E016DB75DB899E0678FFB8B0C191CABF230A2002BD9"
+  },
+  {
+    "file": "Wireless\\AudioBridge.AirPlayHost.exe",
+    "bytes": 586240,
+    "sha256": "066D7084C48D5A950CB8332139FAC33376B9E0FB905F372C8AADF09409A817CF"
+  },
+  {
+    "file": "Wireless\\avcodec-58.dll",
+    "bytes": 59739648,
+    "sha256": "E785B030667C0F4709BA299CB494D405E58BCE6E3035D441832D35715FBADC3C"
+  },
+  {
+    "file": "Wireless\\avutil-56.dll",
+    "bytes": 893440,
+    "sha256": "33E0A0A733302BBB09456A6E6C4B5036278F0A6D95A0233FF7EDEB33B59EE05D"
+  },
+  {
+    "file": "Wireless\\dnssd.dll",
+    "bytes": 469504,
+    "sha256": "87E1A6EDC7B79A32C0A7B79D399D37F8CEC3DF8A0035E4EF8677EFEE0798B9DA"
+  },
+  {
+    "file": "Wireless\\msvcp140.dll",
+    "bytes": 643512,
+    "sha256": "7C26614E1D733892C2DEAC7E245CE115504B1D80592DD0A01B08E3E5A55F89CA"
+  },
+  {
+    "file": "Wireless\\swresample-3.dll",
+    "bytes": 432128,
+    "sha256": "BB8DEFD0517FD12379EDDB0B20B0998356BFD36862B6180A9D2315F3E6128117"
+  },
+  {
+    "file": "Wireless\\swscale-5.dll",
+    "bytes": 568320,
+    "sha256": "DB405507989AED9915287C79A34FD6421FC7683A98EDEBCF4BA370A917EEF311"
+  },
+  {
+    "file": "Wireless\\vcruntime140_1.dll",
+    "bytes": 50112,
+    "sha256": "A7146C08F89FE5B04541AB507CDB59FF7B44534D4BA3C668A426C6450A03434E"
+  },
+  {
+    "file": "Wireless\\vcruntime140.dll",
+    "bytes": 178616,
+    "sha256": "D1F4225DF2CD877DBF130D5668A021DCE3F94118455FF5EC952061C30AFC9CE7"
+  }
+]

@@ -1,6 +1,6 @@
 # Third-party notices
 
-iOSAudioBridge is a GPL-3.0 derivative of the verified audio-only iPhoneMirror
+AudioBridge (formerly iOSAudioBridge) is a GPL-3.0 derivative of the verified audio-only iPhoneMirror
 branch. The root `LICENSE` contains the GPL text. Native protocol, CoreMedia,
 USB transport/discovery, restore helper and logging code originate from
 [RayrenSX/iPhoneMirror](https://github.com/RayrenSX/iPhoneMirror), base commit
@@ -10,6 +10,21 @@ in `third_party/iphone-mirror-baseline/`. The modified implementation is in
 `src/AudioCore/` and `src/AudioBridge.UsbRestore/`. Local changes remove video
 negotiation/decoding, expose a C ABI, replace the audio queue/rendering, and
 integrate the ZL application described below. Changes were made on 2026-09-24.
+
+## Android scrcpy audio input (2026-10-30)
+
+The independently launched, unmodified scrcpy-server 5.0.1 and ADB Windows
+runtime are extracted from the official Genymobile Windows x64 release.
+Version, release URL and archive/server SHA-256 hashes are pinned in
+`third_party/scrcpy.pins.json`; `scripts/Prepare-Scrcpy.ps1` verifies the download.
+The selected files and upstream `LICENSE.txt` are distributed in `Android/`.
+scrcpy is Apache-2.0; corresponding server source is available at
+https://github.com/Genymobile/scrcpy/tree/v5.0.1/server.
+ADB originates in the Android Open Source Project:
+https://android.googlesource.com/platform/packages/modules/adb/.
+AudioBridge uses the raw audio protocol and does not bundle the scrcpy desktop
+player, SDL or its FFmpeg DLLs. The new native client is part of this project's
+GPL/AGPL integration; no modifications to the Android server are required.
 
 ## libusb-win32 1.4.0.2
 
@@ -77,7 +92,7 @@ mode does not require the USB drivers mentioned above.
 This native application uses ZLCompressor's processor and editor with
 the shared iPhone USB/WASAPI backend. It is a modified community integration,
 not an official ZL-Audio release. New application and adapter code in
-`src/ZLUsbAudioBridge/` is provided under AGPL-3.0; original component notices
+`src/AudioBridge/` is provided under AGPL-3.0; original component notices
 remain intact. The combined application follows the AGPL source distribution
 path; the existing backend retains its GPL notices.
 

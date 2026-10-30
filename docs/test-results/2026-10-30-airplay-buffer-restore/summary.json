@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-30",
+  "product": "AudioBridge",
+  "change": "Restore original AirPlay default buffers",
+  "airplay_startup_frames": 4096,
+  "airplay_high_water_frames": 6144,
+  "ctest_passed": 7,
+  "ctest_failed": 0,
+  "published_exe_matches_tested_build": true,
+  "ios_hardware_retested": false
+}

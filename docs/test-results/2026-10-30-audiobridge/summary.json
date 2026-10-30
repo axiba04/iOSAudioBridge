@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-30",
+  "product": "AudioBridge",
+  "version": "0.3.0-local",
+  "scrcpy": "5.0.1",
+  "ctest_passed": 7,
+  "ctest_failed": 0,
+  "ui_sources": [
+    "ios-usb",
+    "airplay",
+    "android-usb",
+    "android-wifi"
+  ],
+  "packaged_ui_empty": "passed",
+  "wasapi": {
+    "passed": true,
+    "pause_cycles": 3,
+    "muted": true,
+    "sample_rate": 48000,
+    "rendered_frames": 410528,
+    "underruns": 0,
+    "missing_frames": 0,
+    "max_render_us": 40,
+    "period_frames": 480
+  },
+  "android_devices_detected": 0,
+  "android_hardware_validated": false,
+  "ios_hardware_retested": false,
+  "driver_guard_tests": 12,
+  "driver_upgrade_simulated_tests": 25
+}

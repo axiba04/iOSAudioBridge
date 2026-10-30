@@ -2,7 +2,7 @@
 #include <cmath>
 namespace audiobridge {
 AudioEngine::AudioEngine(IBlockProcessor* processor)
-    : processor_(processor?*processor:passthrough_),output_(pipe_),source_(pipe_,lifecycle()),airplay_(pipe_,lifecycle()) {}
+    : processor_(processor?*processor:passthrough_),output_(pipe_),source_(pipe_,lifecycle()),airplay_(pipe_,lifecycle()),scrcpy_(pipe_,lifecycle()) {}
 SourceLifecycle AudioEngine::lifecycle(){
     return {
         [this](const AB_Config& c,uint32_t rate){
@@ -15,20 +15,27 @@ SourceLifecycle AudioEngine::lifecycle(){
     };
 }
 AudioEngine::~AudioEngine(){stop();}
-void AudioEngine::selectSource(bool airplay,float value){
+void AudioEngine::selectSource(Input input,float value){
     const auto current=status().state;
     if(current==AB_CONNECTING || current==AB_READY || current==AB_STREAMING || current==AB_STOPPING)
         throw std::runtime_error("Stop the current audio source before switching inputs");
-    source_.stop();airplay_.stop();volume(value);use_airplay_=airplay;
+    source_.stop();airplay_.stop();scrcpy_.stop();volume(value);input_=input;
 }
 void AudioEngine::start(const AB_Config& config){
-    std::scoped_lock lock(source_control_);selectSource(false,config.volume);source_.start(config);
+    std::scoped_lock lock(source_control_);selectSource(Input::Usb,config.volume);source_.start(config);
 }
 void AudioEngine::startAirPlay(const AB_Config& config,const std::filesystem::path& host,std::wstring name){
-    std::scoped_lock lock(source_control_);selectSource(true,config.volume);airplay_.start(config,host,std::move(name));
+    std::scoped_lock lock(source_control_);selectSource(Input::AirPlay,config.volume);airplay_.start(config,host,std::move(name));
 }
-void AudioEngine::stop(){std::scoped_lock lock(source_control_);source_.stop();airplay_.stop();}
-AB_Status AudioEngine::status() const {auto s=use_airplay_?airplay_.status():source_.status();output_.snapshot(s);return s;}
+void AudioEngine::startScrcpy(const AB_Config& config,const std::filesystem::path& runtime,bool wireless){
+    std::scoped_lock lock(source_control_);selectSource(Input::Scrcpy,config.volume);scrcpy_.start(config,runtime,wireless);
+}
+void AudioEngine::stop(){std::scoped_lock lock(source_control_);source_.stop();airplay_.stop();scrcpy_.stop();}
+AB_Status AudioEngine::status() const {
+    AB_Status s{};
+    switch(input_.load()){case Input::Usb:s=source_.status();break;case Input::AirPlay:s=airplay_.status();break;case Input::Scrcpy:s=scrcpy_.status();break;}
+    output_.snapshot(s);return s;
+}
 void AudioEngine::volume(float value){
     if(!std::isfinite(value)||value<0||value>1) throw std::invalid_argument("Volume must be in [0,1]");
     std::scoped_lock lock(output_control_);volume_=value;output_.volume(value);

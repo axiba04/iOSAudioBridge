@@ -49,7 +49,7 @@ function Assert-ConnectionState {
 }
 Assert-ConnectionState
 if (-not $DeviceDisconnected -and (Read-DeviceProperty 'DEVPKEY_Device_ProblemCode') -ne 0) { throw 'Apple parent has a PnP problem; resolve it before a trial.' }
-if (Get-Process ZLUsbAudioBridge,AudioProbe,iPhoneMirror,'iPhoneMirror.UsbAudioOnly','AudioBridge.UsbRestore' -ErrorAction SilentlyContinue) { throw 'Close USB capture applications before switching drivers.' }
+if (Get-Process AudioBridge,ZLUsbAudioBridge,AudioProbe,iPhoneMirror,'iPhoneMirror.UsbAudioOnly','AudioBridge.UsbRestore' -ErrorAction SilentlyContinue) { throw 'Close USB capture applications before switching drivers.' }
 
 # The kernel service is shared. Refuse global filters or additional devices.
 $filterNodes = @(Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Enum\USB' | ForEach-Object {

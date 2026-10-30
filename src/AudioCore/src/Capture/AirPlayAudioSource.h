@@ -11,7 +11,7 @@ public:
     AirPlayAudioSource(PcmPipe& pipe,SourceLifecycle lifecycle);
     ~AirPlayAudioSource();
     void start(const AB_Config& config,const std::filesystem::path& host,
-               std::wstring name=L"ZL Audio Bridge");
+               std::wstring name=L"AudioBridge");
     void stop();
     AB_Status status() const;
 private:

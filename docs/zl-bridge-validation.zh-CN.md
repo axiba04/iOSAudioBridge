@@ -1,5 +1,9 @@
 # ZL 原版界面 USB 集成：实现与验收
 
+2026-10-30 后续调整：按用户要求将 AirPlay 默认起播预填充 / 高水位恢复为 4096 / 6144 帧，并重新编译打包；见 [缓冲恢复验收](test-results/2026-10-30-airplay-buffer-restore/README.zh-CN.md)。
+
+2026-10-30：项目更名 AudioBridge，新增 Android scrcpy USB / Wi-Fi，保留 iOS USB / AirPlay；七组 CTest、四种输入的无设备 UI 检查和静音 WASAPI 暂停/恢复通过。本机没有 Android 设备，真机接收与延迟尚未验收，见 [本轮结果](test-results/2026-10-30-audiobridge/README.zh-CN.md)。下方为历史验收记录。
+
 日期：2026-09-24。对应 `zl-standalone-usb-integration-plan.zh-CN.md`。
 2026-10-07 更新：加入 AirPlay 纯音频输入，接收 PCM 直接进入 ZL，再输出到 Windows 耳机 / DAC；支持 44.1 / 48 kHz。历史 USB 记录保留，新增验收如下。
 2026-10-03 更新：升级至 ZLCompressor 0.6.1 / JUCE 9.0.2，桥接补丁保留；构建、三组回归、无设备界面检查与静音 WASAPI 暂停/恢复通过，详见下方本轮验收。

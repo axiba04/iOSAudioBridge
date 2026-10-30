@@ -32,10 +32,10 @@ try {
         foreach ($item in $statuses) { Write-Host ("{0}: {1}`n  {2}`n  {3}" -f $item.status,$item.name,$item.instance,$item.detail) }
         if (@($statuses | Where-Object status -ne 'READY').Count) { throw 'Some connected devices are not ready; see each device status above.' }
         Write-Host ("READY: {0} connected iPhone/iPad device(s); shared libusb 1.4.0.2 active." -f $statuses.Count)
-        Write-Host 'Open ZLUsbAudioBridge, start muted capture, then unmute when ready.'
+        Write-Host 'Open AudioBridge, start muted capture, then unmute when ready.'
         exit 0
     }
-    if (Get-Process ZLUsbAudioBridge,AudioProbe,iPhoneMirror,'iPhoneMirror.UsbAudioOnly','AudioBridge.UsbRestore' -ErrorAction SilentlyContinue) { throw 'Close all phone capture applications before installing drivers.' }
+    if (Get-Process AudioBridge,ZLUsbAudioBridge,AudioProbe,iPhoneMirror,'iPhoneMirror.UsbAudioOnly','AudioBridge.UsbRestore' -ErrorAction SilentlyContinue) { throw 'Close all phone capture applications before installing drivers.' }
     if ($Stage -eq 'Filter') {
         $phone = Select-KitPhone @(Get-KitPhones) $InstanceId -Interactive
         $InstanceId = $phone.instance

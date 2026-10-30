@@ -1,18 +1,32 @@
-# iOS Audio Bridge — ZL USB Audio Bridge
+# AudioBridge
 
-Windows x64 原生音频程序：接收 iPhone USB 或 AirPlay 音频，使用 ZLCompressor 原版界面和处理器，经 WASAPI 输出到连接在 Windows 上的耳机或 DAC。基于 C++20 / JUCE，无需 .NET 或 VST Host。这是社区集成预览版，不是 ZL-Audio 官方发行版。
+Windows x64 原生音频程序：接收 iPhone / iPad 的 USB、AirPlay 音频，以及 Android 的 scrcpy USB、Wi-Fi 音频，使用 ZLCompressor 原版界面和处理器，经 WASAPI 输出到 Windows 耳机或 DAC。基于 C++20 / JUCE，无需虚拟声卡、.NET 或 VST Host。这是社区集成预览版，不是 ZL-Audio 官方发行版。
+
+iOS 与 Android 接收功能共存在同一程序中，每次监听一个输入，切换前先停止；当前不混合多台手机的声音。项目原名 iOSAudioBridge，现已改名 AudioBridge；GitHub 地址暂沿用原仓库。
 
 ```text
 iPhone USB → QuickTime 仅音频握手 → PCM16 / 48 kHz / Stereo
 iPhone AirPlay → 独立接收进程解码 → PCM16 / 44.1 或 48 kHz / Stereo
+Android USB / Wi-Fi → ADB → scrcpy-server 5.0.1 → PCM16 / 48 kHz / Stereo
            → SPSC → ZL Processor → 最终音量/静音 → WASAPI Shared → Windows 耳机 / DAC
 ```
 
 ## 运行
 
-预编译程序通过 [GitHub Releases](https://github.com/axiba04/iOSAudioBridge/releases) 分发：下载 [Windows x64 程序及运行依赖](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.5/ZLUsbAudioBridge-v0.2.0-preview.5-win-x64.zip)；使用 USB 时按需下载 [驱动离线安装包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.2.0-preview.5/DriverInstallKit-x64-1.4.0.2.zip)。完整解压后使用；驱动按包内说明安装。仓库保留源码与构建材料，`dist/` 为本地构建输出，不再提交。
+下载 [AudioBridge v0.3.0-preview.1 Windows x64 程序包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.3.0-preview.1/AudioBridge-v0.3.0-preview.1-win-x64.zip)，完整解压后运行 `AudioBridge/AudioBridge.exe`。iOS USB 按需下载同版 [驱动离线安装包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.3.0-preview.1/DriverInstallKit-x64-1.4.0.2.zip)。[Release 页面](https://github.com/axiba04/iOSAudioBridge/releases/tag/v0.3.0-preview.1) 提供校验文件、改动和验收范围。旧 `v0.2.0-preview.5` 只包含 iOS 功能。本地构建输出仍为 `dist/AudioBridge/AudioBridge.exe`，`dist/` 不纳入 Git。
 
-运行解压后的 `ZLUsbAudioBridge/ZLUsbAudioBridge.exe`（自行构建时位于 `dist/` 下），保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll`、`Wireless/` 和许可证文件。
+运行 `AudioBridge.exe`，完整保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll`、`Wireless/`、`Android/` 和许可证文件。Android 模式无需安装 Apple USB filter。
+
+### Android scrcpy：USB / Wi-Fi
+
+- USB：Android 11+ 开启开发者选项和 USB 调试，连接数据线，在手机允许调试；选择 **Android USB**，刷新并选择手机及音频输出，再开始监听。
+- Wi-Fi：电脑和手机连接同一局域网，在手机开启“无线调试”；选择 **Android Wi-Fi → 无线连接**。首次填写配对地址、六位配对码及连接地址，点击“配对并连接”；已配对只需填写连接地址并点击“连接”。配对端口与连接端口通常不同。
+- Android 11 启动时需解锁屏幕。捕获系统输出，手机本地播放通常静音；停止监听后恢复。无需开启视频或屏幕控制。
+- 固定使用 scrcpy-server 5.0.1 原始 PCM；不经过桌面 scrcpy 播放器。USB 默认启动缓冲约 21 ms，Wi-Fi 约 64 ms，这不是端到端延迟。
+
+完整步骤、依赖来源、限制与验收边界见 [Android 使用说明](docs/android-scrcpy.zh-CN.md)。Android 真机 USB／Wi-Fi 出声和长期稳定性待验收；协议、进程和 DSP 路由已通过自动测试。
+
+### iOS USB
 
 1. 沿用已验证的 Apple USB 支持与 libusb-win32 filter，连接手机、解锁并信任电脑；关闭其他占用同一手机的程序。
 2. 刷新并选择手机和输出设备，点击“开始监听”。每次启动默认非静音、监听音量 50%；需要静音时勾选“静音输出”。
@@ -24,8 +38,8 @@ iPhone AirPlay → 独立接收进程解码 → PCM16 / 44.1 或 48 kHz / Stereo
 请使用 `v0.2.0-preview.5` 或更新版本。`preview.4` 的接收模式会拒绝纯音频连接，导致 iPhone/iPad 提示“无法连接”；`preview.5` 修复此问题。
 
 1. 电脑与 iPhone/iPad 连接同一局域网，完整保留程序旁的 `Wireless/` 目录。
-2. 左上角输入选择 **AirPlay**，输出选择 Windows 上的耳机或 DAC，点击“开始监听”。
-3. 在 iPhone 控制中心的“正在播放”面板打开 **AirPlay 音频**列表，选择 **ZL Audio Bridge**，再播放音乐。
+2. 左上角输入选择 **iOS AirPlay**，输出选择 Windows 上的耳机或 DAC，点击“开始监听”。
+3. 在 iPhone 控制中心的“正在播放”面板打开 **AirPlay 音频**列表，选择 **AudioBridge**，再播放音乐。
 4. 音频直接进入 ZLCompressor；压缩器、监听音量和静音照常使用。手机端 AirPlay 音量也会作用于最终输出。
 
 使用“正在播放”的音频路由即可只传音频，无需开启屏幕镜像。一次处理一台发送设备；切换 USB / AirPlay 前先停止。AirPlay 模式不需要 USB filter 或 Bonjour。
@@ -58,17 +72,17 @@ iPad 停止后无法重新连接的问题已加入自动恢复，触发补救时
 # 检查源码，并在需要时下载、校验和解压便携 LLVM 22.1.0
 ./scripts/Prepare-ZLDependencies.ps1
 # 构建公共底层、诊断工具、ZL 程序，执行回归测试并打包
-./scripts/Build-ZLBridge.ps1
+./scripts/Build-AudioBridge.ps1
 # 指定具有相同目录结构的便携 MSVC/SDK、Ninja、CMake 工具根目录
-./scripts/Build-ZLBridge.ps1 -ToolRoot 'D:/path/to/audio-only-work'
+./scripts/Build-AudioBridge.ps1 -ToolRoot 'D:/path/to/audio-only-work'
 # 只构建和测试，不更新发布目录
-./scripts/Build-ZLBridge.ps1 -NoPublish
+./scripts/Build-AudioBridge.ps1 -NoPublish
 # 升级依赖或移动工具链目录后，重新生成 CMake 配置
-./scripts/Build-ZLBridge.ps1 -Fresh
+./scripts/Build-AudioBridge.ps1 -Fresh
 ```
 
-构建脚本默认使用 `D:/GreenSoftware/iPhoneMirror/audio-only-work` 中的 MSVC/Windows SDK、Ninja、CMake，以及 `.tools/llvm-22.1.0` 中的 Clang。下载 LLVM 时需要 curl 和 7z。
-输出为 `build/zl-bridge` 与 `dist/ZLUsbAudioBridge`。默认运行 AudioCore.Tests、PcmProcessing.Tests、ZLBridge.Dsp、AirPlay.Runtime、AirPlay.Tests、AirPlay.ReceiverTests 六组回归，不连接手机或打开音频端点。真实接收 DLL 的握手测试会临时使用 TCP 5002/7002；运行测试前停止正在监听的桥接程序。
+构建脚本优先使用 `.tools/build-tools` 的 MSVC/Windows SDK、Ninja、CMake，缺失时回退至原 `D:/GreenSoftware/iPhoneMirror/audio-only-work`，Clang 位于 `.tools/llvm-22.1.0`。旧 `Build-ZLBridge.ps1` 入口仍有效。构建自动调用 `Prepare-Scrcpy.ps1` 下载官方 Windows 包并校验 SHA-256，只提取 ADB、服务器及许可证；固定版本见 `third_party/scrcpy.pins.json`。下载 LLVM 时需要 curl 和 7z。
+输出为 `build/zl-bridge` 与 `dist/AudioBridge`。默认运行 AudioCore.Tests、PcmProcessing.Tests、Scrcpy.Tests、ZLBridge.Dsp、AirPlay.Runtime、AirPlay.Tests、AirPlay.ReceiverTests 七组回归，不连接手机或打开音频端点。真实接收 DLL 的握手测试会临时使用 TCP 5002/7002；运行测试前停止正在监听的桥接程序。
 
 ## 诊断与稳定性测试
 
@@ -88,8 +102,8 @@ ZL 集成测试结果与边界见[集成验收](docs/zl-bridge-validation.zh-CN.
 
 | 路径 | 职责 |
 |---|---|
-| `src/ZLUsbAudioBridge/` | JUCE 程序、原版 ZL 编辑器集成、处理器适配及自测 |
-| `src/AudioCore/` | USB 协议、设备发现、PCM 队列、音频引擎、WASAPI 和诊断 C ABI |
+| `src/AudioBridge/` | JUCE 程序、四种输入、无线配对界面、ZL 编辑器集成及自测 |
+| `src/AudioCore/` | iOS USB / AirPlay / Android scrcpy、ADB、PCM 队列、音频引擎、WASAPI 和诊断 C ABI |
 | `src/AudioBridge.UsbRestore/` | 独立 USB 配置恢复辅助程序 |
 | `src/AudioBridge.AirPlayHost/` | 独立 AirPlay 接收进程构建，源码及运行库固定在 `third_party/iPhoneMirror-AirPlay/` |
 | `tests/`、`tools/AudioProbe/` | 协议 fixtures、Native/PCM/ABI 回归、命令行诊断 |

@@ -1,0 +1,127 @@
+Start testing: Oct 30 09:00 中国标准时间
+----------------------------------------------------------
+1/7 Testing: AudioCore.Tests
+1/7 Test: AudioCore.Tests
+Command: "D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/AudioCore.Tests.exe"
+Directory: D:/Code/repos/iOSAudioBridge/tests
+"AudioCore.Tests" start time: Oct 30 09:00 中国标准时间
+Output:
+----------------------------------------------------------
+PASS: protocol, PCM, ABI, USB restoration, exact-device repair targeting/exclusion/verification, pause/resume and stop drain
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"AudioCore.Tests" end time: Oct 30 09:00 中国标准时间
+"AudioCore.Tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/7 Testing: PcmProcessing.Tests
+2/7 Test: PcmProcessing.Tests
+Command: "D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/PcmProcessing.Tests.exe"
+Directory: D:/Code/repos/iOSAudioBridge/build/zl-bridge
+"PcmProcessing.Tests" start time: Oct 30 09:00 中国标准时间
+Output:
+----------------------------------------------------------
+PCM conversion, channel order, chunk limits, mute, NaN/Inf, processor failure and pipe telemetry passed
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"PcmProcessing.Tests" end time: Oct 30 09:00 中国标准时间
+"PcmProcessing.Tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/7 Testing: Scrcpy.Tests
+3/7 Test: Scrcpy.Tests
+Command: "D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/Scrcpy.Tests.exe" "D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/Scrcpy.TestAdb.exe"
+Directory: D:/Code/repos/iOSAudioBridge/build/zl-bridge
+"Scrcpy.Tests" start time: Oct 30 09:00 中国标准时间
+Output:
+----------------------------------------------------------
+scrcpy framing, ADB parsing/quoting, USB/Wi-Fi lifecycle, DSP, cleanup, cancellation, failure/restart and source isolation passed
+<end of output>
+Test time =   6.48 sec
+----------------------------------------------------------
+Test Passed.
+"Scrcpy.Tests" end time: Oct 30 09:00 中国标准时间
+"Scrcpy.Tests" time elapsed: 00:00:06
+----------------------------------------------------------
+
+4/7 Testing: ZLBridge.Dsp
+4/7 Test: ZLBridge.Dsp
+Command: "D:/Code/repos/iOSAudioBridge/build/zl-bridge/third_party/ZLCompressor/ZLCompressor_artefacts/Release/Standalone/AudioBridge.exe" "--self-test" "--result" "D:/Code/repos/iOSAudioBridge/build/zl-bridge/zl-self-test.json"
+Directory: D:/Code/repos/iOSAudioBridge/build/zl-bridge
+"ZLBridge.Dsp" start time: Oct 30 09:00 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"ZLBridge.Dsp" end time: Oct 30 09:00 中国标准时间
+"ZLBridge.Dsp" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/7 Testing: AirPlay.Runtime
+5/7 Test: AirPlay.Runtime
+Command: "D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/Wireless/AudioBridge.AirPlayHost.exe" "--check-runtime"
+Directory: D:/Code/repos/iOSAudioBridge/build/zl-bridge/src/AudioBridge.AirPlayHost
+"AirPlay.Runtime" start time: Oct 30 09:00 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"AirPlay.Runtime" end time: Oct 30 09:00 中国标准时间
+"AirPlay.Runtime" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/7 Testing: AirPlay.Tests
+6/7 Test: AirPlay.Tests
+Command: "D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/AirPlay.Tests.exe" "D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/AirPlay.TestHost.exe"
+Directory: D:/Code/repos/iOSAudioBridge/build/zl-bridge/src/AudioBridge.AirPlayHost
+"AirPlay.Tests" start time: Oct 30 09:00 中国标准时间
+Output:
+----------------------------------------------------------
+AirPlay PCM routing, compression, sender isolation, rates, volume, reconnect, malformed IPC, crash and cancellation passed
+<end of output>
+Test time =   0.42 sec
+----------------------------------------------------------
+Test Passed.
+"AirPlay.Tests" end time: Oct 30 09:00 中国标准时间
+"AirPlay.Tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/7 Testing: AirPlay.ReceiverTests
+7/7 Test: AirPlay.ReceiverTests
+Command: "D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/AirPlay.ReceiverTests.exe" "D:/Code/repos/iOSAudioBridge/build/zl-bridge/bin/Wireless/AudioBridge.AirPlayHost.exe"
+Directory: D:/Code/repos/iOSAudioBridge/build/zl-bridge/src/AudioBridge.AirPlayHost
+"AirPlay.ReceiverTests" start time: Oct 30 09:00 中国标准时间
+Output:
+----------------------------------------------------------
+FairPlay setup: RTSP/1.0 200 OK
+FairPlay handshake: RTSP/1.0 200 OK
+Audio-only session SETUP: RTSP/1.0 200 OK
+Audio stream SETUP (type 96, no video stream): RTSP/1.0 200 OK
+Audio transport negotiated: type=96 dataPort=60451 controlPort=60449
+RECORD: RTSP/1.0 200 OK
+TEARDOWN audio stream: RTSP/1.0 200 OK
+FairPlay setup: RTSP/1.0 200 OK
+FairPlay handshake: RTSP/1.0 200 OK
+Audio-only session SETUP: RTSP/1.0 200 OK
+Audio stream SETUP (type 96, no video stream): RTSP/1.0 200 OK
+Audio transport negotiated: type=96 dataPort=60461 controlPort=60459
+RECORD: RTSP/1.0 200 OK
+TEARDOWN audio stream: RTSP/1.0 200 OK
+Real DLL audio-only handshake and reconnect passed; no PCM sent
+<end of output>
+Test time =   2.96 sec
+----------------------------------------------------------
+Test Passed.
+"AirPlay.ReceiverTests" end time: Oct 30 09:00 中国标准时间
+"AirPlay.ReceiverTests" time elapsed: 00:00:02
+----------------------------------------------------------
+
+End testing: Oct 30 09:00 中国标准时间

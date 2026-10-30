@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.25)
-project(iOSAudioBridge VERSION 0.1.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.26)
+project(AudioBridge VERSION 0.3.0 LANGUAGES CXX)
 if(NOT WIN32 OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
   message(FATAL_ERROR "Windows x64 is required")
 endif()
@@ -17,7 +17,11 @@ add_library(AudioCoreImpl STATIC
   ${CORE}/Transport/LibUsb0Transport.cpp ${CORE}/Device/AppleUsbDiscovery.cpp
   ${CORE}/Logging.cpp ${CORE}/Device/DeviceCatalog.cpp
   ${CORE}/Device/UsbDeviceRepair.cpp ${CORE}/Device/UsbRepairClient.cpp
-  ${CORE}/Wasapi/WasapiOutput.cpp ${CORE}/Capture/UsbAudioSource.cpp ${CORE}/Capture/AirPlayAudioSource.cpp ${CORE}/Engine/AudioEngine.cpp)
+  ${CORE}/Wasapi/WasapiOutput.cpp ${CORE}/Capture/UsbAudioSource.cpp ${CORE}/Capture/AirPlayAudioSource.cpp
+  ${CORE}/Android/AdbClient.cpp ${CORE}/Capture/ScrcpyAudioSource.cpp ${CORE}/Engine/AudioEngine.cpp)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/third_party/scrcpy.pins.json" SCRCPY_PINS)
+string(JSON SCRCPY_VERSION GET "${SCRCPY_PINS}" version)
+target_compile_definitions(AudioCoreImpl PUBLIC AB_SCRCPY_VERSION="${SCRCPY_VERSION}")
 target_include_directories(AudioCoreImpl PUBLIC src/AudioCore/include ${CORE} "${USB}/include")
 set(AIRPLAY "${CMAKE_CURRENT_SOURCE_DIR}/third_party/iPhoneMirror-AirPlay")
 target_include_directories(AudioCoreImpl PUBLIC "${AIRPLAY}/WirelessHost")
@@ -46,10 +50,28 @@ set_tests_properties(AudioCore.Tests PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRE
 add_executable(PcmProcessing.Tests tests/PcmProcessingTests.cpp)
 target_include_directories(PcmProcessing.Tests PRIVATE "${CORE}")
 add_test(NAME PcmProcessing.Tests COMMAND PcmProcessing.Tests)
+add_executable(Scrcpy.TestAdb tests/ScrcpyTestAdb.cpp ${CORE}/Transport/Socket.cpp)
+target_include_directories(Scrcpy.TestAdb PRIVATE "${CORE}")
+target_link_libraries(Scrcpy.TestAdb PRIVATE ws2_32)
+add_executable(Scrcpy.Tests tests/ScrcpyTests.cpp)
+target_link_libraries(Scrcpy.Tests PRIVATE AudioCoreImpl)
+add_test(NAME Scrcpy.Tests COMMAND Scrcpy.Tests $<TARGET_FILE:Scrcpy.TestAdb>)
+set_tests_properties(Scrcpy.Tests PROPERTIES TIMEOUT 60)
 configure_file("${USB}/bin/x64/libusb0.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libusb0.dll" COPYONLY)
 
-option(AB_BUILD_ZL "Build the original ZL editor with the USB audio engine" OFF)
+option(AB_BUILD_ZL "Build AudioBridge with the original ZL editor" OFF)
 if(AB_BUILD_ZL)
+  set(SCRCPY_RUNTIME "${CMAKE_CURRENT_SOURCE_DIR}/.tools/scrcpy/Android" CACHE PATH "Pinned scrcpy audio runtime")
+  foreach(FILE adb.exe AdbWinApi.dll AdbWinUsbApi.dll scrcpy-server LICENSE.txt)
+    if(NOT EXISTS "${SCRCPY_RUNTIME}/${FILE}")
+      message(FATAL_ERROR "Missing ${SCRCPY_RUNTIME}/${FILE}; run scripts/Prepare-Scrcpy.ps1")
+    endif()
+  endforeach()
+  string(JSON SCRCPY_SERVER_HASH GET "${SCRCPY_PINS}" server_sha256)
+  file(SHA256 "${SCRCPY_RUNTIME}/scrcpy-server" SCRCPY_ACTUAL_HASH)
+  if(NOT SCRCPY_ACTUAL_HASH STREQUAL SCRCPY_SERVER_HASH)
+    message(FATAL_ERROR "scrcpy-server version/hash mismatch; run scripts/Prepare-Scrcpy.ps1")
+  endif()
   enable_language(C)
   set(ZL_JUCE_FORMATS Standalone CACHE STRING "" FORCE)
   set(ZL_JUCE_COPY_PLUGIN OFF CACHE BOOL "" FORCE)
@@ -65,15 +87,16 @@ if(AB_BUILD_ZL)
   target_compile_definitions(SharedCode INTERFACE ZL_USB_BRIDGE=1)
   target_compile_definitions(ZLCompressor_Standalone PRIVATE JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1)
   target_sources(ZLCompressor_Standalone PRIVATE
-    src/ZLUsbAudioBridge/BridgeApplication.cpp src/ZLUsbAudioBridge/ZlProcessorAdapter.cpp src/ZLUsbAudioBridge/SelfTests.cpp)
-  target_include_directories(ZLCompressor_Standalone PRIVATE third_party/ZLCompressor/source src/ZLUsbAudioBridge)
+    src/AudioBridge/BridgeApplication.cpp src/AudioBridge/ZlProcessorAdapter.cpp src/AudioBridge/SelfTests.cpp)
+  target_include_directories(ZLCompressor_Standalone PRIVATE third_party/ZLCompressor/source src/AudioBridge)
   target_link_libraries(ZLCompressor_Standalone PRIVATE AudioCoreImpl)
-  set_target_properties(ZLCompressor_Standalone PROPERTIES OUTPUT_NAME ZLUsbAudioBridge)
+  set_target_properties(ZLCompressor_Standalone PROPERTIES OUTPUT_NAME AudioBridge)
   add_custom_target(ZLBridge.Runtime ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${USB}/bin/x64/libusb0.dll" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:AudioBridge.UsbRestore>" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:AudioBridge.UsbRepair>" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>"
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Wireless" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>/Wireless"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${SCRCPY_RUNTIME}" "$<TARGET_FILE_DIR:ZLCompressor_Standalone>/Android"
     DEPENDS ZLCompressor_Standalone AudioBridge.UsbRestore AudioBridge.UsbRepair AudioBridge.AirPlayHost)
   add_test(NAME ZLBridge.Dsp COMMAND ZLCompressor_Standalone --self-test --result "${CMAKE_BINARY_DIR}/zl-self-test.json")
   set_tests_properties(ZLBridge.Dsp PROPERTIES TIMEOUT 60)
