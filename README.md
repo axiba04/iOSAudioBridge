@@ -2,7 +2,7 @@
 
 Windows x64 原生音频程序：接收 iPhone / iPad 的 USB、AirPlay 音频，以及 Android 的 scrcpy USB、Wi-Fi 音频，使用 ZLCompressor 原版界面和处理器，经 WASAPI 输出到 Windows 耳机或 DAC。基于 C++20 / JUCE，无需虚拟声卡、.NET 或 VST Host。这是社区集成预览版，不是 ZL-Audio 官方发行版。
 
-iOS 与 Android 接收功能共存在同一程序中，每次监听一个输入，切换前先停止；当前不混合多台手机的声音。项目原名 iOSAudioBridge，现已改名 AudioBridge；GitHub 地址暂沿用原仓库。
+iOS 与 Android 接收功能共存在同一程序中，每次监听一个输入，切换前先停止；当前不混合多台手机的声音。项目及 GitHub 仓库原名 iOSAudioBridge，现已改名 AudioBridge。
 
 ```text
 iPhone USB → QuickTime 仅音频握手 → PCM16 / 48 kHz / Stereo
@@ -13,7 +13,7 @@ Android USB / Wi-Fi → ADB → scrcpy-server 5.0.1 → PCM16 / 48 kHz / Stereo
 
 ## 运行
 
-下载 [AudioBridge v0.3.0-preview.1 Windows x64 程序包](https://github.com/axiba04/AudioBridge/releases/download/v0.3.0-preview.1/AudioBridge-v0.3.0-preview.1-win-x64.zip)，完整解压后运行 `AudioBridge/AudioBridge.exe`。iOS USB 按需下载同版 [驱动离线安装包](https://github.com/axiba04/AudioBridge/releases/download/v0.3.0-preview.1/DriverInstallKit-x64-1.4.0.2.zip)。[Release 页面](https://github.com/axiba04/AudioBridge/releases/tag/v0.3.0-preview.1) 提供校验文件、改动和验收范围。旧 `v0.2.0-preview.5` 只包含 iOS 功能。本地构建输出仍为 `dist/AudioBridge/AudioBridge.exe`，`dist/` 不纳入 Git。
+下载 [AudioBridge v0.3.0-preview.2 Windows x64 程序包](https://github.com/axiba04/AudioBridge/releases/download/v0.3.0-preview.2/AudioBridge-v0.3.0-preview.2-win-x64.zip)，完整解压后运行 `AudioBridge/AudioBridge.exe`。iOS USB 按需下载同版 [驱动离线安装包](https://github.com/axiba04/AudioBridge/releases/download/v0.3.0-preview.2/DriverInstallKit-x64-1.4.0.2.zip)。[Release 页面](https://github.com/axiba04/AudioBridge/releases/tag/v0.3.0-preview.2) 提供校验文件、改动和验收范围。旧 `v0.2.0-preview.5` 只包含 iOS 功能。本地构建输出仍为 `dist/AudioBridge/AudioBridge.exe`，`dist/` 不纳入 Git。
 
 运行 `AudioBridge.exe`，完整保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll`、`Wireless/`、`Android/` 和许可证文件。Android 模式无需安装 Apple USB filter。
 
@@ -24,7 +24,9 @@ Android USB / Wi-Fi → ADB → scrcpy-server 5.0.1 → PCM16 / 48 kHz / Stereo
 - Android 11 启动时需解锁屏幕。捕获系统输出，手机本地播放通常静音；停止监听后恢复。无需开启视频或屏幕控制。
 - 固定使用 scrcpy-server 5.0.1 原始 PCM；不经过桌面 scrcpy 播放器。USB 默认启动缓冲约 21 ms，Wi-Fi 约 64 ms，这不是端到端延迟。
 
-完整步骤、依赖来源、限制与验收边界见 [Android 使用说明](docs/android-scrcpy.zh-CN.md)。Android 真机 USB／Wi-Fi 出声和长期稳定性待验收；协议、进程和 DSP 路由已通过自动测试。
+Windows 新启动的 ADB 服务默认使用 libusb 后端，修复部分荣耀等设备已被系统识别、但 Android USB 列表为空的问题；保留用户显式设置的 `ADB_LIBUSB` 值。已运行的共享 ADB 服务沿用其现有后端。
+
+完整步骤、依赖来源、限制与验收边界见 [Android 使用说明](docs/android-scrcpy.zh-CN.md)。荣耀平板（Android 16）已通过 20 秒 USB 静音接收测试，详见[真机验证记录](docs/test-results/2026-10-30-honor-usb/README.zh-CN.md)；七项自动回归全部通过。实际听音、Wi-Fi 真机音频、端到端延迟和长期稳定性仍待验收。
 
 ### iOS USB
 

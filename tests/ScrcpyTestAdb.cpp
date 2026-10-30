@@ -13,6 +13,13 @@ int wmain(int argc,wchar_t** argv){try{
     if(args[0]==L"echo-args"){
         for(size_t i=1;i<args.size();++i)std::wcout<<args[i]<<L'\n';return 0;
     }
+    if(args[0]==L"check-environment"&&args.size()==2){
+        wchar_t backend[16]{},inherited[64]{};
+        GetEnvironmentVariableW(L"ADB_LIBUSB",backend,16);
+        GetEnvironmentVariableW(L"AB_TEST_UNICODE_ENV",inherited,64);
+        if(backend!=args[1]||std::wstring_view(inherited)!=L"保留 inherited value")return 11;
+        std::cout<<"environment-ok\n";return 0;
+    }
     if(args[0]==L"devices"){
         std::cout<<"List of devices attached\nusb-device device usb:1-1 model:Test_Phone\n10.1.2.3:5555 device model:Wireless_Phone\n";return 0;
     }

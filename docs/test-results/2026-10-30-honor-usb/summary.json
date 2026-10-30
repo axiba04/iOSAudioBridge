@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-30",
+  "device_model": "YLP-W00",
+  "android_release": "16",
+  "android_sdk": 36,
+  "adb_version": "37.0.1",
+  "usb_backend": "LIBUSB",
+  "adb_cold_start_verified": true,
+  "duration_seconds": 20,
+  "muted": true,
+  "sample_rate": 48000,
+  "audio_packets": 913,
+  "received_frames": 934912,
+  "underruns": 0,
+  "dropped_frames": 1024,
+  "ctest_passed": 7,
+  "ctest_failed": 0,
+  "exe_sha256": "1FAB46E12B60B8DBAB315F8657992D5613D33B786182E46626DAAEC8C4F000EE",
+  "audible_playback_verified": false,
+  "end_to_end_latency_measured": false
+}

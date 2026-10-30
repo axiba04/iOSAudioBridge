@@ -60,6 +60,22 @@ int wmain(int argc,wchar_t** argv){try{
     struct Cleanup {std::filesystem::path root;~Cleanup(){std::error_code ec;std::filesystem::remove_all(root,ec);}} cleanup{root};
     std::filesystem::copy_file(argv[1],root/L"adb.exe");std::ofstream(root/L"scrcpy-server")<<"fixture";
     android::AdbClient adb(root/L"adb.exe");
+    {
+        struct SavedEnvironment {
+            const wchar_t* name;std::wstring value;bool present;
+            explicit SavedEnvironment(const wchar_t* key):name(key){
+                const auto size=GetEnvironmentVariableW(name,nullptr,0);present=size!=0;
+                if(present){value.resize(size);GetEnvironmentVariableW(name,value.data(),size);value.resize(size-1);}
+            }
+            ~SavedEnvironment(){SetEnvironmentVariableW(name,present?value.c_str():nullptr);}
+        } backend(L"ADB_LIBUSB"),unicode(L"AB_TEST_UNICODE_ENV");
+        SetEnvironmentVariableW(L"ADB_LIBUSB",nullptr);
+        SetEnvironmentVariableW(L"AB_TEST_UNICODE_ENV",L"保留 inherited value");
+        require(adb.run({L"check-environment",L"1"})=="environment-ok\r\n","ADB libusb default or Unicode environment inheritance failed");
+        require(GetEnvironmentVariableW(L"ADB_LIBUSB",nullptr,0)==0,"ADB launch modified parent environment");
+        SetEnvironmentVariableW(L"ADB_LIBUSB",L"0");
+        require(adb.run({L"check-environment",L"0"})=="environment-ok\r\n","Explicit ADB backend override was ignored");
+    }
     const auto quoted=adb.run({L"echo-args",L"a b",L"c\"d",L"path with spaces\\"});
     require(quoted=="a b\r\nc\"d\r\npath with spaces\\\r\n","Windows argv quoting failed");
     require(adb.devices(android::Transport::Usb).size()==1,"ADB process enumeration failed");

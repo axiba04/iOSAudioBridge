@@ -11,6 +11,8 @@
 
 USB 列表保留“未授权”和“离线”设备并显示原因，此时不能开始监听。授权后点击刷新。多个设备按各自序列号选择；不使用隐式默认设备。
 
+Windows 上由 AudioBridge 新启动的 ADB 服务默认使用 libusb 后端，以兼容荣耀等使用厂商专用 USB 接口标识的设备。程序仅为 ADB 子进程设置 `ADB_LIBUSB=1`，保留用户显式设置的 `ADB_LIBUSB` 值。已经运行的共享 ADB 服务仍使用其原后端，程序不会自动重启或断开它；如果 Windows 已识别 ADB Interface、但设备列表为空，可在停止其他 ADB 会话后，用 `ADB_LIBUSB=1` 重启 ADB 服务，再在平板上允许 USB 调试。
+
 ## Wi-Fi
 
 1. 电脑和手机连接同一局域网，手机开发者选项开启 **无线调试**。
@@ -54,6 +56,8 @@ USB 默认启动/高水位缓冲为 1024/3072 帧，Wi-Fi 为 3072/6144 帧。�
 
 自动回归覆盖 scrcpy 协议的所有单次分割点、逐字节/连续帧、禁用音频、错误 codec、超大及未对齐包、ADB 授权/离线状态、USB/无线筛选、Windows 参数引用、超时取消、进程失败、会话清理、错误后重启、来源互斥，以及真实接收类经 PCM 队列和模拟压缩器处理后的双声道采样值。进程测试使用模拟 ADB/服务器，不连接手机。
 
-2026-10-30 本机未枚举到 Android 设备。真实手机 USB/Wi-Fi 出声、两种连接方式切换、拔线/断网、Android 11 解锁行为、具体应用兼容性、延迟听感和持续运行仍需实机验收。`--ui-smoke --android-usb` / `--android-wifi` 可进行静音界面检查；`--capture-muted 60 --android-usb` / `--android-wifi` 仅在设备已连接并选好后用于静音接收诊断。
+2026-10-30 首次集成验证时未接入 Android 真机。同日补充验证了荣耀 MagicPad3 Pro 13.3（Android 16）的 USB 接收：默认 Windows ADB 后端未枚举到设备，改用 libusb 后完成授权；修复版从停止的 ADB 服务冷启动，20 秒静音接收得到 913 个音频包、48 kHz 双声道 PCM，欠载为 0，高水位裁剪 1024 帧。详见[荣耀 USB 验证记录](test-results/2026-10-30-honor-usb/README.zh-CN.md)。
+
+该测试不代表实际听音或端到端延迟验收。Wi-Fi 真机音频、两种连接方式切换、拔线/断网、Android 11 解锁行为、具体应用兼容性及长时间稳定性仍需验证。`--ui-smoke --android-usb` / `--android-wifi` 可进行静音界面检查；`--capture-muted 60 --android-usb` / `--android-wifi` 仅在设备已连接并选好后用于静音接收诊断。
 
 参考：[scrcpy 音频](https://github.com/Genymobile/scrcpy/blob/v5.0.1/doc/audio.md)、[scrcpy 协议](https://github.com/Genymobile/scrcpy/blob/v5.0.1/doc/develop.md)、[Android 无线 ADB](https://developer.android.com/tools/adb#wireless)、[固定发行版](https://github.com/Genymobile/scrcpy/releases/tag/v5.0.1)。

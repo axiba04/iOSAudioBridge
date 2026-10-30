@@ -1,5 +1,7 @@
 # ZL 原版界面 USB 集成：实现与验收
 
+2026-10-30 Android USB 兼容修复：ADB 子进程默认使用 libusb 后端，保留显式覆盖；七项 CTest 全部通过。荣耀 MagicPad3 Pro 13.3（Android 16）从已停止的 ADB 服务冷启动，完成 20 秒 USB 静音接收，913 个音频包、48 kHz、0 次欠载，高水位裁剪 1024 帧。见[荣耀 USB 真机记录](test-results/2026-10-30-honor-usb/README.zh-CN.md)。尚未测量端到端延迟或验收实际听音。
+
 2026-10-30 后续调整：按用户要求将 AirPlay 默认起播预填充 / 高水位恢复为 4096 / 6144 帧，并重新编译打包；见 [缓冲恢复验收](test-results/2026-10-30-airplay-buffer-restore/README.zh-CN.md)。
 
 2026-10-30：项目更名 AudioBridge，新增 Android scrcpy USB / Wi-Fi，保留 iOS USB / AirPlay；七组 CTest、四种输入的无设备 UI 检查和静音 WASAPI 暂停/恢复通过。本机没有 Android 设备，真机接收与延迟尚未验收，见 [本轮结果](test-results/2026-10-30-audiobridge/README.zh-CN.md)。下方为历史验收记录。

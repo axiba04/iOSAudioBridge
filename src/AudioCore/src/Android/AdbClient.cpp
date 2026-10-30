@@ -12,6 +12,26 @@ struct Handle {
     ~Handle(){if(value && value!=INVALID_HANDLE_VALUE)CloseHandle(value);}
 };
 bool ascii_digit(wchar_t c){return c>=L'0'&&c<=L'9';}
+std::vector<wchar_t> adb_environment(){
+    // The native Windows backend only enumerates the standard ADB interface
+    // GUID. libusb also finds WinUSB devices exposing a vendor-specific GUID.
+    struct Environment {
+        wchar_t* value=GetEnvironmentStringsW();
+        ~Environment(){if(value)FreeEnvironmentStringsW(value);}
+    } inherited;
+    if(!inherited.value)throw std::runtime_error("Cannot read adb environment");
+    std::vector<std::wstring> entries;bool configured=false;
+    for(const wchar_t* entry=inherited.value;*entry;){
+        entries.emplace_back(entry);entry+=entries.back().size()+1;
+        if(_wcsnicmp(entries.back().c_str(),L"ADB_LIBUSB=",11)==0)configured=true;
+    }
+    // Respect an explicit override, and do not modify the parent's environment.
+    if(!configured)entries.emplace_back(L"ADB_LIBUSB=1");
+    std::sort(entries.begin(),entries.end(),[](const auto& a,const auto& b){return _wcsicmp(a.c_str(),b.c_str())<0;});
+    std::vector<wchar_t> result;
+    for(const auto& entry:entries){result.insert(result.end(),entry.begin(),entry.end());result.push_back(L'\0');}
+    result.push_back(L'\0');return result;
+}
 }
 std::wstring quote_argument(std::wstring_view value){
     if(value.find(L'\0')!=std::wstring_view::npos)throw std::invalid_argument("NUL in adb argument");
@@ -27,6 +47,7 @@ AdbProcess::AdbProcess(const std::filesystem::path& executable,const std::vector
         throw std::runtime_error("缺少 Android/adb.exe，请完整解压 AudioBridge（构建请运行 Prepare-Scrcpy.ps1）");
     auto command=quote_argument(executable.wstring());
     for(const auto& argument:arguments)command+=L" "+quote_argument(argument);
+    auto environment=adb_environment();
     SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};
     Handle reader,writer,input;
     if(!CreatePipe(&reader.value,&writer.value,&security,0) || !SetHandleInformation(reader.value,HANDLE_FLAG_INHERIT,0))
@@ -45,7 +66,7 @@ AdbProcess::AdbProcess(const std::filesystem::path& executable,const std::vector
     startup.StartupInfo.hStdOutput=startup.StartupInfo.hStdError=writer.value;
     PROCESS_INFORMATION info{};
     const bool launched=updated && CreateProcessW(executable.c_str(),command.data(),nullptr,nullptr,TRUE,
-        CREATE_NO_WINDOW|EXTENDED_STARTUPINFO_PRESENT,nullptr,executable.parent_path().c_str(),&startup.StartupInfo,&info);
+        CREATE_NO_WINDOW|EXTENDED_STARTUPINFO_PRESENT|CREATE_UNICODE_ENVIRONMENT,environment.data(),executable.parent_path().c_str(),&startup.StartupInfo,&info);
     DeleteProcThreadAttributeList(attributes);
     if(!launched)throw std::runtime_error("Cannot launch adb: "+std::to_string(GetLastError()));
     process_=info.hProcess;CloseHandle(info.hThread);read_=reader.value;reader.value=nullptr;
