@@ -13,7 +13,7 @@ Android USB / Wi-Fi → ADB → scrcpy-server 5.0.1 → PCM16 / 48 kHz / Stereo
 
 ## 运行
 
-下载 [AudioBridge v0.3.0-preview.1 Windows x64 程序包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.3.0-preview.1/AudioBridge-v0.3.0-preview.1-win-x64.zip)，完整解压后运行 `AudioBridge/AudioBridge.exe`。iOS USB 按需下载同版 [驱动离线安装包](https://github.com/axiba04/iOSAudioBridge/releases/download/v0.3.0-preview.1/DriverInstallKit-x64-1.4.0.2.zip)。[Release 页面](https://github.com/axiba04/iOSAudioBridge/releases/tag/v0.3.0-preview.1) 提供校验文件、改动和验收范围。旧 `v0.2.0-preview.5` 只包含 iOS 功能。本地构建输出仍为 `dist/AudioBridge/AudioBridge.exe`，`dist/` 不纳入 Git。
+下载 [AudioBridge v0.3.0-preview.1 Windows x64 程序包](https://github.com/axiba04/AudioBridge/releases/download/v0.3.0-preview.1/AudioBridge-v0.3.0-preview.1-win-x64.zip)，完整解压后运行 `AudioBridge/AudioBridge.exe`。iOS USB 按需下载同版 [驱动离线安装包](https://github.com/axiba04/AudioBridge/releases/download/v0.3.0-preview.1/DriverInstallKit-x64-1.4.0.2.zip)。[Release 页面](https://github.com/axiba04/AudioBridge/releases/tag/v0.3.0-preview.1) 提供校验文件、改动和验收范围。旧 `v0.2.0-preview.5` 只包含 iOS 功能。本地构建输出仍为 `dist/AudioBridge/AudioBridge.exe`，`dist/` 不纳入 Git。
 
 运行 `AudioBridge.exe`，完整保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll`、`Wireless/`、`Android/` 和许可证文件。Android 模式无需安装 Apple USB filter。
 

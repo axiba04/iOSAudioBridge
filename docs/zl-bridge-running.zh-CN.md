@@ -24,7 +24,7 @@ AirPlay 延迟包含发送端缓冲和网络抖动，界面延迟数字仅反映
 
 ## 运行
 
-从 [v0.3.0-preview.1 Release](https://github.com/axiba04/iOSAudioBridge/releases/tag/v0.3.0-preview.1) 下载程序包并完整解压，运行 `AudioBridge/AudioBridge.exe`；本地构建程序位于 `dist/AudioBridge/AudioBridge.exe`。保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll`、`Wireless/` 与 `Android/`。无需 VST Host 或 .NET。旧 `v0.2.0-preview.5` 为 iOS 版本，Android 输入需使用本次新版本。
+从 [v0.3.0-preview.1 Release](https://github.com/axiba04/AudioBridge/releases/tag/v0.3.0-preview.1) 下载程序包并完整解压，运行 `AudioBridge/AudioBridge.exe`；本地构建程序位于 `dist/AudioBridge/AudioBridge.exe`。保留同目录的 `AudioBridge.UsbRestore.exe`、`AudioBridge.UsbRepair.exe`、`libusb0.dll`、`Wireless/` 与 `Android/`。无需 VST Host 或 .NET。旧 `v0.2.0-preview.5` 为 iOS 版本，Android 输入需使用本次新版本。
 
 当前包使用 libusb-win32 1.4.0.2 DLL。系统驱动单独维护，本机升级及恢复方法见[驱动升级记录](driver-upgrade-evaluation.zh-CN.md)。
 
